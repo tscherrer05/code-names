@@ -1,0 +1,36 @@
+#cn-schema .row {
+    padding-left: 50px;
+}
+.cn-schema-img {
+    width: 15%;
+}
+.cn-card {
+    width: 100%;
+    height: auto;
+}
+.cn-card:hover,
+.cn-text-card:hover {
+    cursor: pointer;
+}
+.cn-card-container {
+    position: relative;
+    text-align: center;
+    color: white;
+    width: auto;
+    max-width: 18%;
+    margin-right: 1%;
+    margin-bottom: 1%;
+}
+.cn-card-text {
+    position: absolute;
+    top: 73%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: black;
+}
+
+#cn-show-schema {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+}

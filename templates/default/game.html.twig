@@ -1,7 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
 <div class="container" id="cn-cards">
     <div class="row">
 
     {# TODO : Boucle avec twig #}
+    <img src="{{ asset('images/red0.png') }}" alt="Symfony!"/>
     </div>
 
     <div class="row">
@@ -11,3 +15,4 @@
         <p class="col">Nombre annoncé : <span id="announced-number"></span> </p>
     </div>
 </div>
+{% endblock %}

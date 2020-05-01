@@ -1,0 +1,130 @@
+[
+    {
+        "id": 1,
+        "cards": [
+            {
+                "word": "Ananas",
+                "color": 1,
+                "x": 0,
+                "y": 0,
+                "returned": false
+            },
+            {
+                "word": "aigle",
+                "color": 2,
+                "x": 0,
+                "y": 1,
+                "returned": false
+            },
+            {
+                "word": "abeille",
+                "color": 1,
+                "x": 0,
+                "y": 2,
+                "returned": false
+            },
+            {
+                "word": "sieste",
+                "color": 1,
+                "x": 0,
+                "y": 3,
+                "returned": false
+            },
+            {
+                "word": "carnet",
+                "color": 1,
+                "x": 0,
+                "y": 4,
+                "returned": false
+            },
+            {
+                "word": "carreau",
+                "color": 2,
+                "x": 1,
+                "y": 0,
+                "returned": false
+            },
+            {
+                "word": "marchand",
+                "color": 1,
+                "x": 1,
+                "y": 1,
+                "returned": false
+            },
+            {
+                "word": "carnet",
+                "color": 1,
+                "x": 1,
+                "y": 2,
+                "returned": false
+            },
+            {
+                "word": "soldat",
+                "color": 2,
+                "x": 1,
+                "y": 3,
+                "returned": false
+            },
+            {
+                "word": "soleil",
+                "color": 2,
+                "x": 1,
+                "y": 4,
+                "returned": false
+            },
+            {
+                "word": "goutte",
+                "color": 1,
+                "x": 2,
+                "y": 0,
+                "returned": false
+            },
+            {
+                "word": "noisette",
+                "color": 1,
+                "x": 2,
+                "y": 1,
+                "returned": false
+            },
+            {
+                "word": "gomme",
+                "color": 1,
+                "x": 2,
+                "y": 2,
+                "returned": false
+            },
+            {
+                "word": "air",
+                "color": 2,
+                "x": 2,
+                "y": 3,
+                "returned": false
+            },
+            {
+                "word": "nourriture",
+                "color": 1,
+                "x": 2,
+                "y": 4,
+                "returned": false
+            }
+        ],
+        "players": [
+            {
+                "id": 1,
+                "name": "Player1",
+                "team": 1
+            },
+            {
+                "id": 2,
+                "name": "Player2",
+                "team": 2
+            }
+        ],
+        "votes": [
+            { "playerId": 1, "x": 0, "y": 0 }
+        ],
+        "announcedWord": "Fruit",
+        "announcedNumber": 1,
+        "currentTeam": 2
+    }
+]

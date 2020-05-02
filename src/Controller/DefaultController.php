@@ -103,11 +103,23 @@ class DefaultController extends AbstractController
     }
 
     /**
+     * @Route("/join", methods={"POST"})
+     */
+    public function join(Request $request)
+    {
+        $game = $request->request->get('gameId');
+        return $this->redirectToRoute('join_game', [
+            "id" => $game
+        ]);
+    }
+
+    /**
      * @Route("/disconnect")
      */
     public function disconnect()
     {
         $this->playerSession->remove(DefaultController::PLAYER_SESSION_NAME);
         $this->playerSession->remove(DefaultController::GAME_SESSION_NAME);
+        return $this->render('default/start.html.twig');
     }
 }

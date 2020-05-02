@@ -2,13 +2,13 @@
 
 {% block content %}
 <div class="container">
-    <form action="/game" method="get">
+    <form action="/join" method="post" name="join-game-form">
         <label for="game">Rejoindre une partie</label>
-        <input type="text" id="gameId" name="id">
-        <button type="submit">Rejoindre</button>    
+        <input type="text" id="gameId" name="gameId">
+        <button id="join-game" type="submit">Rejoindre</button>    
     </form>
     <p>OU</p>
-    <form action="create.php" method="post">
+    <form action="/create" method="post">
         <button>Créer une nouvelle partie</button>
     </form>
 </div>

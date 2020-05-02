@@ -5,6 +5,8 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class DefaultControllerTest extends WebTestCase
 {
+    // TODO : Use data test
+
     public function testIndex()
     {
         $client = static::createClient();
@@ -26,23 +28,38 @@ class DefaultControllerTest extends WebTestCase
         $this->assertInputValueSame('gameId', '1', 'Wrong input value');
     }
 
-    public function testConnect()
+    public function testStart()
     {
         $client = static::createClient();
+        $crawler = $client->request('GET', '/start');
 
-        // TODO : warning : writes in datasource
-        // $client->request(
-        //     'POST', 
-        //     '/login',
-        //     [
-        //         'gameId' => 1,
-        //         'login' => "ChuckNorris78",
-        //         'team' => 1,
-        //         'role' => 2
-        //     ]
-        // );
+        $this->assertSelectorExists('input#gameId');
+        $form = $crawler->selectButton('join-game')->form();
 
-        $this->assertSame(302, $client->getResponse()->getStatusCode());
+        $form['id'] = 1;
+
+        $crawler = $client->submit($form);
+
+        $this->assertEquals(302, $client->getResponse()->getStatusCode());
     }
+
+    // public function testConnect()
+    // {
+    //     $client = static::createClient();
+
+    //     // TODO : warning : writes in datasource
+    //     // $client->request(
+    //     //     'POST', 
+    //     //     '/login',
+    //     //     [
+    //     //         'gameId' => 1,
+    //     //         'login' => "ChuckNorris78",
+    //     //         'team' => 1,
+    //     //         'role' => 2
+    //     //     ]
+    //     // );
+
+    //     // $this->assertSame(302, $client->getResponse()->getStatusCode());
+    // }
 
 }

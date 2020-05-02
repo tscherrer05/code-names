@@ -30,16 +30,17 @@ class DefaultControllerTest extends WebTestCase
     {
         $client = static::createClient();
 
-        $client->request(
-            'POST', 
-            '/login',
-            [
-                'gameId' => 1,
-                'login' => "ChuckNorris78",
-                'team' => 1,
-                'role' => 2
-            ]
-        );
+        // TODO : warning : writes in datasource
+        // $client->request(
+        //     'POST', 
+        //     '/login',
+        //     [
+        //         'gameId' => 1,
+        //         'login' => "ChuckNorris78",
+        //         'team' => 1,
+        //         'role' => 2
+        //     ]
+        // );
 
         $this->assertSame(302, $client->getResponse()->getStatusCode());
     }

@@ -34,13 +34,13 @@ class GameRepository
         $votes = array();
         $players = array();
 
-        foreach ($gameData->players as $p) {
+        foreach ($gameData['players'] as $p) {
             $players[] = new Player($p["id"], $p["name"], $p["team"]);
         }
-        foreach ($gameData->cards as $c) {
+        foreach ($gameData['cards'] as $c) {
             $cards[$c['x']][$c['y']] = new Card($c['word'], $c['color'], $c['x'], $c['y'], $c['returned']);
         }
-        foreach ($gameData->votes as $v) {
+        foreach ($gameData['votes'] as $v) {
             $votes[$v['playerId']] = $cards[$v['x']][$v['y']];
         }
 

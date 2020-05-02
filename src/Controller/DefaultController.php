@@ -47,14 +47,13 @@ class DefaultController extends AbstractController
             ]);
         }
 
-        // TODO : implement
-        // $player = $gameInfo->getPlayer($identity);
+        $player = $gameInfo->getPlayer($identity);
         
         $viewModel = [
             "announcedNumber" => $gameInfo->currentNumber(),
             "announcedWord" => $gameInfo->currentWord(),
             "currentTeam" => $gameInfo->currentTeam(),
-            "currentPlayerType" => "???",
+            "currentPlayerType" => $player->name,
             "cards" => $board->cards() // TODO : view models for cards
         ];
         return $this->render('default/game.html.twig', $viewModel);

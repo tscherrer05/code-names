@@ -12,6 +12,7 @@ class GameRepository
 
     public function __construct()
     {
+        // TODO : inject datasource
         $datasource = dirname(__DIR__) . '/datasource/data.json';
         $data = \file_get_contents($datasource);
         $this->context = \json_decode($data);

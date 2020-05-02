@@ -11,7 +11,7 @@ class GameInfo
         array $players)
     {
         $this->team = $teamId;
-        $this->nbPlayers = \count($players);
+        $this->players = $players;
         $this->board= $board;
         $this->word = $word;
         $this->number = $number;
@@ -20,9 +20,9 @@ class GameInfo
     public $word;
     public $number;
     public $team;
-    public $nbPlayers;
-    public $board;
-
+    
+    private $board;
+    private $players = array();
 
     // Query
     public function currentWord()
@@ -45,6 +45,26 @@ class GameInfo
         return $this->board;
     }
 
+    public function getPlayers()
+    {
+        return $this->players;
+    }
+
+    public function getPlayer($id)
+    {
+        foreach ($this->players as $player) {
+            if($player->id == $id)
+                return $player;
+        }
+        throw new \Exception('Player not found with id : ' . $player->id);
+    }
+
+    public function nbPlayers()
+    {
+        return \count($this->players);
+    }
+
+
     public function winner($board)
     {
         if ($board->nbColorCards[1] == 0)
@@ -62,6 +82,12 @@ class GameInfo
         if($this->team != $player->team)
             throw new \InvalidArgumentException("Ce n'est pas le tour du joueur " . $player->name . " (#" . $player->id . ")");
         $this->board->voteForCard($player, $x, $y, $this);
+    }
+
+    public function addPlayer(string $name, int $team, int $role)
+    {
+        $player = new Player(0, $name, $team);
+        array_push($this->players, $player);
     }
 
 }

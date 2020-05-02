@@ -28,7 +28,7 @@ class Board
     public function voteForCard(Player $player, int $x, int $y, GameInfo $gameInfo)
     {
         $this->votes[$player->id] = $this->cards[$x][$y];
-        $everyBodyHasVoted = (\count($this->votes) == $gameInfo->nbPlayers);
+        $everyBodyHasVoted = (\count($this->votes) == $gameInfo->nbPlayers());
         $lastCard = null;
 
         if($everyBodyHasVoted)

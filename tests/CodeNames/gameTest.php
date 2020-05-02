@@ -8,6 +8,11 @@ use App\Tests\CodeNames\TestData as TestData;
 class GameTest extends TestCase
 {
 
+    const BLUE = 1;
+    const RED = 2;
+    const MASTER = 1;
+    const SPY = 2;
+
     public function testPlayerVoteFirstCard()
     {
         // Arrange
@@ -128,6 +133,30 @@ class GameTest extends TestCase
 
         $gameInfo->vote($player2, $x, $y);
         $this->assertSame(1, $gameInfo->winner($board));
+    }
+
+    public function testAddSpy()
+    {
+        $name = "ChuckNorris23";
+        $team = GameTest::RED;
+        $role = GameTest::MASTER;
+        $board    = new Board(TestData::getCards());
+        $gameInfo = new GameInfo($board, 1, "", 1, array());
+
+        $gameInfo->addPlayer($name, $team, $role);
+
+        $this->assertSame(1, $gameInfo->nbPlayers());
+    }
+
+    public function testGetPlayerById()
+    {
+        $board    = new Board(TestData::getCards());
+        $player1  = new Player(3, "Jack", 1);
+        $gameInfo = new GameInfo($board, 1, "", 1, array($player1));
+
+        $result = $gameInfo->getPlayer(3);
+
+        $this->assertSame("Jack", $result->name);
     }
 }
 

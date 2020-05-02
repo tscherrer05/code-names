@@ -7,6 +7,10 @@
     <input type="hidden" name="gameId" value="{{gameId}}">
     <label for="login">Choisir un nom de joueur</label>
     <input type="text" name="login" id="login">
+    <select name="role" id="role">
+        <option value="master">Maître espion</option>
+        <option value="spy">Espion</option>
+    </select>
     <button type="submit">Valider</button>
 </form>
 {% endblock %}

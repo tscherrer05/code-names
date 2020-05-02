@@ -15,18 +15,18 @@ class DefaultControllerTest extends WebTestCase
         $this->assertSelectorTextContains('html h1', 'Code games');
     }
 
-    public function testLogin()
+    public function testLoginPage()
     {
         $client = static::createClient();
 
-        $client->request('GET', '/login?game=1');
+        $client->request('GET', '/login?gameId=1');
 
         $this->assertEquals(200, $client->getResponse()->getStatusCode());
         $this->assertSelectorExists('input#login');
         $this->assertInputValueSame('gameId', '1', 'Wrong input value');
     }
 
-    public function testPostLogin()
+    public function testConnect()
     {
         $client = static::createClient();
 
@@ -35,10 +35,12 @@ class DefaultControllerTest extends WebTestCase
             '/login',
             [
                 "gameId" => 1,
-                "login" => "ChuckNorris78"
+                "login" => "ChuckNorris78",
+                "role" => 2
             ]
         );
 
-        $this->assertTrue($client->getResponse()->isSuccessful(), 'response status is 2xx');
+        $this->assertSame(302, $client->getResponse()->getStatusCode());
     }
+
 }

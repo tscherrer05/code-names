@@ -3,6 +3,7 @@ namespace App\Controller;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use App\Repository\GameRepository;
+use Symfony\Component\HttpFoundation\Request;
 
 class DefaultController extends AbstractController
 {
@@ -10,7 +11,8 @@ class DefaultController extends AbstractController
 
     public function __construct()
     {
-        $this->gameRepository = new GameRepository();
+        // TODO : Inject dependencies
+        $this->gameRepository = new GameRepository(); 
     }
 
     public function index()
@@ -42,6 +44,22 @@ class DefaultController extends AbstractController
         return $this->render('default/game.html.twig', $viewModel);
     }
 
+    /**
+     * @Route("/login")
+     */
+    public function login(Request $request)
+    {
+        $game = $request->query->get('game');
+
+        $viewModel = [
+            "gameId" => $game
+        ];
+        return $this->render('default/login.html.twig', $viewModel);
+    }
+
+    /**
+     * @Route("/start")
+     */
     public function start()
     {
         return $this->render('default/start.html.twig');

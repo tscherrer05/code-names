@@ -34,9 +34,10 @@ class DefaultControllerTest extends WebTestCase
             'POST', 
             '/login',
             [
-                "gameId" => 1,
-                "login" => "ChuckNorris78",
-                "role" => 2
+                'gameId' => 1,
+                'login' => "ChuckNorris78",
+                'team' => 1,
+                'role' => 2
             ]
         );
 

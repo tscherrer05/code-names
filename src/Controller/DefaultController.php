@@ -32,9 +32,9 @@ class DefaultController extends AbstractController
      */
     public function game(Request $request)
     {
-        $game = $request->query->get('gameId');
+        $gameId = $request->query->get('id');
 
-        $gameInfo = $this->gameRepository->get(1);
+        $gameInfo = $this->gameRepository->get($gameId);
         $board = $gameInfo->board();
         
         $identity = $this->playerSession->get(DefaultController::PLAYER_SESSION_NAME);
@@ -43,7 +43,7 @@ class DefaultController extends AbstractController
         {
             return $this->redirectToRoute('user_login',
             [
-                'gameId' => $game
+                'gameId' => $gameId
             ]);
         }
 
@@ -78,17 +78,20 @@ class DefaultController extends AbstractController
      */
     public function connect(Request $request)
     {
-        $game = $request->query->get('gameId');
-        $playerName = $request->query->get('login');
-        $role = $request->query->get('role');
+        $game = $request->request->get('gameId');
+        $playerName = $request->request->get('login');
+        $team = $request->request->get('team');
+        $role = $request->request->get('role');
 
-        // TODO : save player (game logic)
+        //save player
+        $newPlayerId = $this->gameRepository->addPlayer($game, $playerName, $team, $role);
 
-        // TODO : save session
-        $this->playerSession->set(DefaultController::PLAYER_SESSION_NAME, 1);
+        // save session
+        $this->playerSession->set(DefaultController::PLAYER_SESSION_NAME, $newPlayerId);
+        $this->playerSession->set(DefaultController::GAME_SESSION_NAME, $game);
 
         return $this->redirectToRoute('join_game', [
-            "gameId" => $game
+            "id" => $game
         ]);
     }
 

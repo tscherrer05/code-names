@@ -1,5 +1,5 @@
-[
-    {
+{
+    "1": {
         "id": 1,
         "cards": [
             {
@@ -112,19 +112,25 @@
             {
                 "id": 1,
                 "name": "Player1",
-                "team": 1
+                "team": 1,
+                "role": 1
             },
             {
                 "id": 2,
                 "name": "Player2",
-                "team": 2
+                "team": 2,
+                "role": 1
             }
         ],
         "votes": [
-            { "playerId": 1, "x": 0, "y": 0 }
+            {
+                "playerId": 1,
+                "x": 0,
+                "y": 0
+            }
         ],
         "announcedWord": "Fruit",
         "announcedNumber": 1,
         "currentTeam": 2
     }
-]
+}

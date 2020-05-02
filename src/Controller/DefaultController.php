@@ -23,22 +23,23 @@ class DefaultController extends AbstractController
      */
     public function game()
     {
-        // TODO : devrait être dans un controller côté web
-
         $gameInfo = $this->gameRepository->get(1);
         $board = $gameInfo->board();
-
-        $result = array(
-            "gameInfo" => $gameInfo
-        );
-
+        
+        // TODO : player identity management
         // if(empty($_SESSION["identity"]))
         //     $_SESSION["identity"] = 1;
         // $identity = $_SESSION["identity"];
-
         // $player = $controller->getPlayer($identity);
-
-        return $this->render('default/game.html.twig');
+        
+        $viewModel = [
+            "announcedNumber" => $gameInfo->currentNumber(),
+            "announcedWord" => $gameInfo->currentWord(),
+            "currentTeam" => $gameInfo->currentTeam(),
+            "currentPlayerType" => "???",
+            "cards" => $board->cards()
+        ];
+        return $this->render('default/game.html.twig', $viewModel);
     }
 
     public function start()

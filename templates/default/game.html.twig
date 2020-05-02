@@ -4,15 +4,32 @@
 <div class="container" id="cn-cards">
     <div class="row">
 
-    {# TODO : Boucle avec twig #}
-    <img src="{{ asset('images/red0.png') }}" alt="Symfony!"/>
+    {% for row in cards %}
+    <div class="row" id="cn-cards-row-{{loop.index0}}">
+        {% for card in row %}
+        <div class="cn-card-container" id="cn-card-{{card.x}}-{{card.y}}">
+            {% if card.returned %}
+                {% if card.color == 1 %}
+                <img src="{{ asset('images/blue0.png') }}" alt="Blue card" class="cn-card revealed">
+                {% else %}
+                <img src="{{ asset('images/red0.png') }}" alt="Red card" class="cn-card revealed">
+                {% endif %}
+            {% else %}
+            <img src="{{ asset('images/card.png') }}" alt="White card">
+            <div class="cn-card-text">{{card.word}}</div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+
     </div>
 
     <div class="row">
-        <p class="col">Vous êtes : <span id="current-player"></span> </p>
-        <p class="col">C'est le tour de l'équipe : <span id="current-team"></span> </p>
-        <p class="col">Mot annoncé : <span id="announced-word"></span> </p>
-        <p class="col">Nombre annoncé : <span id="announced-number"></span> </p>
+        <p class="col">Vous êtes : <span id="current-player">{{currentPlayerType}}</span></p>
+        <p class="col">C'est le tour de l'équipe : <span id="current-team">{{currentTeam}} </span></p>
+        <p class="col">Mot annoncé : <span id="announced-word">{{announcedWord}} </span></p>
+        <p class="col">Nombre annoncé : <span id="announced-number">{{announcedNumber}}</span></p>
     </div>
 </div>
 {% endblock %}

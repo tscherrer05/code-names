@@ -50,6 +50,8 @@ class DefaultController extends AbstractController
         $player = $gameInfo->getPlayer($identity);
         
         $viewModel = [
+            "gameId" => $gameId,
+            "playerId" => $identity,
             "announcedNumber" => $gameInfo->currentNumber(),
             "announcedWord" => $gameInfo->currentWord(),
             "currentTeam" => $gameInfo->currentTeam(),

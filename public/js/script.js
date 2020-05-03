@@ -1,5 +1,7 @@
 $(document).ready(function () {
     // GAME SETUP
+    const gameId = $('#gameId').data('value');
+    const playerId = $('#playerId').data('value');
 
     function returnCard(i, j, color) {
         var img = $(`#cn-card-${i}-${j} img`);
@@ -17,16 +19,7 @@ $(document).ready(function () {
 
     // WebSocket events
     conn.onopen = function (e) {
-        console.log("Connection established!");
-
-        // example to remove
-        var message = {
-            action: "getGame",
-            parameters: {
-                gameId: 1
-            }
-        };
-        conn.send(JSON.stringify(message));    
+        console.log("Connection established!");   
     };
 
     conn.onmessage = function (e) {
@@ -37,16 +30,34 @@ $(document).ready(function () {
         }
     };
 
+    $("img.cn-card, .cn-card-text").click(function () {
+        let card = $(this).parent();
+        // TODO : use data attributes
+        var i = parseInt(card.attr('id').substring(8, 9));
+        var j = parseInt(card.attr('id').substring(10, 11));
+
+        var message = {
+            action: "vote",
+            parameters: {
+                x: i,
+                y: j,
+                gameId: gameId,
+                playerId: playerId
+            }
+        };
+        conn.send(JSON.stringify(message));
+    });
+
     // Who starts?
     // if == 1, the red starts, if == 0, then blue starts
-    first_team = Math.floor(Math.random() * Math.floor(2));
-    if (first_team == 1) {
-        $("body").css("border", "5px solid #8a1a18")
-        $(".modal-footer").html("<button type='button' class='btn btn-danger' data-dismiss='modal'>C'est bon, go ! (les rouges commencent)</button>");
-    } else {
-        $("body").css("border", "5px solid #005e9b")
-        $(".modal-footer").html("<button type='button' class='btn btn-primary' data-dismiss='modal'>C'est bon, go ! (les bleus commencent)</button>");
-    }
+    // first_team = Math.floor(Math.random() * Math.floor(2));
+    // if (first_team == 1) {
+    //     $("body").css("border", "5px solid #8a1a18")
+    //     $(".modal-footer").html("<button type='button' class='btn btn-danger' data-dismiss='modal'>C'est bon, go ! (les rouges commencent)</button>");
+    // } else {
+    //     $("body").css("border", "5px solid #005e9b")
+    //     $(".modal-footer").html("<button type='button' class='btn btn-primary' data-dismiss='modal'>C'est bon, go ! (les bleus commencent)</button>");
+    // }
 
 
     // Init grid colors
@@ -80,20 +91,4 @@ $(document).ready(function () {
     // $("#cn-show-schema").click(function () {
     //     $('#cn-explain').modal();
     // });
-
-    $("img.cn-card, .cn-card-text").click(function () {
-        let card = $(this).parent();
-        // TODO : use data attributes
-        var i = parseInt(card.attr('id').substring(8, 9));
-        var j = parseInt(card.attr('id').substring(10, 11));
-
-        var message = {
-            action: "vote",
-            parameters: {
-                x: i,
-                y: j
-            }
-        };
-        conn.send(JSON.stringify(message));
-    });
 });

@@ -1,11 +1,21 @@
 <?php
 namespace App\RealTime;
 
+use Symfony\Component\DependencyInjection\ContainerInterface;
+
 class Router
 {
-    public static function execute(Action $action)
+    protected $container;
+
+    public function __construct(ContainerInterface $container)
     {
-        $reflectionMethod = new \ReflectionMethod('CodeNames\Controller', $action->getMethod());
-        return $reflectionMethod->invoke(new Controller(), $action->getArguments());
+        $this->container = $container;
+    }
+
+    public function execute(Action $action)
+    {
+        $realTimeController = $this->container->get('realtime');
+        return $realTimeController->vote($action->getArguments());
+        // return $reflectionMethod->invoke(new Controller(), $action->getArguments());
     }
 }

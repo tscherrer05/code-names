@@ -2,15 +2,18 @@
 namespace App\RealTime;
 use Ratchet\MessageComponentInterface;
 use Ratchet\ConnectionInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class Messager implements MessageComponentInterface
 {
     protected $clients;
+    protected $container;
 
     // TODO : action queue !
 
-    public function __construct()
+    public function __construct(ContainerInterface $container)
     {
+        $this->container = $container;
         $this->clients = new \SplObjectStorage;
     }
 
@@ -18,7 +21,7 @@ class Messager implements MessageComponentInterface
     {
         // Store the new connection to send messages to later
         $this->clients->attach($conn);
-
+        
         echo "New connection! ({$conn->resourceId})\n";
     }
 
@@ -26,7 +29,7 @@ class Messager implements MessageComponentInterface
     {
         $numRecv = count($this->clients) - 1;
         echo sprintf('Connection %d sending message "%s" to %d other connection%s' . "\n",
-         $from->resourceId, $msg, $numRecv, $numRecv == 1 ? '' : 's');
+        $from->resourceId, $msg, $numRecv, $numRecv == 1 ? '' : 's');
 
         // 1. Parse message
         $action = new Action($msg);
@@ -34,7 +37,8 @@ class Messager implements MessageComponentInterface
         // 2. Execute corresponding action
         try
         {
-            $result = Router::execute($action);
+            $realTimeController = $this->container->get('realtime');
+            $result = $realTimeController->vote($action->getArguments());
 
             // 3. Push result to clients
             foreach ($this->clients as $client) {
@@ -46,8 +50,9 @@ class Messager implements MessageComponentInterface
         }
         catch(\Exception $e)
         {
-            // TODO : Manage error
-            $from->send("Erreur");
+            echo "An error has occurred: {$e->getMessage()}\n";
+            $err = \json_encode(array("data" => "Une erreur s'est produite."));
+            $from->send($err);
         }
     }
 

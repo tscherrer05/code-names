@@ -19,7 +19,6 @@ class Action
 
     public function getArguments()
     {
-        var_dump($this->json);
         return $this->json["parameters"];
     }
 }

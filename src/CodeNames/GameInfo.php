@@ -50,13 +50,13 @@ class GameInfo
         return $this->players;
     }
 
-    public function getPlayer($id)
+    public function getPlayer(int $id)
     {
         foreach ($this->players as $player) {
             if($player->id == $id)
                 return $player;
         }
-        throw new \Exception('Player not found with id : ' . $player->id);
+        throw new \Exception('Player not found with id : ' . $id);
     }
 
     public function nbPlayers()

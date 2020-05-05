@@ -1,10 +1,9 @@
 <?php
 namespace App\Controller;
 
-use App\Repository\GameRepository;
+use App\Repository\GameInfoRepository;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
 
 
 class RealTimeController extends AbstractController
@@ -15,7 +14,7 @@ class RealTimeController extends AbstractController
     public function __construct()
     {
         // TODO : Inject dependencies
-        $this->gameRepository = new GameRepository();
+        $this->gameRepository = new GameInfoRepository();
     }
 
     /**

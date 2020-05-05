@@ -50,7 +50,7 @@ class GameInfo
         return $this->players;
     }
 
-    public function getPlayer(int $id)
+    public function getPlayer(string $id)
     {
         foreach ($this->players as $player) {
             if($player->id == $id)
@@ -75,7 +75,6 @@ class GameInfo
             return null;
     }
 
-
     // Commands
     public function vote(Player $player, int $x, int $y)
     {
@@ -86,7 +85,7 @@ class GameInfo
 
     public function addPlayer(string $name, int $team, int $role)
     {
-        $player = new Player(0, $name, $team);
+        $player = new Player(0, $name, $team, $role);
         array_push($this->players, $player);
     }
 

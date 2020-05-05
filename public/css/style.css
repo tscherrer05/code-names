@@ -37,6 +37,14 @@ body {
     color: black;
 }
 
+.cn-card-votes {
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: black;
+}
+
 #cn-show-schema {
     position: fixed;
     bottom: 0;

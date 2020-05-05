@@ -15,6 +15,7 @@
                 <img src="{{ asset('images/red0.png') }}" alt="Red card" class="cn-card revealed">
                 {% endif %}
             {% else %}
+            <div class="cn-card-votes"></div>
             <img src="{{ asset('images/card.png') }}" alt="White card" class="cn-card">
             <div class="cn-card-text">{{card.word}}</div>
             {% endif %}
@@ -26,12 +27,26 @@
     </div>
 
     <div class="row">
-        <p class="col">Vous êtes : <span id="current-player">{{currentPlayerType}}</span></p>
-        <p class="col">C'est le tour de l'équipe : <span id="current-team">{{currentTeam}} </span></p>
-        <p class="col">Mot annoncé : <span id="announced-word">{{announcedWord}} </span></p>
-        <p class="col">Nombre annoncé : <span id="announced-number">{{announcedNumber}}</span></p>
-        <span id="gameId" data-value="{{gameId}}"></span>
-        <span id="playerId" data-value="{{playerId}}"></span>
+        <div class="col">
+            <p>Vous êtes : <span id="current-player" data-value="{{currentPlayerName}}">{{currentPlayerName}}</span></p>
+            <p>Votre équipe : {{currentPlayerTeam}}</p>
+            <p>Votre rôle : {{currentPlayerRole}}</p>
+        </div>
+        <div class="col">
+            <p>Tour : <span id="current-team">{{currentTeam}} </span></p>
+            <p>Mot annoncé : <span id="announced-word">{{announcedWord}} </span></p>
+            <p>Nombre annoncé : <span id="announced-number">{{announcedNumber}}</span></p>
+            <span id="gameId" data-value="{{gameId}}"></span>
+            <span id="playerId" data-value="{{playerId}}"></span>
+        </div>
+        <div class="col">
+            <p class="display-block">Votes restants :</p>
+            <span id="vote-tag-{{playerId}}" class="badge badge-secondary">{{currentPlayerName}}</span>
+        </div>
+    </div>
+
+    <div class="row">
+
     </div>
 </div>
 {% endblock %}

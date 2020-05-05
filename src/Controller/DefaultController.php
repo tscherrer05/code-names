@@ -2,7 +2,7 @@
 namespace App\Controller;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use App\Repository\GameRepository;
+use App\Repository\GameInfoRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
@@ -19,7 +19,7 @@ class DefaultController extends AbstractController
     {
         $this->playerSession = $playerSession;
         // TODO : Inject dependencies
-        $this->gameRepository = new GameRepository();
+        $this->gameRepository = new GameInfoRepository();
     }
 
     public function index()
@@ -55,7 +55,9 @@ class DefaultController extends AbstractController
             "announcedNumber" => $gameInfo->currentNumber(),
             "announcedWord" => $gameInfo->currentWord(),
             "currentTeam" => $gameInfo->currentTeam(),
-            "currentPlayerType" => $player->name,
+            "currentPlayerName" => $player->name,
+            "currentPlayerRole" => $player->role,
+            "currentPlayerTeam" => $player->team,
             "cards" => $board->cards() // TODO : view models for cards
         ];
         return $this->render('default/game.html.twig', $viewModel);
@@ -85,7 +87,11 @@ class DefaultController extends AbstractController
         $role = $request->request->get('role');
 
         //save player
+        // TODO : use Doctrine
+        // TODO : error handling
         $newPlayerId = $this->gameRepository->addPlayer($game, $playerName, $team, $role);
+
+        $this->gameRepository->commit();
 
         // save session
         $this->playerSession->set(DefaultController::PLAYER_SESSION_NAME, $newPlayerId);

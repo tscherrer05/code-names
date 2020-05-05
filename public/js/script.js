@@ -2,6 +2,7 @@ $(document).ready(function () {
     // GAME SETUP
     const gameId = $('#gameId').data('value');
     const playerId = $('#playerId').data('value');
+    const playerName = $('#current-player').data('value');
 
     function returnCard(i, j, color) {
         var img = $(`#cn-card-${i}-${j} img`);
@@ -11,6 +12,11 @@ $(document).ready(function () {
             img.attr("src", "images/" + imageName + ".png");
         }).fadeIn(600);
         img.parent().find(".cn-card-text").fadeOut(300);
+    }
+
+    function putVoteOnCard(x, y) {
+        var img = $(`#cn-card-${x}-${y} img`);
+        $("#vote-tag-" + playerId).appendTo(img.parent().find(".cn-card-votes"));
     }
 
     // WebSocket connection
@@ -23,10 +29,20 @@ $(document).ready(function () {
     };
 
     conn.onmessage = function (e) {
-        console.log(e.data);
+        if(e === null || e === undefined) {
+            return;
+        }
+
         const result = JSON.parse(e.data);
-        if (result.action === "returnCard") {
-            returnCard(result.x, result.y, result.color);
+
+        switch (result.action) {
+            case "vote":
+                putVoteOnCard(result.x, result.y, result.playerId, result.playerName);
+                break;
+            case null:
+            case undefined:
+            default:
+                break;
         }
     };
 
@@ -46,6 +62,8 @@ $(document).ready(function () {
             }
         };
         conn.send(JSON.stringify(message));
+
+        putVoteOnCard(i, j, playerId, playerName);
     });
 
     // Who starts?

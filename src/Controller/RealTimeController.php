@@ -23,17 +23,17 @@ class RealTimeController extends AbstractController
      */
     public function vote($request)
     {
-        echo 'Vote !\n';
+        echo "Vote !\n";
         // TODO : Sanitize !
         $x = $request['x'];
         $y = $request['y'];
         $playerId = $request['playerId'];
         $gameId = $request['gameId'];
 
-        echo 'PlayerId : ' . $playerId;
-        echo 'GameId : ' . $playerId;
-        echo 'x : ' . $x;
-        echo 'y : ' . $y;
+        echo 'PlayerId : ' . $playerId . "\n";
+        echo 'GameId : ' . $gameId . "\n";
+        echo 'x : ' . $x . "\n";
+        echo 'y : ' . $y . "\n";
 
         // Récupérer l'état du jeu en base de données
         $gameInfo = $this->gameRepository->get($gameId);
@@ -45,7 +45,9 @@ class RealTimeController extends AbstractController
             $gameInfo->vote($player, $x, $y);
 
             // Sauvegarder le nouvel état en base
-            // $this->gameRepository->saveGameInfo($gameInfo);
+            // $this->gameRepository->addVote($gameId, $playerId, $x, $y);
+
+            // $this->gameRepository->commit();
 
             // Retourner le résultat à l'utilisateur
             $model = [
@@ -70,21 +72,4 @@ class RealTimeController extends AbstractController
         }
     }
 
-    /**
-     * @Route("/returnCard", methods={"GET"})
-     */
-    public function returnCard(Request $request)
-    {
-        // TODO : Sanitize !
-        $x = $request->query->get("x");
-        $y = $request->query->get("y");
-
-        $result = array(
-            "action" => "returnCard",
-            "x" => $x,
-            "y" => $y
-        );
-
-        return \json_encode($result);
-    }
 }

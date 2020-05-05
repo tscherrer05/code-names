@@ -11,12 +11,16 @@ class Player
     // Team can be 1 or 2
     public $team;
 
-    function __construct(int $id, string $name, int $team)
+    // Role can be 1 or 2
+    public $role;
+
+    function __construct(string $id, string $name, int $team, int $role)
     {
         // TODO : throw exception if invalid values
         $this->id = $id;
         $this->name = $name;
         $this->team = $team;
+        $this->role = $role;
     }
 }
 

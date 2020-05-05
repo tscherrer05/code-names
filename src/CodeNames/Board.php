@@ -33,7 +33,7 @@ class Board
 
         if($everyBodyHasVoted)
         {
-            foreach($this->votes as $playerId => $card)
+            foreach($this->votes as $card)
             {
                 if($lastCard == null)
                     $lastCard = $card;

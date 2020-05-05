@@ -37,8 +37,7 @@ class Messager implements MessageComponentInterface
         // 2. Execute corresponding action
         try
         {
-            $realTimeController = $this->container->get('realtime');
-            $result = $realTimeController->vote($action->getArguments());
+            $result = (new Router($this->container))->execute($action);
 
             // 3. Push result to clients
             foreach ($this->clients as $client) {

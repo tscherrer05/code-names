@@ -15,7 +15,15 @@ class Router
     public function execute(Action $action)
     {
         $realTimeController = $this->container->get('realtime');
-        return $realTimeController->vote($action->getArguments());
-        // return $reflectionMethod->invoke(new Controller(), $action->getArguments());
+     
+        switch($action->getMethod())
+        {
+            case 'vote':
+                return $realTimeController->vote($action->getArguments());
+            case 'returnCard':
+                return $realTimeController->returnCard($action->getArguments());
+            default:
+                throw new \InvalidArgumentException("Cette action n'est pas possible.");
+        }
     }
 }

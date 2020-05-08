@@ -18,8 +18,8 @@ class GameTest extends TestCase
         // Arrange
         $cards    = TestData::getCards();
         $board    = new Board($cards);
-        $player1  = new Player(1, "nom", 1);
-        $player2  = new Player(2, "nom", 1);
+        $player1  = new Player(1, "nom", 1, 1);
+        $player2  = new Player(2, "nom", 1, 1);
         $gameInfo = new GameInfo($board, 1, "", 0, array($player1, $player2));
 
         // Act
@@ -34,8 +34,8 @@ class GameTest extends TestCase
         // Arrange
         $cards    = TestData::getCards();
         $board    = new Board($cards);
-        $player1  = new Player(1, "nom", 1);
-        $player2  = new Player(2, "nom", 1);
+        $player1  = new Player(1, "nom", 1, 1);
+        $player2  = new Player(2, "nom", 1, 1);
         $gameInfo = new GameInfo($board, 1, "", 1, array($player1, $player2));
 
         // Act
@@ -56,9 +56,9 @@ class GameTest extends TestCase
     {
         // Arrange
         $board    = new Board(TestData::getCards());
-        $player1  = new Player(1, "Jack", 1);
-        $player2  = new Player(2, "Boby", 1);
-        $player3  = new Player(3, "Boby", 1);
+        $player1  = new Player(1, "Jack", 1, 1);
+        $player2  = new Player(2, "Boby", 1, 1);
+        $player3  = new Player(3, "Boby", 1, 1);
         $gameInfo = new GameInfo($board, 1, "", 1, array($player1, $player2, $player3));
         $coordX = 3;
         $coordY = 3;
@@ -75,7 +75,7 @@ class GameTest extends TestCase
     {
         // Arrange
         $board = new Board(TestData::getCards());
-        $player = new Player(1, "Jack", 2);
+        $player = new Player(1, "Jack", 2, 1);
         $gameInfo = new GameInfo($board, 1, "", 1, array($player));
         $coordX = 1;
         $coordY = 1;
@@ -89,7 +89,7 @@ class GameTest extends TestCase
     {
         // Arrange
         $board    = new Board(TestData::getCards());
-        $player   = new Player(1, "Jack", 2);
+        $player   = new Player(1, "Jack", 2, 1);
         $gameInfo = new GameInfo($board, 1, "", 1, array($player));
         $coordX = 5;
         $coordY = 5;
@@ -103,8 +103,8 @@ class GameTest extends TestCase
     {
         // Arrange
         $board    = new Board(TestData::getCards());
-        $player1  = new Player(1, "Jack", 1);
-        $player2  = new Player(2, "Boby", 1);
+        $player1  = new Player(1, "Jack", 1, 1);
+        $player2  = new Player(2, "Boby", 1, 1);
         $gameInfo = new GameInfo($board, 1, "", 1, array($player1, $player2));
         $coordX = 3;
         $coordY = 3;
@@ -121,8 +121,8 @@ class GameTest extends TestCase
     public function testVictory()
     {
         $board    = new Board(TestData::getCardAlmostWin());
-        $player1  = new Player(1, "Jack", 1);
-        $player2  = new Player(2, "Boby", 1);
+        $player1  = new Player(1, "Jack", 1, 1);
+        $player2  = new Player(2, "Boby", 1, 1);
         $gameInfo = new GameInfo($board, 1, "", 1, array($player1, $player2));
         $x = 4;
         $y = 0;
@@ -151,7 +151,7 @@ class GameTest extends TestCase
     public function testGetPlayerById()
     {
         $board    = new Board(TestData::getCards());
-        $player1  = new Player(3, "Jack", 1);
+        $player1  = new Player(3, "Jack", 1, 1);
         $gameInfo = new GameInfo($board, 1, "", 1, array($player1));
 
         $result = $gameInfo->getPlayer(3);

@@ -1,11 +1,13 @@
 <?php
+
 namespace App\Controller;
+
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use App\Repository\GameInfoRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
+use App\Repository\GameRepository;
 
 class DefaultController extends AbstractController
 {
@@ -15,11 +17,10 @@ class DefaultController extends AbstractController
     const PLAYER_SESSION_NAME = 'playerId';
     const GAME_SESSION_NAME = 'gameId';
 
-    public function __construct(SessionInterface $playerSession)
+    public function __construct(SessionInterface $playerSession, GameRepository $repo)
     {
         $this->playerSession = $playerSession;
-        // TODO : Inject dependencies
-        $this->gameRepository = new GameInfoRepository();
+        $this->gameRepository = $repo;
     }
 
     public function index()
@@ -33,22 +34,30 @@ class DefaultController extends AbstractController
     public function game(Request $request)
     {
         $gameId = $request->query->get('id');
+        try 
+        {
+            $gameInfo = $this->gameRepository->get($gameId);
+        } 
+        catch (\Exception $e) 
+        {
+            return $this->render('404.html.twig');
+        }
 
-        $gameInfo = $this->gameRepository->get($gameId);
         $board = $gameInfo->board();
-        
+
         $identity = $this->playerSession->get(DefaultController::PLAYER_SESSION_NAME);
 
-        if(!isset($identity))
-        {
-            return $this->redirectToRoute('user_login',
-            [
-                'gameId' => $gameId
-            ]);
+        if (!isset($identity)) {
+            return $this->redirectToRoute(
+                'user_login',
+                [
+                    'gameId' => $gameId
+                ]
+            );
         }
 
         $player = $gameInfo->getPlayer($identity);
-        
+
         $viewModel = [
             "gameId" => $gameId,
             "playerId" => $identity,
@@ -61,6 +70,14 @@ class DefaultController extends AbstractController
             "cards" => $board->cards() // TODO : view models for cards
         ];
         return $this->render('default/game.html.twig', $viewModel);
+    }
+
+    /**
+     * @Route("/lobby", methods={"GET"}, name="lobby")
+     */
+    public function lobby(Request $request)
+    {
+        
     }
 
     /**

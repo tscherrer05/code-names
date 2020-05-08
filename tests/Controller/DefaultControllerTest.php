@@ -36,18 +36,18 @@ class DefaultControllerTest extends WebTestCase
         $this->assertSelectorExists('input#gameId');
         $form = $crawler->selectButton('join-game')->form();
 
-        $form['id'] = 1;
+        $form['gameId'] = 1;
 
         $crawler = $client->submit($form);
 
         $this->assertEquals(302, $client->getResponse()->getStatusCode());
     }
 
+    // TODO : warning : writes in datasource
     // public function testConnect()
     // {
     //     $client = static::createClient();
 
-    //     // TODO : warning : writes in datasource
     //     // $client->request(
     //     //     'POST', 
     //     //     '/login',

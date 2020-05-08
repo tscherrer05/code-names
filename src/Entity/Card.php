@@ -64,14 +64,14 @@ class Card
         return $this;
     }
 
-    public function getGameId(): ?Game
+    public function getGame(): ?Game
     {
-        return $this->gameId;
+        return $this->game;
     }
 
-    public function setGameId(?Game $gameId): self
+    public function setGame(?Game $game): self
     {
-        $this->gameId = $gameId;
+        $this->game = $game;
 
         return $this;
     }

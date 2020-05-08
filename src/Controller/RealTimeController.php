@@ -1,20 +1,18 @@
 <?php
 namespace App\Controller;
 
-use App\Repository\GameInfoRepository;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-
+use App\Repository\GameRepository;
 
 class RealTimeController extends AbstractController
 {
-    const PLAYER_SESSION_NAME = 'playerId';
-    const GAME_SESSION_NAME = 'gameId';
+    private $gameRepository;
 
-    public function __construct()
+    public function __construct(GameRepository $repo)
     {
-        // TODO : Inject dependencies
-        $this->gameRepository = new GameInfoRepository();
+        $this->gameRepository  = $repo;
+
     }
 
     /**
@@ -28,11 +26,6 @@ class RealTimeController extends AbstractController
         $y = $request['y'];
         $playerId = $request['playerId'];
         $gameId = $request['gameId'];
-
-        echo 'PlayerId : ' . $playerId . "\n";
-        echo 'GameId : ' . $gameId . "\n";
-        echo 'x : ' . $x . "\n";
-        echo 'y : ' . $y . "\n";
 
         // Récupérer l'état du jeu en base de données
         $gameInfo = $this->gameRepository->get($gameId);

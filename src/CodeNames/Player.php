@@ -4,7 +4,6 @@ namespace App\CodeNames;
 
 class Player
 {
-    // Unique id (in whole application) to identify a player
     public $id;
     public $name;
 
@@ -14,7 +13,10 @@ class Player
     // Role can be 1 or 2
     public $role;
 
-    function __construct(string $id, string $name, int $team, int $role)
+    // Unique id (in whole application) to identify a player
+    public $guid;
+
+    function __construct(string $id, string $name, int $team = null, int $role = null)
     {
         // TODO : throw exception if invalid values
         $this->id = $id;

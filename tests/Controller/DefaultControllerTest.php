@@ -1,47 +1,72 @@
 <?php
 namespace App\Tests\Controller;
 
+use App\Controller\DefaultController;
+use App\DataFixtures\DefaultFixtures;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+
 
 class DefaultControllerTest extends WebTestCase
 {
-    // TODO : Use data test
-
-    public function testIndex()
+    public function testLoginPageNominal()
     {
         $client = static::createClient();
 
-        $client->request('GET', '/');
-
-        $this->assertEquals(200, $client->getResponse()->getStatusCode());
-        $this->assertSelectorTextContains('html h1', 'Code games');
-    }
-
-    public function testLoginPage()
-    {
-        $client = static::createClient();
-
-        $client->request('GET', '/login?gameId=1');
+        $client->request('GET', '/login');
 
         $this->assertEquals(200, $client->getResponse()->getStatusCode());
         $this->assertSelectorExists('input#login');
-        $this->assertInputValueSame('gameId', '1', 'Wrong input value');
     }
 
-    public function testStart()
+    public function testStartNominal()
     {
         $client = static::createClient();
         $crawler = $client->request('GET', '/start');
 
-        $this->assertSelectorExists('input#gameId');
+        $this->assertSelectorExists('input#gameKey');
         $form = $crawler->selectButton('join-game')->form();
 
-        $form['gameId'] = 1;
+        $form['gameKey'] = DefaultFixtures::GameKey1;
 
         $crawler = $client->submit($form);
+        $client->followRedirects(true);
 
-        $this->assertEquals(302, $client->getResponse()->getStatusCode());
+        $this->assertTrue($client->getResponse()->isRedirect());
+        $this->assertContains('join', $client->getRequest()->getUri());
+        $client->followRedirect();
+        $this->assertContains('login', $client->getRequest()->getUri());
     }
+
+
+    public function testCreateGameAnonymous()
+    {
+        $client = static::createClient();
+        $crawler = $client->request('POST', '/create');
+        $this->assertTrue($client->getResponse()->isRedirect());
+        $client->followRedirect();
+        $this->assertContains('login', $client->getRequest()->getUri());
+    }
+
+    public function testCreateGameNominal()
+    {
+        $client = static::createClient();
+        $session = static::$container->get('session');
+        $session->set(DefaultController::PlayerSession, 1);
+        $crawler = $client->request('POST', '/create', []);
+        $this->assertTrue($client->getResponse()->isRedirect());
+        $client->followRedirect();
+        $this->assertContains('lobby', $client->getRequest()->getUri());
+    }
+
+    // public function testLobbyNominal()
+    // {
+    //     $client = static::createClient();
+
+    //     $client->request('GET', '/lobby?game='.DefaultFixtures::GameKey1);
+
+    //     $this->assertEquals(200, $client->getResponse()->getStatusCode());
+    //     $this->assertSelectorExists('#game-guid');
+    // }
 
     // TODO : warning : writes in datasource
     // public function testConnect()
@@ -61,5 +86,4 @@ class DefaultControllerTest extends WebTestCase
 
     //     // $this->assertSame(302, $client->getResponse()->getStatusCode());
     // }
-
 }

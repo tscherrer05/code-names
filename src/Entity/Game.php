@@ -44,7 +44,7 @@ class Game
     private $currentTeam;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Card", mappedBy="gameId")
+     * @ORM\OneToMany(targetEntity="App\Entity\Card", mappedBy="game")
      */
     private $cards;
 
@@ -136,7 +136,7 @@ class Game
     {
         if (!$this->cards->contains($card)) {
             $this->cards[] = $card;
-            $card->setGameId($this);
+            $card->setGame($this);
         }
 
         return $this;
@@ -147,8 +147,8 @@ class Game
         if ($this->cards->contains($card)) {
             $this->cards->removeElement($card);
             // set the owning side to null (unless already changed)
-            if ($card->getGameId() === $this) {
-                $card->setGameId(null);
+            if ($card->getGame() === $this) {
+                $card->setGame(null);
             }
         }
 

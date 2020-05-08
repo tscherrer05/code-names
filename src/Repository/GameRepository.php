@@ -4,17 +4,15 @@ namespace App\Repository;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
-use Doctrine\ORM\EntityManagerInterface;
 
 use App\Entity\Game;
 use App\CodeNames\GameInfo;
 use App\CodeNames\Board;
 use App\CodeNames\Player;
-use App\CodeNames\Card;
-use Ramsey\Uuid\Uuid;
 
 /**
  * @method Game|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Game|null findByGuid($gameKey)
  * @method Game|null findOneBy(array $criteria, array $orderBy = null)
  * @method Game[]    findAll()
  * @method Game[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
@@ -28,33 +26,6 @@ class GameRepository extends ServiceEntityRepository
         parent::__construct($registry, Game::class);
     }
 
-    /**
-     * @return Game[] Returns an array of Game objects
-     */
-    public function findByExampleField($value)
-    {
-        return $this->createQueryBuilder('g')
-            ->andWhere('g.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('g.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
-
-    }
-
-    /*
-    public function findOneBySomeField($value): ?Game
-    {
-        return $this->createQueryBuilder('g')
-            ->andWhere('g.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
-    }
-    */
 
     public function get(int $gameId)
     {
@@ -63,9 +34,34 @@ class GameRepository extends ServiceEntityRepository
             ->setParameter(':val', $gameId)
             ->getQuery()
             ->getOneOrNullResult();
+        return $this->createGame($gameEntity);
+    }
+
+    public function getByGuid(string $gameKey)
+    {
+        $gameEntity = $this->createQueryBuilder('g')
+            ->andWhere('g.publicKey = :val')
+            ->setParameter(':val', $gameKey)
+            ->getQuery()
+            ->getOneOrNullResult();
+        return $this->createGame($gameEntity);
+    }
+
+    public function findByGuid(string $gameKey)
+    {
+        $gameEntity = $this->createQueryBuilder('g')
+            ->andWhere('g.publicKey = :val')
+            ->setParameter(':val', $gameKey)
+            ->getQuery()
+            ->getOneOrNullResult();
+        return $gameEntity;
+    }
+
+    private function createGame(Game $gameEntity)
+    {
         if($gameEntity == null)
         {
-            throw new \Exception('Game not found with id : ' . $gameId);
+            throw new \Exception('Game does not exist in db.');
         }
 
         $cards = $gameEntity->getCards();
@@ -86,16 +82,21 @@ class GameRepository extends ServiceEntityRepository
         }
 
         $players = $gamePlayers->map(function($gp) {
-            return new Player($gp->id, $gp->getPlayer()->name, $gp->getTeam(), $gp->getRole());
+            $playerEntity = $gp->getPlayer();
+            $play = new Player($gp->getId(), $playerEntity->getName(), $gp->getTeam(), $gp->getRole());
+            $play->guid = $playerEntity->getPlayerKey();
+            return $play;
         });
 
-        $board = new Board($cards, $votes);
+        $board = new Board($cards->toArray(), $votes);
         $gameInfo = new GameInfo(
             $board, 
             $gameEntity->getCurrentTeam(), 
             $gameEntity->getCurrentWord(), 
             $gameEntity->getCurrentNumber(), 
-            $players);
+            $players->toArray());
+        $gameInfo->guid = $gameEntity->getPublicKey();
+        $gameInfo->status = $gameEntity->getStatus();
     
         return $gameInfo;
     }

@@ -1,0 +1,15 @@
+{% extends 'base.html.twig' %}
+
+
+{% block content %}
+<p id="game-uid">Identifiant de jeu à partager : {{gameKey}}</p>
+<ul>
+    {% for player in players %}
+        <li>{{player.name}} ({{player.guid}})</li>
+    {% endfor %}
+</ul>
+{% endblock %}
+
+{% block javascript %}
+
+{% endblock %}

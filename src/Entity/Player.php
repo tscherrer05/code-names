@@ -21,6 +21,11 @@ class Player
      */
     private $name;
 
+    /**
+     * @ORM\Column(type="guid")
+     */
+    private $playerKey;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -34,6 +39,18 @@ class Player
     public function setName(string $name): self
     {
         $this->name = $name;
+
+        return $this;
+    }
+
+    public function getPlayerKey(): ?string
+    {
+        return $this->playerKey;
+    }
+
+    public function setPlayerKey(string $playerKey): self
+    {
+        $this->playerKey = $playerKey;
 
         return $this;
     }

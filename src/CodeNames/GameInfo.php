@@ -5,9 +5,9 @@ class GameInfo
 {
     function __construct(
         Board $board, 
-        int $teamId,
-        string $word,
-        int $number, 
+        int $teamId = null,
+        string $word = null,
+        int $number = null, 
         array $players)
     {
         $this->team = $teamId;
@@ -23,6 +23,9 @@ class GameInfo
     
     private $board;
     private $players = array();
+    
+    public $guid;
+    public $status;
 
     // Query
     public function currentWord()
@@ -50,20 +53,24 @@ class GameInfo
         return $this->players;
     }
 
-    public function getPlayer(string $id)
+    public function getGuid()
+    {
+        return $this->guid;   
+    }
+
+    public function getPlayer(string $playerKey)
     {
         foreach ($this->players as $player) {
-            if($player->id == $id)
+            if($player->guid == $playerKey)
                 return $player;
         }
-        throw new \Exception('Player not found with id : ' . $id);
+        throw new \Exception('Player not found with id : ' . $playerKey);
     }
 
     public function nbPlayers()
     {
         return \count($this->players);
     }
-
 
     public function winner($board)
     {
@@ -83,7 +90,7 @@ class GameInfo
         $this->board->voteForCard($player, $x, $y, $this);
     }
 
-    public function addPlayer(string $name, int $team, int $role)
+    public function addPlayer(string $name, int $team = null, int $role = null)
     {
         $player = new Player(0, $name, $team, $role);
         array_push($this->players, $player);

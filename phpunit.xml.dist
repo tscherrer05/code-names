@@ -29,5 +29,8 @@
 
     <listeners>
         <listener class="Symfony\Bridge\PhpUnit\SymfonyTestsListener" />
+        <!-- To reset db between functional tests -->
+        <listener class="\DAMA\DoctrineTestBundle\PHPUnit\PHPUnitListener"/> 
     </listeners>
+
 </phpunit>

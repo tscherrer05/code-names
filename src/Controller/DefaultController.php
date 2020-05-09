@@ -175,15 +175,20 @@ class DefaultController extends AbstractController
         {
             throw new \Exception("Game not found with key : ".$gameKey);
         }
+        $playerKey = Guid::uuid1();
+
+        // Save pdo session (save in database)
+        $this->playerSession->set(DefaultController::PlayerSession, $playerKey);
+        $this->playerSession->set(DefaultController::GameSession, $gameKey);
 
         $player = new Player();
         $player->setName($playerName);
-        $playerKey = Guid::uuid1();
         $player->setPlayerKey($playerKey);
 
         $gamePlayer = new GamePlayer();
         $gamePlayer->setGame($game);
         $gamePlayer->setPlayer($player);
+        $gamePlayer->setSessionId($this->playerSession->getId());
         
         // Persistance
         $entityManager = $this->getDoctrine()->getManager();
@@ -191,9 +196,6 @@ class DefaultController extends AbstractController
         $entityManager->persist($gamePlayer);
         $entityManager->flush();
 
-        // Save session
-        $this->playerSession->set(DefaultController::PlayerSession, $playerKey);
-        $this->playerSession->set(DefaultController::GameSession, $gameKey);
 
         // Routing
         return $this->redirectToRoute('lobby');

@@ -48,6 +48,11 @@ class GamePlayer
      */
     private $y;
 
+    /**
+     * @ORM\Column(type="string", length=128)
+     */
+    private $sessionId;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -121,6 +126,18 @@ class GamePlayer
     public function setY(?int $y): self
     {
         $this->y = $y;
+
+        return $this;
+    }
+
+    public function getSessionId(): ?string
+    {
+        return $this->sessionId;
+    }
+
+    public function setSessionId(string $sessionId): self
+    {
+        $this->sessionId = $sessionId;
 
         return $this;
     }

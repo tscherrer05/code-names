@@ -8,12 +8,10 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class ServerCommand extends Command
 {
     protected $container;
-
 
     public function __construct(ContainerInterface $container)
     {
@@ -33,7 +31,6 @@ class ServerCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-
         $server = IoServer::factory(
             new HttpServer(
                 new WsServer(
@@ -44,7 +41,6 @@ class ServerCommand extends Command
         );
 
         $server->run();
-
     }
 
 }

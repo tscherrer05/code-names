@@ -37,11 +37,18 @@
             <p>Mot annoncé : <span id="announced-word">{{announcedWord}} </span></p>
             <p>Nombre annoncé : <span id="announced-number">{{announcedNumber}}</span></p>
             <span id="gameKey" data-value="{{gameKey}}"></span>
-            <span id="playerId" data-value="{{playerId}}"></span>
+            <span id="playerKey" data-value="{{currentPlayerKey}}"></span>
         </div>
         <div class="col">
             <p class="display-block">Votes restants :</p>
-            <span id="vote-tag-{{playerId}}" class="badge badge-secondary">{{currentPlayerName}}</span>
+            {% for p in players %}
+                {% if p.guid == currentPlayerKey %}
+                    <span id="vote-tag-{{p.guid}}" class="badge badge-success">{{p.name}}</span>
+                    {% else %}
+                    <span id="vote-tag-{{p.guid}}" class="badge badge-secondary">{{p.name}}</span>    
+                {% endif %}
+            {% endfor %}
+
         </div>
     </div>
 

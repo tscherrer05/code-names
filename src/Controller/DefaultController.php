@@ -2,33 +2,37 @@
 
 namespace App\Controller;
 
-use App\CodeNames\GameStatus;
-use App\Entity\GamePlayer;
-use App\Entity\Player;
-use App\Repository\GamePlayerRepository;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
+use Ramsey\Uuid\Guid\Guid;
+
+use App\CodeNames\GameStatus;
+use App\Entity\GamePlayer;
+use App\Entity\Player;
+use App\Repository\GamePlayerRepository;
 use App\Repository\GameRepository;
 use App\Repository\PlayerRepository;
-use Ramsey\Uuid\Guid\Guid;
+
+use App\Tests\CodeNames\TestData as TestData;
 
 class DefaultController extends AbstractController
 {
     private $gameRepository;
     private $playerSession;
     private $playerRepository;
+    private $gamePlayerRepository;
 
     const PlayerSession = 'playerKey';
     const GameSession = 'gameKey';
 
-    public function __construct(SessionInterface $playerSession, 
+    public function __construct(SessionInterface $session, 
         GameRepository $gameRepo, PlayerRepository $playerRepo,
         GamePlayerRepository $gamePlayerRepository)
     {
-        $this->playerSession = $playerSession;
+        $this->playerSession = $session;
         $this->gameRepository = $gameRepo;
         $this->playerRepository = $playerRepo;
         $this->gamePlayerRepository = $gamePlayerRepository;
@@ -40,7 +44,7 @@ class DefaultController extends AbstractController
     }
 
     /**
-     * @Route("/game", name="join_game")
+     * @Route("/game", methods={"GET"}, name="join_game")
      */
     public function game(Request $request)
     {
@@ -72,17 +76,26 @@ class DefaultController extends AbstractController
 
         $board = $gameInfo->board();
         $player = $gameInfo->getPlayer($identity);
+        $cards = $board->cards();
+
+        $cards = TestData::getCards();
 
         $viewModel = [
             "gameKey" => $gameKey,
-            "playerId" => $identity,
             "announcedNumber" => $gameInfo->currentNumber(),
             "announcedWord" => $gameInfo->currentWord(),
             "currentTeam" => $gameInfo->currentTeam(),
+            "currentPlayerKey" => $identity,
             "currentPlayerName" => $player->name,
             "currentPlayerRole" => $player->role,
             "currentPlayerTeam" => $player->team,
-            "cards" => $board->cards() // TODO : view models for cards
+            "cards" => $cards, // TODO : view models for cards
+            "players" => array_map(function($p) {
+                return [
+                    'guid' => $p->guid,
+                    'name' => $p->name
+                ];
+            }, $gameInfo->getPlayers())
         ];
         return $this->render('default/game.html.twig', $viewModel);
     }
@@ -103,28 +116,55 @@ class DefaultController extends AbstractController
      */
     public function lobby()
     {
-        $gameKey = $this->playerSession->get('gameKey');
+        $gameKey = $this->playerSession->get(self::GameSession);
         if($gameKey == null)
         {
             return $this->redirectToRoute('start');
         }
 
-        $game = $this->gameRepository->getByGuid($gameKey);
-        if($game == null)
+        $identity = $this->playerSession->get(self::PlayerSession);
+
+        if (!isset($identity)) {
+            return $this->redirectToRoute(
+                'get_login',
+                [
+                    'gameKey' => $gameKey
+                ]
+            );
+        }
+
+        $gameInfo = $this->gameRepository->getByGuid($gameKey);
+        if($gameInfo == null)
         {
             throw new \Exception("Game not found with public key : ". $gameKey);
         }
 
+        if($gameInfo->status == GameStatus::OnGoing)
+        {
+            return $this->redirectToRoute('game', ['gameKey' => $gameKey]);
+        }
+
         $viewModel = [
-            "gameKey" => $game->getGuid(),
+            "gameKey" => $gameKey,
             "players" => array_map(function($p) {
                 return [
                     'guid' => $p->guid,
                     'name' => $p->name
                 ];
-            }, $game->getPlayers()) 
+            }, $gameInfo->getPlayers()) 
         ];
         return $this->render('default/lobby.html.twig', $viewModel);
+    }
+
+    /**
+     * @Route("/refreshLobby", methods={"GET"}, name="refreshLobby")
+     */
+    public function refreshLobby(Request $request)      
+    {
+        // Pas sûr que cela soit utile
+        $this->playerRepository->cleanPlayerSessions();
+
+        return $this->redirectToRoute('lobby');
     }
 
     /**
@@ -132,7 +172,7 @@ class DefaultController extends AbstractController
      */
     public function create(Request $request)
     {
-        $identity = $this->playerSession->get(DefaultController::PlayerSession);
+        $identity = $this->playerSession->get(self::PlayerSession);
         if (!isset($identity)) 
         {
             return $this->redirectToRoute('get_login');
@@ -150,7 +190,7 @@ class DefaultController extends AbstractController
     public function login(Request $request)
     {
         $gameKey = $request->query->get('gameKey');
-        $identity = $this->playerSession->get(DefaultController::PlayerSession);
+        $identity = $this->playerSession->get(self::PlayerSession);
         if (isset($identity))
             return $this->redirectToRoute('start');
 
@@ -178,8 +218,8 @@ class DefaultController extends AbstractController
         $playerKey = Guid::uuid1();
 
         // Save pdo session (save in database)
-        $this->playerSession->set(DefaultController::PlayerSession, $playerKey);
-        $this->playerSession->set(DefaultController::GameSession, $gameKey);
+        $this->playerSession->set(self::PlayerSession, $playerKey);
+        $this->playerSession->set(self::GameSession, $gameKey);
 
         $player = new Player();
         $player->setName($playerName);
@@ -206,7 +246,7 @@ class DefaultController extends AbstractController
      */
     public function start()
     {
-        $identity = $this->playerSession->get(DefaultController::PlayerSession);
+        $identity = $this->playerSession->get(self::PlayerSession);
         $playerName = 'anonyme';
 
         if(isset($identity))
@@ -230,8 +270,8 @@ class DefaultController extends AbstractController
      */
     public function disconnect()
     {
-        $this->playerSession->remove(DefaultController::PlayerSession);
-        $this->playerSession->remove(DefaultController::GameSession);
+        $this->playerSession->remove(self::PlayerSession);
+        $this->playerSession->remove(self::GameSession);
         return $this->redirectToRoute('start');
     }
 }

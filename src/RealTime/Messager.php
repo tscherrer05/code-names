@@ -1,5 +1,6 @@
 <?php
 namespace App\RealTime;
+
 use Ratchet\MessageComponentInterface;
 use Ratchet\ConnectionInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -21,7 +22,7 @@ class Messager implements MessageComponentInterface
     {
         // Store the new connection to send messages to later
         $this->clients->attach($conn);
-        
+
         echo "New connection! ({$conn->resourceId})\n";
     }
 

@@ -1,7 +1,7 @@
 $(document).ready(function () {
     // GAME SETUP
-    const gameId = $('#gameId').data('value');
-    const playerId = $('#playerId').data('value');
+    const gameKey = $('#gameKey').data('value');
+    const playerKey = $('#playerKey').data('value');
     const playerName = $('#current-player').data('value');
 
     function returnCard(i, j, color) {
@@ -14,9 +14,9 @@ $(document).ready(function () {
         img.parent().find(".cn-card-text").fadeOut(300);
     }
 
-    function putVoteOnCard(x, y) {
+    function putVoteOnCard(x, y, playerKey) {
         var img = $(`#cn-card-${x}-${y} img`);
-        $("#vote-tag-" + playerId).appendTo(img.parent().find(".cn-card-votes"));
+        $("#vote-tag-" + playerKey).appendTo(img.parent().find(".cn-card-votes"));
     }
 
     // WebSocket connection
@@ -29,7 +29,8 @@ $(document).ready(function () {
     };
 
     conn.onmessage = function (e) {
-        if(e === null || e === undefined) {
+        if(e === null || e === undefined) 
+        {
             return;
         }
 
@@ -37,7 +38,7 @@ $(document).ready(function () {
 
         switch (result.action) {
             case "vote":
-                putVoteOnCard(result.x, result.y, result.playerId, result.playerName);
+                putVoteOnCard(result.x, result.y, result.playerKey);
                 break;
             case null:
             case undefined:
@@ -57,13 +58,13 @@ $(document).ready(function () {
             parameters: {
                 x: i,
                 y: j,
-                gameId: gameId,
-                playerId: playerId
+                gameKey: gameKey,
+                playerKey: playerKey
             }
         };
         conn.send(JSON.stringify(message));
 
-        putVoteOnCard(i, j, playerId, playerName);
+        putVoteOnCard(i, j, playerKey);
     });
 
     // Who starts?

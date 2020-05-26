@@ -10,6 +10,7 @@ framework:
         cookie_secure: auto
         cookie_samesite: lax
         handler_id: Symfony\Component\HttpFoundation\Session\Storage\Handler\PdoSessionHandler
+        gc_maxlifetime: 1440
 
     #esi: true
     #fragments: true

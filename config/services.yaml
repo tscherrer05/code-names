@@ -12,8 +12,6 @@ services:
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
     Symfony\Component\HttpFoundation\Session\Storage\Handler\PdoSessionHandler:
         arguments:
-            # - 'mysql:dbname=mydatabase; host=myhost; port=myport'
-            # - { db_username: myuser, db_password: mypassword }
             - !service { class: PDO, factory: ['@database_connection', 'getWrappedConnection'] }
             - { lock_mode: 1 }
 

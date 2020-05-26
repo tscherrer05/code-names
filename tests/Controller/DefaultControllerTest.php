@@ -52,7 +52,18 @@ class DefaultControllerTest extends WebTestCase
         $client = static::createClient();
         $session = static::$container->get('session');
         $session->set(DefaultController::PlayerSession, 1);
-        $crawler = $client->request('POST', '/create', []);
+        $client->request('POST', '/create', ['gameKey' => 'ad0abce2-f458-4d02-8cb4-ee3e0df495e6']);
+        $this->assertTrue($client->getResponse()->isRedirect());
+        $client->followRedirect();
+        $this->assertContains('lobby', $client->getRequest()->getUri());
+    }
+
+    public function testRefreshLobby()
+    {
+        $client = static::createClient();
+        $session = static::$container->get('session');
+        $session->set(DefaultController::PlayerSession, 1);
+        $client->request('POST', '/refreshLobby', []);
         $this->assertTrue($client->getResponse()->isRedirect());
         $client->followRedirect();
         $this->assertContains('lobby', $client->getRequest()->getUri());

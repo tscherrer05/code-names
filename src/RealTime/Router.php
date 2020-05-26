@@ -22,6 +22,8 @@ class Router
                 return $realTimeController->vote($action->getArguments());
             case 'returnCard':
                 return $realTimeController->returnCard($action->getArguments());
+            case 'startGame':
+                return $realTimeController->startGame($action->getArguments());
             default:
                 throw new \InvalidArgumentException("Cette action n'est pas possible.");
         }

@@ -26,6 +26,7 @@ class GameInfo
     
     public $guid;
     public $status;
+    public $id;
 
     // Query
     public function currentWord()
@@ -56,6 +57,11 @@ class GameInfo
     public function getGuid()
     {
         return $this->guid;   
+    }
+
+    public function getId()
+    {
+        return $this->id;
     }
 
     public function getPlayer(string $playerKey)

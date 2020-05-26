@@ -3,13 +3,86 @@
 
 {% block content %}
 <p id="game-uid">Identifiant de jeu à partager : {{gameKey}}</p>
-<ul>
-    {% for player in players %}
-        <li>{{player.name}} ({{player.guid}})</li>
-    {% endfor %}
-</ul>
+<form action="/game" method="post">
+        <input type="hidden" name="game-key" id="game-key" data-value="{{gameKey}}">
+        <ul>
+        {% for player in players %}
+            <li>{{player.name}} ({{player.guid}}) 
+                <label for="team">Equipe</label>
+                <select name="team_{{player.guid}}" id="team_{{player.guid}}">
+                    <option value="1">Bleu</option>
+                    <option value="2">Rouge</option>
+                </select>
+                <label for="role_{{player.guid}}">Rôle</label>
+                <select name="role_{{player.guid}}" id="role_{{player.guid}}">
+                    <option value="1">Espion</option>
+                    <option value="2">Maître espion</option>
+                </select>
+            </li>
+        {% endfor %}
+    </ul>
+    <button id="start-game" type="button">Démarrer la partie</button>
+    <div>
+        <a href="/refreshLobby?gameKey={{gameKey}}">Rafraîchir le lobby</a>
+    </div>
+</form>
+
 {% endblock %}
 
-{% block javascript %}
+{% block javascripts %}
+<script>
+$(document).ready(() => {
 
+    // WebSocket connection
+    const webSockUrl = 'ws://localhost:8080';
+    var conn = new WebSocket(webSockUrl);
+
+    // WebSocket events
+    conn.onopen = function (e) {
+        console.log("Connection established!");   
+    };
+
+    conn.onmessage = function (e) {
+        if(e === null || e === undefined) 
+        {
+            return;
+        }
+
+        const result = JSON.parse(e.data);
+
+        debugger;
+
+        switch (result.action) 
+        {
+            case "startGame":
+                redirectToGame(result.gameKey);
+                break;
+            case null:
+            case undefined:
+            default:
+                break;
+        }
+    };
+
+    var redirectToGame = (gameKey) =>
+    {
+        window.location.replace('/game?gameKey=' + gameKey);
+    };
+
+    $('#start-game').on('click', () => {
+        const gameKey = $('#game-key').data('value');
+        const message = {
+            action: 'startGame',
+            parameters: {
+                gameKey: gameKey
+            }
+        };
+        // Envoyer un message au serveur socket
+        conn.send(JSON.stringify(message));
+        redirectToGame(gameKey);
+    });
+
+});
+        
+</script>
 {% endblock %}

@@ -26,8 +26,8 @@ class GameRepository extends ServiceEntityRepository
         parent::__construct($registry, Game::class);
     }
 
-
-    public function get(int $gameId)
+    // Model object
+    public function getById(int $gameId)
     {
         $gameEntity = $this->createQueryBuilder('g')
             ->andWhere('g.id = :val')
@@ -37,6 +37,7 @@ class GameRepository extends ServiceEntityRepository
         return $this->createGame($gameEntity);
     }
 
+    // Model object
     public function getByGuid(string $gameKey)
     {
         $gameEntity = $this->createQueryBuilder('g')
@@ -47,6 +48,7 @@ class GameRepository extends ServiceEntityRepository
         return $this->createGame($gameEntity);
     }
 
+    // Entity
     public function findByGuid(string $gameKey)
     {
         $gameEntity = $this->createQueryBuilder('g')
@@ -95,6 +97,7 @@ class GameRepository extends ServiceEntityRepository
             $gameEntity->getCurrentWord(), 
             $gameEntity->getCurrentNumber(), 
             $players->toArray());
+        $gameInfo->id = $gameEntity->getId();
         $gameInfo->guid = $gameEntity->getPublicKey();
         $gameInfo->status = $gameEntity->getStatus();
     

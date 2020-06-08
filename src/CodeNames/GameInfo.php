@@ -4,10 +4,10 @@ namespace App\CodeNames;
 class GameInfo
 {
     function __construct(
-        Board $board, 
+        Board $board,
         int $teamId = null,
         string $word = null,
-        int $number = null, 
+        int $number = null,
         array $players)
     {
         $this->team = $teamId;
@@ -20,15 +20,14 @@ class GameInfo
     public $word;
     public $number;
     public $team;
-    
+
     private $board;
     private $players = array();
-    
+
     public $guid;
     public $status;
     public $id;
 
-    // Query
     public function currentWord()
     {
         return $this->word;
@@ -56,7 +55,7 @@ class GameInfo
 
     public function getGuid()
     {
-        return $this->guid;   
+        return $this->guid;
     }
 
     public function getId()
@@ -66,11 +65,10 @@ class GameInfo
 
     public function getPlayer(string $playerKey)
     {
-        foreach ($this->players as $player) {
-            if($player->guid == $playerKey)
-                return $player;
-        }
-        throw new \Exception('Player not found with id : ' . $playerKey);
+        return array_values(array_filter($this->players, function($p) use($playerKey) 
+        {
+            return $p->guid === $playerKey;
+        }))[0];
     }
 
     public function nbPlayers()

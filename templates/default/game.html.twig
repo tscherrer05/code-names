@@ -15,7 +15,15 @@
                 <img src="{{ asset('images/red0.png') }}" alt="Red card" class="cn-card revealed">
                 {% endif %}
             {% else %}
-            <div class="cn-card-votes"></div>
+            <div class="cn-card-votes">
+                {% for p in card.voters %}
+                    {% if p.playerKey == currentPlayerKey %}
+                        <span id="vote-tag-{{p.playerKey}}" class="badge badge-success">{{p.name}}</span>
+                    {% else %}
+                        <span id="vote-tag-{{p.playerKey}}" class="badge badge-secondary">{{p.name}}</span>    
+                    {% endif %}
+                {% endfor %}
+            </div>
             <img src="{{ asset('images/card.png') }}" alt="White card" class="cn-card">
             <div class="cn-card-text">{{card.word}}</div>
             {% endif %}
@@ -33,7 +41,7 @@
             <p>Votre rôle : {{currentPlayerRole}}</p>
         </div>
         <div class="col">
-            <p>Tour : <span id="current-team">{{currentTeam}} </span></p>
+            <p>Tour : <span id="current-team">Equipe {{currentTeam}} </span></p>
             <p>Mot annoncé : <span id="announced-word">{{announcedWord}} </span></p>
             <p>Nombre annoncé : <span id="announced-number">{{announcedNumber}}</span></p>
             <span id="gameKey" data-value="{{gameKey}}"></span>
@@ -41,20 +49,23 @@
         </div>
         <div class="col">
             <p class="display-block">Votes restants :</p>
-            {% for p in players %}
-                {% if p.guid == currentPlayerKey %}
-                    <span id="vote-tag-{{p.guid}}" class="badge badge-success">{{p.name}}</span>
-                    {% else %}
-                    <span id="vote-tag-{{p.guid}}" class="badge badge-secondary">{{p.name}}</span>    
+            {% for p in notVoted %}
+                {% if p.playerKey == currentPlayerKey %}
+                <span id="vote-tag-{{p.playerKey}}" class="badge badge-success">{{p.name}}</span>
+                {% else %}
+                <span id="vote-tag-{{p.playerKey}}" class="badge badge-secondary">{{p.name}}</span>    
                 {% endif %}
             {% endfor %}
-
         </div>
     </div>
 
-    <div class="row">
+    {# {% if isGuesser %}
+        <div class="row">
+            <input type="text" name="word" id="word" value="{{announcedWord}}">
+            <input type="number" name="number" id="number" value="{{announcedNumber}}">
+        </div>
+    {% endif %} #}
 
-    </div>
 </div>
 {% endblock %}
 

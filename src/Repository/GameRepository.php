@@ -8,6 +8,7 @@ use Doctrine\Persistence\ManagerRegistry;
 use App\Entity\Game;
 use App\CodeNames\GameInfo;
 use App\CodeNames\Board;
+use App\CodeNames\Card;
 use App\CodeNames\Player;
 
 /**
@@ -66,7 +67,22 @@ class GameRepository extends ServiceEntityRepository
             throw new \Exception('Game does not exist in db.');
         }
 
-        $cards = $gameEntity->getCards();
+        $cardEntities = $gameEntity->getCards()->toArray();
+        $cards = [];
+        $twoDimCards = [];
+        foreach ($cardEntities as $c) 
+        {
+            $card = new Card(
+                $c->getWord(), 
+                $c->getColor(), 
+                $c->getX(),
+                $c->getY(),
+                $c->getReturned()
+            );
+            $cards[] = $card;
+            $twoDimCards[$card->x][$card->y] = $card;
+        }
+
         $gamePlayers = $gameEntity->getGamePlayers();
 
         // Build votes
@@ -74,11 +90,11 @@ class GameRepository extends ServiceEntityRepository
         $votes = array();
         foreach($gamePlayers as $gp)
         {
-            foreach ($cards as $c) 
+            foreach ($cardEntities as $c)
             {
-                if($c->x == $gp->x && $c->y == $gp->y)
+                if($c->getX() == $gp->getX() && $c->getY() == $gp->getY())
                 {
-                    $votes[$gp->playerId] = $c;
+                    $votes[$gp->getPlayer()->getPlayerKey()] = $c;
                 }
             }
         }
@@ -90,17 +106,17 @@ class GameRepository extends ServiceEntityRepository
             return $play;
         });
 
-        $board = new Board($cards->toArray(), $votes);
+        $board = new Board($twoDimCards, $votes);
         $gameInfo = new GameInfo(
-            $board, 
-            $gameEntity->getCurrentTeam(), 
-            $gameEntity->getCurrentWord(), 
-            $gameEntity->getCurrentNumber(), 
+            $board,
+            $gameEntity->getCurrentTeam(),
+            $gameEntity->getCurrentWord(),
+            $gameEntity->getCurrentNumber(),
             $players->toArray());
         $gameInfo->id = $gameEntity->getId();
         $gameInfo->guid = $gameEntity->getPublicKey();
         $gameInfo->status = $gameEntity->getStatus();
-    
+
         return $gameInfo;
     }
 

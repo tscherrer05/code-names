@@ -22,7 +22,7 @@ class Player
     private $name;
 
     /**
-     * @ORM\Column(type="guid")
+     * @ORM\Column(type="guid", name="player_key")
      */
     private $playerKey;
 

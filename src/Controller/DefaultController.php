@@ -12,11 +12,10 @@ use Ramsey\Uuid\Guid\Guid;
 use App\CodeNames\GameStatus;
 use App\Entity\GamePlayer;
 use App\Entity\Player;
+use App\Repository\CardRepository;
 use App\Repository\GamePlayerRepository;
 use App\Repository\GameRepository;
 use App\Repository\PlayerRepository;
-
-use App\Tests\CodeNames\TestData as TestData;
 
 class DefaultController extends AbstractController
 {
@@ -24,18 +23,21 @@ class DefaultController extends AbstractController
     private $playerSession;
     private $playerRepository;
     private $gamePlayerRepository;
+    private $cardRepository;
 
     const PlayerSession = 'playerKey';
     const GameSession = 'gameKey';
 
-    public function __construct(SessionInterface $session, 
+    public function __construct(SessionInterface $session,
         GameRepository $gameRepo, PlayerRepository $playerRepo,
-        GamePlayerRepository $gamePlayerRepository)
+        GamePlayerRepository $gamePlayerRepository,
+        CardRepository $cardRepository)
     {
-        $this->playerSession = $session;
-        $this->gameRepository = $gameRepo;
-        $this->playerRepository = $playerRepo;
+        $this->playerSession        = $session;
+        $this->gameRepository       = $gameRepo;
+        $this->playerRepository     = $playerRepo;
         $this->gamePlayerRepository = $gamePlayerRepository;
+        $this->cardRepository       = $cardRepository;
     }
 
     public function index()
@@ -48,10 +50,17 @@ class DefaultController extends AbstractController
      */
     public function game(Request $request)
     {
+        // Parsage des paramètres
         $gameKey = $request->query->get('gameKey');
-        $identity = $this->playerSession->get(DefaultController::PlayerSession);
+        $playerKey = $this->playerSession->get(DefaultController::PlayerSession);
 
-        if (!isset($identity)) {
+        // Routing
+        if(!isset($gameKey))
+        {
+            return $this->redirectToRoute('start');
+        }
+        if (!isset($playerKey)) 
+        {
             return $this->redirectToRoute(
                 'get_login',
                 [
@@ -60,42 +69,68 @@ class DefaultController extends AbstractController
             );
         }
 
-        try 
+        // Lecture IO
+        $gameEntity = $this->gameRepository->findByGuid($gameKey);
+
+        // Routing
+        if($gameEntity->getStatus() == GameStatus::Lobby)
         {
-            $gameInfo = $this->gameRepository->getByGuid($gameKey);
-        } 
-        catch (\Exception $e) 
-        {
-            return $this->render('404.html.twig');
+            return $this->redirectToRoute('lobby', ['gameKey' => $gameKey]);
         }
 
-        if($gameInfo->status == GameStatus::Lobby)
+        // Lecture IO
+        $currPlayer = $this->gamePlayerRepository->findByGuid($playerKey);
+        $gameEntity  = $this->gameRepository->findByGuid($gameKey);
+        $gamePlayers = $this->gamePlayerRepository->findBy(['game' => $gameEntity->getId()]);
+        $cards       = $this->cardRepository->findBy(['game' => $gameEntity->getId()]);
+
+        // Construction de la réponse
+
+        // Joueurs qui ont pas voté
+        $notVoted = array_filter($gamePlayers, function($gp) 
         {
-            return $this->redirectToRoute('lobby');
+            return $gp->getX() == null && $gp->getY() == null;
+        });
+
+        $twoDimCards = [];
+        foreach ($cards as $c) {
+            $twoDimCards[$c->getX()][$c->getY()] = [
+                'color'     => $c->getColor(),
+                'returned'  => $c->getReturned(),
+                'word'      => $c->getWord(),
+                'x'         => $c->getX(),
+                'y'         => $c->getY(),
+                'voters'   => array_map(function($gp) {
+                    return [
+                        'playerKey' => $gp->getPlayer()->getPlayerKey(),
+                        'name' => $gp->getPlayer()->getName()
+                    ];
+                },
+                array_filter($gamePlayers, function($gp) use($c)
+                {
+                    return $gp->getX() === $c->getX() && $gp->getY() === $c->getY();
+                }))
+            ];
         }
-
-        $board = $gameInfo->board();
-        $player = $gameInfo->getPlayer($identity);
-        $cards = $board->cards();
-
-        $cards = TestData::getCards();
 
         $viewModel = [
-            "gameKey" => $gameKey,
-            "announcedNumber" => $gameInfo->currentNumber(),
-            "announcedWord" => $gameInfo->currentWord(),
-            "currentTeam" => $gameInfo->currentTeam(),
-            "currentPlayerKey" => $identity,
-            "currentPlayerName" => $player->name,
-            "currentPlayerRole" => $player->role,
-            "currentPlayerTeam" => $player->team,
-            "cards" => $cards, // TODO : view models for cards
-            "players" => array_map(function($p) {
-                return [
-                    'guid' => $p->guid,
-                    'name' => $p->name
-                ];
-            }, $gameInfo->getPlayers())
+            "gameKey"           => $gameKey,
+            "announcedNumber"   => $gameEntity->getCurrentNumber(),
+            "announcedWord"     => $gameEntity->getCurrentWord(),
+            "currentTeam"       => $gameEntity->getCurrentTeam(),
+            "currentPlayerKey"  => $playerKey,
+            "currentPlayerName" => $currPlayer->getPlayer()->getName(),
+            "currentPlayerRole" => $currPlayer->getRole(),
+            "currentPlayerTeam" => $currPlayer->getTeam(),
+            "isGuesser"         => true,
+            "cards"             => $twoDimCards,
+            "notVoted"          => array_map(function($gp) 
+                                    { 
+                                        return [
+                                            'playerKey' => $gp->getPlayer()->getPlayerKey(),
+                                            'name'      => $gp->getPlayer()->getName()
+                                        ];
+                                    }, $notVoted)
         ];
         return $this->render('default/game.html.twig', $viewModel);
     }
@@ -141,7 +176,7 @@ class DefaultController extends AbstractController
 
         if($gameInfo->status == GameStatus::OnGoing)
         {
-            return $this->redirectToRoute('game', ['gameKey' => $gameKey]);
+            return $this->redirectToRoute('join_game', ['gameKey' => $gameKey]);
         }
 
         $viewModel = [
@@ -151,7 +186,7 @@ class DefaultController extends AbstractController
                     'guid' => $p->guid,
                     'name' => $p->name
                 ];
-            }, $gameInfo->getPlayers()) 
+            }, $gameInfo->getPlayers())
         ];
         return $this->render('default/lobby.html.twig', $viewModel);
     }
@@ -159,7 +194,7 @@ class DefaultController extends AbstractController
     /**
      * @Route("/refreshLobby", methods={"GET"}, name="refreshLobby")
      */
-    public function refreshLobby(Request $request)      
+    public function refreshLobby()
     {
         // Pas sûr que cela soit utile
         $this->playerRepository->cleanPlayerSessions();
@@ -173,7 +208,7 @@ class DefaultController extends AbstractController
     public function create(Request $request)
     {
         $identity = $this->playerSession->get(self::PlayerSession);
-        if (!isset($identity)) 
+        if (!isset($identity))
         {
             return $this->redirectToRoute('get_login');
         }
@@ -229,13 +264,12 @@ class DefaultController extends AbstractController
         $gamePlayer->setGame($game);
         $gamePlayer->setPlayer($player);
         $gamePlayer->setSessionId($this->playerSession->getId());
-        
+
         // Persistance
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->persist($player);
         $entityManager->persist($gamePlayer);
         $entityManager->flush();
-
 
         // Routing
         return $this->redirectToRoute('lobby');

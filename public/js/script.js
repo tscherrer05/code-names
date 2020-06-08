@@ -2,7 +2,6 @@ $(document).ready(function () {
     // GAME SETUP
     const gameKey = $('#gameKey').data('value');
     const playerKey = $('#playerKey').data('value');
-    const playerName = $('#current-player').data('value');
 
     function returnCard(i, j, color) {
         var img = $(`#cn-card-${i}-${j} img`);

@@ -21,13 +21,25 @@ class GamePlayerRepository extends ServiceEntityRepository
 
     public function findByGame($gameId)
     {
-        $playerEntity = $this->createQueryBuilder('g')
-            ->andWhere('g.game = :val')
+        $gamePlayerEntity = $this->createQueryBuilder('g')
+            ->where('g.game = :val')
             ->setParameter(':val', $gameId)
             ->getQuery()
             ->getResult()
         ;
-        return $playerEntity;
+        return $gamePlayerEntity;
+    }
+
+    public function findByGuid($playerKey)
+    {
+        $gamePlayerEntity = $this->createQueryBuilder('gp')
+            ->join('gp.player', 'p')
+            ->where('p.playerKey = :val')
+            ->setParameter(':val', $playerKey)
+            ->getQuery()
+            ->getOneOrNullResult()
+        ;
+        return $gamePlayerEntity;
     }
     
 }

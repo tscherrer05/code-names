@@ -2,21 +2,23 @@
 namespace App\Controller;
 
 use App\CodeNames\GameStatus;
+use App\Repository\GamePlayerRepository;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use App\Repository\GameRepository;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use Exception;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class RealTimeController extends AbstractController
 {
     private $gameRepository;
-    private $playerSession;
+    private $gamePlayerRepository;
 
-    public function __construct(GameRepository $gameRepository, SessionInterface $session)
+    public function __construct(GameRepository $gameRepository, 
+    GamePlayerRepository $gamePlayerRepository, SessionInterface $session)
     {
-        $this->gameRepository  = $gameRepository;
-        $this->playerSession = $session;
+        $this->gameRepository       = $gameRepository;
+        $this->gamePlayerRepository = $gamePlayerRepository;
     }
 
     /**
@@ -42,34 +44,46 @@ class RealTimeController extends AbstractController
         ];
         return json_encode($model);
         // TODO : Else return errors
-    
+
     }
 
     /**
      * @Route("/vote", methods={"GET"})
      */
-    public function vote($request)
+    public function vote($params)
     {
-        // TODO : Sanitize !
-        $x = $request['x'];
-        $y = $request['y'];
-        $playerKey = $request['playerKey'];
-        $gameKey = $request['gameKey'];
-
-        // Récupérer l'état du jeu en base de données
-        $gameInfo = $this->gameRepository->getByGuid($gameKey);
-        $player = $gameInfo->getPlayer($playerKey);
+        // TODO : Sanitize input !
+        $x = $params['x'];
+        $y = $params['y'];
+        $playerKey = $params['playerKey'];
+        $gameKey = $params['gameKey'];
 
         // Effectuer la commande demandée par l'utilisateur en passant les paramètres à la racine du graphe.
         try
         {
-            // $gameInfo->vote($player, $x, $y);
+            // Récupérer la racine du graphe
+            $gameInfo = $this->gameRepository->getByGuid($gameKey);
+            $player = $gameInfo->getPlayer($playerKey);
 
-            // TODO : Sauvegarder le nouvel état en base
-            // $this->gameRepository->addVote($gameId, $playerId, $x, $y);
+            // Exécuter les règles du jeu (change l'état du jeu)
+            $gameInfo->vote($player, $x, $y);
 
-            // $this->gameRepository->commit();
-
+            // Persister le nouvel état du jeu en base 
+            // (aucune logique métier ici. Les règles du jeu n'influent pas ce type de code)
+            // OP OP OP OPA MAPPING TIME
+            $game = $this->gameRepository->findOneBy(['publicKey' => $gameKey]);
+            $game->setStatus($gameInfo->status);
+            $game->setCurrentWord($gameInfo->currentWord());
+            $game->setCurrentNumber($gameInfo->currentNumber());
+            $game->setCurrentTeam($gameInfo->currentTeam());
+            $gp = $this->gamePlayerRepository->findOneBy(['id' => $player->id]);
+            if($gp == null)
+                throw new Exception("Game player not found with id : " . $player->id);
+            $gp->setX($x);
+            $gp->setY($y);
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->flush();
+            
             // Retourner le résultat à l'utilisateur
             // action à effectuer côté client
             // clé du jeu
@@ -87,14 +101,13 @@ class RealTimeController extends AbstractController
         catch(\InvalidArgumentException $e)
         {
             // Gérer les éventuelles erreurs retournées par la racine du graphe.
-            // TODO
-            var_dump($e->getMessage());
-            return json_encode($e->getMessage());
+            return json_encode(['error' => $e->getMessage()]);
         }
         catch(\Exception $e)
         {
-            var_dump($e->getMessage());
-            return json_encode("Une erreur s'est produite. Essayez de redémarrer votre ordi pour voir ?");
+            print($e->getMessage());
+            print($e->getTraceAsString());
+            return json_encode(['error' => "Une erreur interne s'est produite."]);
         }
     }
 

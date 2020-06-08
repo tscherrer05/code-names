@@ -1,9 +1,13 @@
 <?php
 use PHPUnit\Framework\TestCase;
 use App\CodeNames\Board          as Board;
+use App\CodeNames\Card;
 use App\CodeNames\GameInfo       as GameInfo;
 use App\CodeNames\Player         as Player;
 use App\Tests\CodeNames\TestData as TestData;
+use Ramsey\Uuid\Guid\Guid;
+use Ramsey\Uuid\Nonstandard\Uuid;
+use Ramsey\Uuid\Uuid as UuidUuid;
 
 class GameTest extends TestCase
 {
@@ -55,10 +59,13 @@ class GameTest extends TestCase
     public function testTwoPlayersVoteForOneCard()
     {
         // Arrange
-        $board    = new Board(TestData::getCards());
         $player1  = new Player(1, "Jack", 1, 1);
         $player2  = new Player(2, "Boby", 1, 1);
         $player3  = new Player(3, "Boby", 1, 1);
+        $player1->guid = Uuid::uuid1();
+        $player2->guid = Uuid::uuid1();
+        $player3->guid = Uuid::uuid1();
+        $board    = new Board(TestData::getCards(), [$player1->guid => new Card('whatevs', 1, 0, 0)]);
         $gameInfo = new GameInfo($board, 1, "", 1, array($player1, $player2, $player3));
         $coordX = 3;
         $coordY = 3;
@@ -105,6 +112,8 @@ class GameTest extends TestCase
         $board    = new Board(TestData::getCards());
         $player1  = new Player(1, "Jack", 1, 1);
         $player2  = new Player(2, "Boby", 1, 1);
+        $player1->guid = Uuid::uuid1();
+        $player2->guid = Uuid::uuid1();
         $gameInfo = new GameInfo($board, 1, "", 1, array($player1, $player2));
         $coordX = 3;
         $coordY = 3;
@@ -152,9 +161,11 @@ class GameTest extends TestCase
     {
         $board    = new Board(TestData::getCards());
         $player1  = new Player(3, "Jack", 1, 1);
+        $playerGuid = Uuid::uuid1();
+        $player1->guid = $playerGuid;
         $gameInfo = new GameInfo($board, 1, "", 1, array($player1));
 
-        $result = $gameInfo->getPlayer(3);
+        $result = $gameInfo->getPlayer($playerGuid);
 
         $this->assertSame("Jack", $result->name);
     }

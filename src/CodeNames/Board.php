@@ -2,12 +2,14 @@
 declare(strict_types=1);
 namespace App\CodeNames;
 
+use Ramsey\Uuid\Uuid;
+
 class Board
 {
     // A two dimensional array representing the cards on board
     private $cards;
-    // A single dimension array playerId => card
-    private $votes;
+    // A single dimension array playerKey => card
+    public $votes;
 
     public $nbColorCards;
 
@@ -27,7 +29,7 @@ class Board
     // Command
     public function voteForCard(Player $player, int $x, int $y, GameInfo $gameInfo)
     {
-        $this->votes[$player->id] = $this->cards[$x][$y];
+        $this->votes[$player->guid] = $this->cards[$x][$y];
         $everyBodyHasVoted = (\count($this->votes) == $gameInfo->nbPlayers());
         $lastCard = null;
 
@@ -46,8 +48,9 @@ class Board
 
     public function returnCard(int $x, int $y)
     {
-        $this->cards[$x][$y]->returnMe();
-        $this->nbColorCards[$this->cards[$x][$y]->color]--;
+        $card = $this->cards[$x][$y];
+        $card->returnMe();
+        $this->nbColorCards[$card->color]--;
         $this->votes = array();
     }
 

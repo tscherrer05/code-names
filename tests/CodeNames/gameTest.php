@@ -24,6 +24,8 @@ class GameTest extends TestCase
         $board    = new Board($cards);
         $player1  = new Player(1, "nom", 1, 1);
         $player2  = new Player(2, "nom", 1, 1);
+        $player1->guid = Uuid::uuid1()->toString();
+        $player2->guid = Uuid::uuid1()->toString();
         $gameInfo = new GameInfo($board, 1, "", 0, array($player1, $player2));
 
         // Act
@@ -40,6 +42,8 @@ class GameTest extends TestCase
         $board    = new Board($cards);
         $player1  = new Player(1, "nom", 1, 1);
         $player2  = new Player(2, "nom", 1, 1);
+        $player1->guid = Uuid::uuid1()->toString();
+        $player2->guid = Uuid::uuid1()->toString();
         $gameInfo = new GameInfo($board, 1, "", 1, array($player1, $player2));
 
         // Act
@@ -62,10 +66,11 @@ class GameTest extends TestCase
         $player1  = new Player(1, "Jack", 1, 1);
         $player2  = new Player(2, "Boby", 1, 1);
         $player3  = new Player(3, "Boby", 1, 1);
-        $player1->guid = Uuid::uuid1();
-        $player2->guid = Uuid::uuid1();
-        $player3->guid = Uuid::uuid1();
-        $board    = new Board(TestData::getCards(), [$player1->guid => new Card('whatevs', 1, 0, 0)]);
+        $player1->guid = Uuid::uuid1()->toString();
+        $player2->guid = Uuid::uuid1()->toString();
+        $player3->guid = Uuid::uuid1()->toString();
+        $votes[$player1->guid] = new Card('whatevs', 1, 0, 0);
+        $board    = new Board(TestData::getCards(), $votes);
         $gameInfo = new GameInfo($board, 1, "", 1, array($player1, $player2, $player3));
         $coordX = 3;
         $coordY = 3;
@@ -112,8 +117,8 @@ class GameTest extends TestCase
         $board    = new Board(TestData::getCards());
         $player1  = new Player(1, "Jack", 1, 1);
         $player2  = new Player(2, "Boby", 1, 1);
-        $player1->guid = Uuid::uuid1();
-        $player2->guid = Uuid::uuid1();
+        $player1->guid = Uuid::uuid1()->toString();
+        $player2->guid = Uuid::uuid1()->toString();
         $gameInfo = new GameInfo($board, 1, "", 1, array($player1, $player2));
         $coordX = 3;
         $coordY = 3;
@@ -132,6 +137,8 @@ class GameTest extends TestCase
         $board    = new Board(TestData::getCardAlmostWin());
         $player1  = new Player(1, "Jack", 1, 1);
         $player2  = new Player(2, "Boby", 1, 1);
+        $player1->guid = Uuid::uuid1()->toString();
+        $player2->guid = Uuid::uuid1()->toString();
         $gameInfo = new GameInfo($board, 1, "", 1, array($player1, $player2));
         $x = 4;
         $y = 0;
@@ -162,7 +169,7 @@ class GameTest extends TestCase
         $board    = new Board(TestData::getCards());
         $player1  = new Player(3, "Jack", 1, 1);
         $playerGuid = Uuid::uuid1();
-        $player1->guid = $playerGuid;
+        $player1->guid = $playerGuid->toString();
         $gameInfo = new GameInfo($board, 1, "", 1, array($player1));
 
         $result = $gameInfo->getPlayer($playerGuid);

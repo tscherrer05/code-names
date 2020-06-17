@@ -32,21 +32,13 @@ class Messager implements MessageComponentInterface
         echo sprintf('Connection %d sending message "%s" to %d other connection%s' . "\n",
         $from->resourceId, $msg, $numRecv, $numRecv == 1 ? '' : 's');
 
-        // 1. Parse message
-        $action = new Action($msg);
-
-        // 2. Execute corresponding action
         try
         {
-            $result = (new Router($this->container))->execute($action);
+            // 1. Parse message
+            $action = new Action($msg);
 
-            // 3. Push result to clients
-            foreach ($this->clients as $client) {
-                if ($from !== $client) {
-                    // The sender is not the receiver, send to each client connected
-                    $client->send($result);
-                }
-            }
+            // 2. Execute corresponding action
+            (new Router($this->container))->execute($action, $this->clients, $from);
         }
         catch(\Exception $e)
         {

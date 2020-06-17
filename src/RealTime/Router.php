@@ -1,6 +1,7 @@
 <?php
 namespace App\RealTime;
 
+use Ratchet\ConnectionInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class Router
@@ -10,20 +11,23 @@ class Router
     public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
+
     }
 
-    public function execute(Action $action)
+    public function execute(Action $action, \SplObjectStorage $clients, ConnectionInterface $from)
     {
         $realTimeController = $this->container->get('realtime');
+
+        $arguments = $action->getArguments();
+        $arguments['clients'] = $clients;
+        $arguments['from'] = $from;
      
         switch($action->getMethod())
         {
             case 'vote':
-                return $realTimeController->vote($action->getArguments());
-            case 'returnCard':
-                return $realTimeController->returnCard($action->getArguments());
+                return $realTimeController->vote($arguments);
             case 'startGame':
-                return $realTimeController->startGame($action->getArguments());
+                return $realTimeController->startGame($arguments);
             default:
                 throw new \InvalidArgumentException("Cette action n'est pas possible.");
         }

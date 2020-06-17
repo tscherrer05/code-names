@@ -11,6 +11,7 @@ use App\Entity\Player;
 use App\Entity\GamePlayer;
 
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
+use Ramsey\Uuid\Nonstandard\Uuid;
 
 class DefaultFixtures extends Fixture implements FixtureGroupInterface
 {
@@ -21,6 +22,7 @@ class DefaultFixtures extends Fixture implements FixtureGroupInterface
  
     const GameKey1 = "ad0abce2-f458-4d02-8cb4-ee3e0df495e6";
     const PlayerKey1 = "299c6679-62a9-43d0-9a28-4299d25672eb";
+    const PlayerKey2 = "900c6679-62a9-43d0-9a28-4299d25672ai";
 
     public function load(ObjectManager $manager)
     {
@@ -30,22 +32,15 @@ class DefaultFixtures extends Fixture implements FixtureGroupInterface
         $game->setStatus(GameStatus::Lobby);
         
         // player
-        $player = new Player();
-        $player->setName('Tim');
-        $player->setPlayerKey(self::PlayerKey1);
-
-        // game player
-        $gamePlayer1 = new GamePlayer();
-        $gamePlayer1->setGame($game);
-        $gamePlayer1->setPlayer($player);
-        $gamePlayer1->setSessionId("1234");
+        $this->createFakePlayer($manager, $game, 'Player1', self::PlayerKey1);
+        $this->createFakePlayer($manager, $game, 'Player2', self::PlayerKey2);
 
         // card
         $dataCards = [
-            ['orange',0, 0],
-            ['chimpanzé',0, 1],
-            ['orteil',0, 2],
-            ['courgette',0, 3]
+            ['orange', 0, 0, 1],
+            ['chimpanzé', 0, 1, 2],
+            ['orteil', 0, 2, 2],
+            ['courgette', 0, 3, 1]
         ];
         foreach ($dataCards as $value) {
             $card = new Card();
@@ -53,14 +48,28 @@ class DefaultFixtures extends Fixture implements FixtureGroupInterface
             $card->setX($value[1]);
             $card->setY($value[2]);
             $card->setGame($game);
-            $card->setColor(0);
+            $card->setColor($value[3]);
             $card->setReturned(false);
             $manager->persist($card);
         }
 
         $manager->persist($game);
-        $manager->persist($player);
-        $manager->persist($gamePlayer1);
         $manager->flush();
+    }
+
+    private function createFakePlayer(ObjectManager $manager,
+        Game $game, string $name, string $playerKey)
+    {
+        $player = new Player();
+        $player->setName($name);
+        $player->setPlayerKey($playerKey);
+
+        $gamePlayer = new GamePlayer();
+        $gamePlayer->setGame($game);
+        $gamePlayer->setPlayer($player);
+        $gamePlayer->setSessionId(Uuid::uuid1()->toString());
+
+        $manager->persist($player);
+        $manager->persist($gamePlayer);
     }
 }

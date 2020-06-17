@@ -3,6 +3,7 @@ namespace App\Tests\Controller;
 
 use App\Controller\RealTimeController;
 use App\DataFixtures\DefaultFixtures;
+use App\Entity\Card;
 use App\Entity\GamePlayer;
 use App\Entity\Player;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -63,6 +64,39 @@ class RealTimeControllerTest extends WebTestCase
         // Assert data
         $this->assertSame(0, $gp->getX());
         $this->assertSame(2, $gp->getY());
+    }
+
+    public function testVoteAndReturnCard()
+    {
+        $result = $this->service->vote([
+            'x' => 0,
+            'y' => 2,
+            'playerKey' => DefaultFixtures::PlayerKey1,
+            'gameKey' => DefaultFixtures::GameKey1
+        ]);
+
+        $card = $this->entityManager
+            ->getRepository(Card::class)
+            ->findOneBy(['x' => '0', 'y' => '2'])
+        ;
+
+        $this->assertSame(false, $card->getReturned());
+
+        $result = $this->service->vote([
+            'x' => 0,
+            'y' => 2,
+            'playerKey' => DefaultFixtures::PlayerKey2,
+            'gameKey' => DefaultFixtures::GameKey1
+        ]);
+
+        $parsed = json_decode($result, true);
+
+        $card = $this->entityManager
+            ->getRepository(Card::class)
+            ->findOneBy(['x' => '0', 'y' => '2'])
+        ;
+
+        $this->assertSame(true, $card->getReturned());
     }
 
 

@@ -9,10 +9,14 @@
         {% for card in row %}
         <div class="cn-card-container" id="cn-card-{{card.x}}-{{card.y}}">
             {% if card.returned %}
-                {% if card.color == 1 %}
+                {% if card.color == 0 %}
+                <img src="{{ asset('images/white.png') }}" alt="White card" class="cn-card revealed">
+                {% elseif card.color == 1 %}
                 <img src="{{ asset('images/blue0.png') }}" alt="Blue card" class="cn-card revealed">
-                {% else %}
+                {% elseif card.color == 2 %}
                 <img src="{{ asset('images/red0.png') }}" alt="Red card" class="cn-card revealed">
+                {% elseif card.color == 3 %}
+                <img src="{{ asset('images/black.png') }}" alt="Black card" class="cn-card revealed">
                 {% endif %}
             {% else %}
             <div class="cn-card-votes">
@@ -58,13 +62,6 @@
             {% endfor %}
         </div>
     </div>
-
-    {# {% if isGuesser %}
-        <div class="row">
-            <input type="text" name="word" id="word" value="{{announcedWord}}">
-            <input type="number" name="number" id="number" value="{{announcedNumber}}">
-        </div>
-    {% endif %} #}
 
 </div>
 {% endblock %}

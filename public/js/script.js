@@ -5,7 +5,24 @@ $(document).ready(function () {
 
     function returnCard(i, j, color) {
         var img = $(`#cn-card-${i}-${j} img`);
-        var imageName = color == 1 ? "blue0" : "red0";
+        var imageName = '';
+        switch(color)
+        {
+            case 0: 
+                imageName = 'white';
+                break;
+            case 1:
+                imageName = 'blue0';
+                break;
+            case 2:
+                imageName = 'red0';
+                break;
+            case 3:
+                imageName = 'black';
+                break;
+            default:
+                imageName = 'white';
+        }
         img.toggleClass('revealed');
         img.fadeOut(300, function () {
             img.attr("src", "images/" + imageName + ".png");
@@ -28,17 +45,19 @@ $(document).ready(function () {
     };
 
     conn.onmessage = function (e) {
-        if(e === null || e === undefined) 
-        {
+        if(e === null || e === undefined) {
             return;
         }
 
         const result = JSON.parse(e.data);
+        debugger;
 
         switch (result.action) {
-            case "vote":
+            case "hasVoted":
                 putVoteOnCard(result.x, result.y, result.playerKey);
                 break;
+            case "cardReturned":
+                returnCard(result.x, result.y, result.color);
             case null:
             case undefined:
             default:
@@ -62,8 +81,6 @@ $(document).ready(function () {
             }
         };
         conn.send(JSON.stringify(message));
-
-        putVoteOnCard(i, j, playerKey);
     });
 
     // Who starts?

@@ -2,8 +2,6 @@
 declare(strict_types=1);
 namespace App\CodeNames;
 
-use Ramsey\Uuid\Uuid;
-
 class Board
 {
     // A two dimensional array representing the cards on board
@@ -42,6 +40,7 @@ class Board
                 if($lastCard != $card)
                     return;
             }
+
             $this->returnCard($x, $y);
         }
     }

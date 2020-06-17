@@ -60,6 +60,9 @@ class GameRepository extends ServiceEntityRepository
         return $gameEntity;
     }
 
+    /**
+     * Mappe les entités sur les objets logiques
+     */
     private function createGame(Game $gameEntity)
     {
         if($gameEntity == null)
@@ -94,7 +97,9 @@ class GameRepository extends ServiceEntityRepository
             {
                 if($c->getX() == $gp->getX() && $c->getY() == $gp->getY())
                 {
-                    $votes[$gp->getPlayer()->getPlayerKey()] = $c;
+                    $votes[$gp->getPlayer()->getPlayerKey()] = new Card(
+                        $c->getWord(), $c->getColor(),
+                        $c->getX(), $c->getY(), $c->getReturned());
                 }
             }
         }

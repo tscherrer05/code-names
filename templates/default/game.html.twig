@@ -1,71 +1,91 @@
 {% extends 'base.html.twig' %}
 
 {% block content %}
-<div class="container" id="cn-cards">
-    <div class="row">
+	<div class="container" id="cn-cards">
+		<div class="row">
+			<div id="board"</div>
 
-    {% for row in cards %}
-    <div class="row" id="cn-cards-row-{{loop.index0}}">
-        {% for card in row %}
-        <div class="cn-card-container" id="cn-card-{{card.x}}-{{card.y}}">
-            {% if card.returned %}
-                {% if card.color == 0 %}
-                <img src="{{ asset('images/white.png') }}" alt="White card" class="cn-card revealed">
-                {% elseif card.color == 1 %}
-                <img src="{{ asset('images/blue0.png') }}" alt="Blue card" class="cn-card revealed">
-                {% elseif card.color == 2 %}
-                <img src="{{ asset('images/red0.png') }}" alt="Red card" class="cn-card revealed">
-                {% elseif card.color == 3 %}
-                <img src="{{ asset('images/black.png') }}" alt="Black card" class="cn-card revealed">
-                {% endif %}
-            {% else %}
-            <div class="cn-card-votes">
-                {% for p in card.voters %}
-                    {% if p.playerKey == currentPlayerKey %}
-                        <span id="vote-tag-{{p.playerKey}}" class="badge badge-success">{{p.name}}</span>
-                    {% else %}
-                        <span id="vote-tag-{{p.playerKey}}" class="badge badge-secondary">{{p.name}}</span>    
-                    {% endif %}
-                {% endfor %}
-            </div>
-            <img src="{{ asset('images/card.png') }}" alt="White card" class="cn-card">
-            <div class="cn-card-text">{{card.word}}</div>
-            {% endif %}
-        </div>
-        {% endfor %}
-    </div>
-    {% endfor %}
+			{# {% for row in cards %}
+				<div class="row" id="cn-cards-row-{{loop.index0}}">
+					{% for card in row %}
+						<div class="cn-card-container" id="cn-card-{{card.x}}-{{card.y}}">
+							{% if card.returned %}
+								{% if card.color == 0 %}
+									<img src="{{ asset('images/white.png') }}" alt="White card" class="cn-card revealed">
+								{% elseif card.color == 1 %}
+									<img src="{{ asset('images/blue0.png') }}" alt="Blue card" class="cn-card revealed">
+								{% elseif card.color == 2 %}
+									<img src="{{ asset('images/red0.png') }}" alt="Red card" class="cn-card revealed">
+								{% elseif card.color == 3 %}
+									<img src="{{ asset('images/black.png') }}" alt="Black card" class="cn-card revealed">
+								{% endif %}
+							{% else %}
+								<div class="cn-card-votes">
+									{% for p in card.voters %}
+										{% if p.playerKey == currentPlayerKey %}
+											<span id="vote-tag-{{p.playerKey}}" class="badge badge-success">{{p.name}}</span>
+										{% else %}
+											<span id="vote-tag-{{p.playerKey}}" class="badge badge-secondary">{{p.name}}</span>
+										{% endif %}
+									{% endfor %}
+								</div>
+								<img src="{{ asset('images/card.png') }}" alt="White card" class="cn-card">
+								<div class="cn-card-text">{{card.word}}</div>
+							{% endif %}
+						</div>
+					{% endfor %}
+				</div>
+			{% endfor %} #}
 
-    </div>
+		</div>
 
-    <div class="row">
-        <div class="col">
-            <p>Vous êtes : <span id="current-player" data-value="{{currentPlayerName}}">{{currentPlayerName}}</span></p>
-            <p>Votre équipe : {{currentPlayerTeam}}</p>
-            <p>Votre rôle : {{currentPlayerRole}}</p>
-        </div>
-        <div class="col">
-            <p>Tour : <span id="current-team">Equipe {{currentTeam}} </span></p>
-            <p>Mot annoncé : <span id="announced-word">{{announcedWord}} </span></p>
-            <p>Nombre annoncé : <span id="announced-number">{{announcedNumber}}</span></p>
-            <span id="gameKey" data-value="{{gameKey}}"></span>
-            <span id="playerKey" data-value="{{currentPlayerKey}}"></span>
-        </div>
-        <div class="col">
-            <p class="display-block">Votes restants :</p>
-            {% for p in notVoted %}
-                {% if p.playerKey == currentPlayerKey %}
-                <span id="vote-tag-{{p.playerKey}}" class="badge badge-success">{{p.name}}</span>
-                {% else %}
-                <span id="vote-tag-{{p.playerKey}}" class="badge badge-secondary">{{p.name}}</span>    
-                {% endif %}
-            {% endfor %}
-        </div>
-    </div>
+		<div class="row">
+			<div class="col">
+				<p>Vous êtes :
+					<span id="current-player" data-value="{{currentPlayerName}}">{{currentPlayerName}}</span>
+				</p>
+				<p>Votre équipe :
+					{{currentPlayerTeam}}</p>
+				<p>Votre rôle :
+					{{currentPlayerRole}}</p>
+			</div>
+			<div class="col">
+				<p>Tour :
+					<span id="current-team">Equipe
+						{{currentTeam}}
+					</span>
+				</p>
+				<p>Mot annoncé :
+					<span id="announced-word">{{announcedWord}}
+					</span>
+				</p>
+				<p>Nombre annoncé :
+					<span id="announced-number">{{announcedNumber}}</span>
+				</p>
+				<span id="gameKey" data-value="{{gameKey}}"></span>
+				<span id="playerKey" data-value="{{currentPlayerKey}}"></span>
+			</div>
+			<div class="col">
+				<p class="display-block">Votes restants :</p>
+				{% for p in notVoted %}
+					{% if p.playerKey == currentPlayerKey %}
+						<span id="vote-tag-{{p.playerKey}}" class="badge badge-success">{{p.name}}</span>
+					{% else %}
+						<span id="vote-tag-{{p.playerKey}}" class="badge badge-secondary">{{p.name}}</span>
+					{% endif %}
+				{% endfor %}
+			</div>
+		</div>
+	</div>
 
-</div>
+	<div id="root"></div>
 {% endblock %}
 
 {% block javascripts %}
-    <script src="{{ asset('js/script.js') }}"></script>
+	<script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
+	<script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
+	<script src="{{ asset('js/components.js') }}"></script>
+	<script src="{{ asset('js/script.js') }}"></script>
+
+	{{ encore_entry_script_tags('app') }}
 {% endblock %}

@@ -5,7 +5,6 @@ use App\Controller\DefaultController;
 use App\DataFixtures\DefaultFixtures;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
-
 class DefaultControllerTest extends WebTestCase
 {
     public function testLoginPageNominal()
@@ -36,7 +35,6 @@ class DefaultControllerTest extends WebTestCase
         $client->followRedirect();
         $this->assertContains('login', $client->getRequest()->getUri());
     }
-
 
     public function testCreateGameAnonymous()
     {

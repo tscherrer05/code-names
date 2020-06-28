@@ -1,9 +1,17 @@
+// Le système doit :
+// - Pouvoir se connecter par web socket à un serveur
+// - Pouvoir envoyer des messages au serveur
+// - Réagir à la réception de messages depuis le serveur
+// - Avoir des composants qui réagissent à des évènements
+// - Avoir des composants qui s'initialisent au chargement de la page
+
 $(document).ready(function () {
     // GAME SETUP
     const gameKey = $('#gameKey').data('value');
     const playerKey = $('#playerKey').data('value');
 
-    function returnCard(i, j, color) {
+    function returnCard(i, j, color) 
+    {
         var img = $(`#cn-card-${i}-${j} img`);
         var imageName = '';
         switch(color)
@@ -30,9 +38,15 @@ $(document).ready(function () {
         img.parent().find(".cn-card-text").fadeOut(300);
     }
 
-    function putVoteOnCard(x, y, playerKey) {
+    function putVoteOnCard(x, y, playerKey) 
+    {
         var img = $(`#cn-card-${x}-${y} img`);
         $("#vote-tag-" + playerKey).appendTo(img.parent().find(".cn-card-votes"));
+    }
+
+    function resetVotes()
+    {
+        // TODO
     }
 
     // WebSocket connection
@@ -40,24 +54,27 @@ $(document).ready(function () {
     var conn = new WebSocket(webSockUrl);
 
     // WebSocket events
-    conn.onopen = function (e) {
+    conn.onopen = function (e) 
+    {
         console.log("Connection established!");   
     };
 
-    conn.onmessage = function (e) {
+    conn.onmessage = function (e) 
+    {
         if(e === null || e === undefined) {
             return;
         }
 
         const result = JSON.parse(e.data);
-        debugger;
 
-        switch (result.action) {
-            case "hasVoted":
+        switch (result.action) 
+        {
+            case 'hasVoted':
                 putVoteOnCard(result.x, result.y, result.playerKey);
                 break;
-            case "cardReturned":
+            case 'cardReturned':
                 returnCard(result.x, result.y, result.color);
+                resetVotes();
             case null:
             case undefined:
             default:

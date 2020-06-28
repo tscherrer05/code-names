@@ -96,11 +96,11 @@ class RealTimeController extends AbstractController
             
             // Propage des évènements à différents clients
             $model = [
-                'action' => 'hasVoted',
+                'action'    => 'hasVoted',
                 'playerKey' => $player->guid,
-                'x' => $x,
-                'y' => $y,
-                'color' => $card->getColor()
+                'x'         => $x,
+                'y'         => $y,
+                'color'     => $card->getColor()
             ];
             $this->sendToAllClients($clients, json_encode($model));
             
@@ -114,7 +114,6 @@ class RealTimeController extends AbstractController
                 ];
                 $this->sendToAllClients($clients, json_encode($model));
             }
-
         }
         catch(\InvalidArgumentException $e)
         {

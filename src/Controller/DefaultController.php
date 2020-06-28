@@ -6,9 +6,8 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
-
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Ramsey\Uuid\Guid\Guid;
-
 use App\CodeNames\GameStatus;
 use App\Entity\GamePlayer;
 use App\Entity\Player;

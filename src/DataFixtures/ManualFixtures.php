@@ -27,6 +27,8 @@ class ManualFixtures extends Fixture implements FixtureGroupInterface
         $game = new Game();
         $game->setPublicKey(self::GameKey1);
         $game->setStatus(GameStatus::Lobby);
+        $game->setCurrentWord('potager');
+        $game->setCurrentNumber(3);
 
         // card
         $dataCards = [

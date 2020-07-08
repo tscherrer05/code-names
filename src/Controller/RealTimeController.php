@@ -62,7 +62,7 @@ class RealTimeController extends AbstractController
             // Exécuter les règles du jeu (change l'état du jeu)
             $gameInfo->vote($player, $x, $y);
 
-            // Persister le nouvel état du jeu en base 
+            // Persister le nouvel état du jeu en base
             // (aucune logique métier à partir d'ici)
             // Mapper les objets modèle et objets métier
             
@@ -94,7 +94,7 @@ class RealTimeController extends AbstractController
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->flush();
             
-            // Propage des évènements à différents clients
+            // Propage des évènements aux clients connectés
             $model = [
                 'action'    => 'hasVoted',
                 'playerKey' => $player->guid,
@@ -117,6 +117,8 @@ class RealTimeController extends AbstractController
         }
         catch(\InvalidArgumentException $e)
         {
+            print($e->getMessage());
+            print($e->getTraceAsString());
             // Gérer les éventuelles erreurs retournées par la racine du graphe.
             $this->sendToAllClients($clients, json_encode(['error' => $e->getMessage()]));
         }

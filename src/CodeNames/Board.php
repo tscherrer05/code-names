@@ -27,6 +27,10 @@ class Board
     // Command
     public function voteForCard(Player $player, int $x, int $y, GameInfo $gameInfo)
     {
+        if(\count($this->cards) <= $x)
+            throw new \InvalidArgumentException();
+        if(\count($this->cards[0]) <= $y)
+            throw new \InvalidArgumentException();
         $this->votes[$player->guid] = $this->cards[$x][$y];
         $everyBodyHasVoted = (\count($this->votes) == $gameInfo->nbPlayers());
         $lastCard = null;

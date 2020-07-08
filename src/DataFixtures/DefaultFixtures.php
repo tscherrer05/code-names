@@ -23,6 +23,12 @@ class DefaultFixtures extends Fixture implements FixtureGroupInterface
     const GameKey1 = "ad0abce2-f458-4d02-8cb4-ee3e0df495e6";
     const PlayerKey1 = "299c6679-62a9-43d0-9a28-4299d25672eb";
     const PlayerKey2 = "900c6679-62a9-43d0-9a28-4299d25672ai";
+    const Cards = [
+        ['orange', 0, 0, 1],
+        ['chimpanzé', 0, 1, 2],
+        ['orteil', 0, 2, 2],
+        ['courgette', 0, 3, 1]
+    ];
 
     public function load(ObjectManager $manager)
     {
@@ -30,18 +36,16 @@ class DefaultFixtures extends Fixture implements FixtureGroupInterface
         $game = new Game();
         $game->setPublicKey(self::GameKey1);
         $game->setStatus(GameStatus::Lobby);
-        
+        $game->setCurrentWord('Acme');
+        $game->setCurrentNumber(42);
+        $game->setCurrentTeam(1);
+
         // player
         $this->createFakePlayer($manager, $game, 'Player1', self::PlayerKey1);
         $this->createFakePlayer($manager, $game, 'Player2', self::PlayerKey2);
 
         // card
-        $dataCards = [
-            ['orange', 0, 0, 1],
-            ['chimpanzé', 0, 1, 2],
-            ['orteil', 0, 2, 2],
-            ['courgette', 0, 3, 1]
-        ];
+        $dataCards = self::Cards;
         foreach ($dataCards as $value) {
             $card = new Card();
             $card->setWord($value[0]);
@@ -68,6 +72,7 @@ class DefaultFixtures extends Fixture implements FixtureGroupInterface
         $gamePlayer->setGame($game);
         $gamePlayer->setPlayer($player);
         $gamePlayer->setSessionId(Uuid::uuid1()->toString());
+        $gamePlayer->setTeam(1);
 
         $manager->persist($player);
         $manager->persist($gamePlayer);

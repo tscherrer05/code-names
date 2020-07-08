@@ -91,6 +91,7 @@ class GameInfo
     {
         if($this->team != $player->team)
             throw new \InvalidArgumentException("Ce n'est pas le tour du joueur " . $player->name . " (#" . $player->id . ")");
+        
         $this->board->voteForCard($player, $x, $y, $this);
     }
 

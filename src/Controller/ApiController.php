@@ -71,4 +71,30 @@ class ApiController extends AbstractController
 
         return new JsonResponse($models);
     }
+
+    /**
+     * @Route("/gameInfos", methods={"GET"}, name="get_game_infos")
+     */
+    public function gameInfos(Request $request)
+    {
+        // Parsing
+        $gameKey = $request->query->get('gameKey');
+        $playerKey = $this->playerSession->get(DefaultController::PlayerSession);
+
+        // Queries
+        $gameEntity  = $this->gameRepository->findByGuid($gameKey);
+        $player = $this->playerRepository->findByGuid($playerKey);
+
+        $model = [
+            'gameKey'               => $gameEntity->getPublicKey()->toString(),
+            'currentNumber'         => $gameEntity->getCurrentNumber(),
+            'currentWord'           => $gameEntity->getCurrentWord(),
+            'currentTeam'           => $gameEntity->getCurrentTeam(),
+            'playerName'            => $player->getName(),
+            'playerKey'             => $player->getPlayerKey()->toString(),
+            'remainingVotes'        => []
+        ];
+
+        return new JsonResponse($model);
+    }
 }

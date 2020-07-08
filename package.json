@@ -16,6 +16,7 @@
     },
     "dependencies": {
         "prop-types": "^15.7.2",
+        "pubsub-js": "^1.8.0",
         "react": "^16.13.1",
         "react-dom": "^16.13.1"
     }

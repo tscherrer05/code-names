@@ -64,15 +64,14 @@ export class Board extends React.Component {
             }),
             PubSub.subscribe('cardReturned', (evt, data) => {
                 // TODO : retourner la carte
-                debugger
-                // this.setState({
-                //     cards: self.state.cards.map(c => {
-                //         if(c.x === data.x && c.y === data.y) {
-                //             c.returned = true;
-                //             return c;
-                //         }
-                //     })
-                // })
+                this.setState({
+                    cards: self.state.cards.map(c => {
+                        if(c.x === data.x && c.y === data.y) {
+                            c.returned = true;
+                        }
+                        return c;
+                    })
+                })
             })
         ]
     }
@@ -118,6 +117,7 @@ export class Board extends React.Component {
                                 color=      {c.color}
                                 x=          {c.x}
                                 y=          {c.y}
+                                returned =  {c.returned}
                                 gameKey=    {this.state.gameKey}
                                 playerKey=  {this.state.playerKey}
                                 votes=      {c.voters}

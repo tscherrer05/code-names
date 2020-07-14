@@ -96,6 +96,23 @@ class GameTest extends TestCase
         $gameInfo->vote($player, $coordX, $coordY);
     }
 
+    public function testPlayerVoteForReturnedCardShouldFail()
+    {
+        // Arrange
+        $team = 1;
+        $board = new Board(TestData::getCardAlmostWin());
+        $player = new Player(1, "Jack", $team, 1);
+        $gameInfo = new GameInfo($board, 1, "", 1, array($player));
+        // Coordonnées d'une carte retournée
+        $coordX = 0;
+        $coordY = 0;
+
+        // TODO ; retourner plutôt un objet resultant (succès/échec, messages d'erreur, objets résultants)
+        $this->expectException(\Exception::class);
+        $gameInfo->vote($player, $coordX, $coordY);
+
+    }
+
     public function testVoteInvalidRanges()
     {
         // Arrange

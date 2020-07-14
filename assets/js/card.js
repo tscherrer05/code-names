@@ -28,7 +28,7 @@ export class Card extends React.Component {
                 onClick:    () => this.vote(),
                 className:  'cn-card',
             };
-            if(props.revealed) {
+            if(props.returned) {
                 switch(props.color) {
                     case 0:
                         attr['src'] = 'images/white.png';

@@ -2,6 +2,8 @@
 declare(strict_types=1);
 namespace App\CodeNames;
 
+use Exception;
+
 class Board
 {
     // A two dimensional array representing the cards on board
@@ -28,10 +30,13 @@ class Board
     public function voteForCard(Player $player, int $x, int $y, GameInfo $gameInfo)
     {
         if(\count($this->cards) <= $x)
-            throw new \InvalidArgumentException();
+            throw new \InvalidArgumentException("Invalid x coord");
         if(\count($this->cards[0]) <= $y)
-            throw new \InvalidArgumentException();
-        $this->votes[$player->guid] = $this->cards[$x][$y];
+            throw new \InvalidArgumentException("Invalid y coord");
+        $card = $this->cards[$x][$y];
+        if($this->isCardReturned($x, $y))
+            throw new Exception("Can not return a returned card");
+        $this->votes[$player->guid] = $card;
         $everyBodyHasVoted = (\count($this->votes) == $gameInfo->nbPlayers());
         $lastCard = null;
 

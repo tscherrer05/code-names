@@ -3,6 +3,8 @@
         "@babel/preset-react": "^7.10.1",
         "@symfony/webpack-encore": "^0.30.0",
         "core-js": "^3.0.0",
+        "react": "^16.13.1",
+        "react-dom": "^16.13.1",
         "regenerator-runtime": "^0.13.2",
         "webpack-notifier": "^1.6.0"
     },
@@ -15,9 +17,8 @@
         "build": "encore production --progress"
     },
     "dependencies": {
+        "jquery-slim": "^3.0.0",
         "prop-types": "^15.7.2",
-        "pubsub-js": "^1.8.0",
-        "react": "^16.13.1",
-        "react-dom": "^16.13.1"
+        "pubsub-js": "^1.8.0"
     }
 }

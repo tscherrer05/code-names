@@ -1,11 +1,39 @@
-import {Card} from './card.js';
-import { DataSource } from './dataSource';
+import React, {Component} from 'react'
+import {DataSource} from './dataSource'
+import {Events} from './events'
+import PubSub from 'pubsub-js';
+import {Card} from './card';
 
-// TODO : mock to remove
-DataSource.get = () => { 
-    debugger
-    console.log("datasource") 
-}
+// Datasource mock
+// DataSource.get = (params) => { 
+//     return new Promise((resolve, reject) => { resolve([
+//             {
+//                 color: 2,
+//                 word: 'test',
+//                 x: 0,
+//                 y: 0,
+//                 returned: false,
+//                 voters: []
+//             },
+//             {
+//                 color: 2,
+//                 word: 'AEDS',
+//                 x: 0,
+//                 y: 1,
+//                 returned: false,
+//                 voters: []
+//             },
+//             {
+//                 color: 2,
+//                 word: 'JDOFIJ',
+//                 x: 0,
+//                 y: 2,
+//                 returned: false,
+//                 voters: []
+//             }
+//         ]) 
+//     })
+// }
 
 export class Board extends React.Component {
     constructor(props) {
@@ -18,11 +46,17 @@ export class Board extends React.Component {
         };
         const self = this;
         this.subscriptions = [
-            PubSub.subscribe('hasVoted', (evt, data) => {
+            PubSub.subscribe(Events.HAS_VOTED, (evt, data) => {
                 this.setState({
                     cards: self.state.cards.map(c => {
+                        const voterTuple = {key: data.playerKey, name: data.playerName}
+                        c.voters = c.voters.filter(v => { return v.key != voterTuple.key })
                         if(c.x === data.x && c.y === data.y) {
-                            c.voters.push({key: data.playerKey, name: data.playerName})
+                            // Ajouter le nom du votant sur la carte désignée
+                            c.voters.push(voterTuple)
+                        } else {
+                            // Retirer le nom du votant de toute autre carte
+                            c.voters = c.voters.filter(v => { return v.key != voterTuple.key })
                         }
                         return c
                     })
@@ -30,6 +64,15 @@ export class Board extends React.Component {
             }),
             PubSub.subscribe('cardReturned', (evt, data) => {
                 // TODO : retourner la carte
+                debugger
+                // this.setState({
+                //     cards: self.state.cards.map(c => {
+                //         if(c.x === data.x && c.y === data.y) {
+                //             c.returned = true;
+                //             return c;
+                //         }
+                //     })
+                // })
             })
         ]
     }
@@ -42,14 +85,16 @@ export class Board extends React.Component {
             })
             .then(data => {
                 // data = cartes;
+                // TODO : vérif input
                 self.setState({cards: data.map(x => {
+                    const voters = Array.isArray(x.voters) ? x.voters : Object.values(x.voters);
                     return {
                         color: x.color,
                         returned: x.returned,
                         name: x.word,
                         x: x.x,
                         y: x.y,
-                        voters: x.voters
+                        voters: voters.map(v => { return {key:v.playerKey, name:v.name} })
                     }
                 })})
             })

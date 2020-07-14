@@ -10,6 +10,7 @@ use App\Repository\CardRepository;
 use App\Repository\GamePlayerRepository;
 use App\Repository\GameRepository;
 use App\Repository\PlayerRepository;
+use Exception;
 
 class ApiController extends AbstractController
 {
@@ -77,24 +78,34 @@ class ApiController extends AbstractController
      */
     public function gameInfos(Request $request)
     {
-        // Parsing
-        $gameKey = $request->query->get('gameKey');
-        $playerKey = $this->playerSession->get(DefaultController::PlayerSession);
+        try {
+            // Parsing
+            $gameKey = $request->query->get('gameKey');
+            $playerKey = $this->playerSession->get(DefaultController::PlayerSession);
 
-        // Queries
-        $gameEntity  = $this->gameRepository->findByGuid($gameKey);
-        $player = $this->playerRepository->findByGuid($playerKey);
+            // Queries
+            $gameEntity  = $this->gameRepository->findByGuid($gameKey);
+            $player = $this->playerRepository->findByGuid($playerKey);
 
-        $model = [
-            'gameKey'               => $gameEntity->getPublicKey()->toString(),
-            'currentNumber'         => $gameEntity->getCurrentNumber(),
-            'currentWord'           => $gameEntity->getCurrentWord(),
-            'currentTeam'           => $gameEntity->getCurrentTeam(),
-            'playerName'            => $player->getName(),
-            'playerKey'             => $player->getPlayerKey()->toString(),
-            'remainingVotes'        => []
-        ];
+            $model = [
+                'gameKey'               => $gameEntity->getPublicKey(),
+                'currentNumber'         => $gameEntity->getCurrentNumber(),
+                'currentWord'           => $gameEntity->getCurrentWord(),
+                'currentTeam'           => $gameEntity->getCurrentTeam(),
+                'playerName'            => $player->getName(),
+                'playerKey'             => $player->getPlayerKey(),
+                'remainingVotes'        => []
+            ];
 
-        return new JsonResponse($model);
+            return new JsonResponse($model);
+        } catch(Exception $e) {
+            $model = [
+                'error' => true,
+                'message' => $e->getMessage(),
+                'stack' => $e->getTrace()
+            ];
+            return new JsonResponse($model);
+        }
+        
     }
 }

@@ -1,8 +1,9 @@
+import React, {Component} from 'react'
 import {Board} from './board';
 import {GameInfo} from './gameInfo';
 import { DataSource } from './dataSource';
 
-export class Game extends React.Component {
+export default class Game extends React.Component {
 
     constructor(props) {
         super(props)

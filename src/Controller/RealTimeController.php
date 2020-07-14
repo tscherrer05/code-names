@@ -98,6 +98,7 @@ class RealTimeController extends AbstractController
             $model = [
                 'action'    => 'hasVoted',
                 'playerKey' => $player->guid,
+                'playerName' => $player->name,
                 'x'         => $x,
                 'y'         => $y,
                 'color'     => $card->getColor()
@@ -127,6 +128,31 @@ class RealTimeController extends AbstractController
             print($e->getMessage());
             print($e->getTraceAsString());
             $this->sendToAllClients($clients, $from, json_encode(['error' => "Une erreur interne s'est produite."]));
+        }
+    }
+
+    public function passTurn($params)
+    {
+        $gameKey = $params['gameKey'];
+        $clients = $params['clients'];
+        $from = $params['from'];
+
+        try
+        {
+            // Récupérer la racine du graphe
+            $gameInfo = $this->gameRepository->getByGuid($gameKey);
+            $gameInfo->passTurn();
+
+            $model = [
+                'team' => $gameInfo->currentTeam()
+            ];
+            $this->sendToAllClients($clients, json_encode($model));
+        }
+        catch(\Exception $e)
+        {
+            print($e->getMessage());
+            print($e->getTraceAsString());
+            $this->sendToOtherClients($clients, $from, json_encode(['error' => "Une erreur interne s'est produite."]));
         }
     }
 

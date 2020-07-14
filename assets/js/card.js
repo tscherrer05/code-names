@@ -1,4 +1,6 @@
+import React, {Component} from 'react'
 import PubSub from 'pubsub-js';
+import {Events} from './events';
 
 export class Card extends React.Component {
     constructor(props) {
@@ -10,7 +12,7 @@ export class Card extends React.Component {
 
     vote() {
         // Publier un évènement sur le topic 'vote' avec ces données
-        PubSub.publish('vote', {
+        PubSub.publish(Events.VOTE, {
             x:          this.props.x,
             y:          this.props.y,
             gameKey:    this.props.gameKey,
@@ -20,14 +22,14 @@ export class Card extends React.Component {
 
     render() {
 
-        const renderImgComponent = () => {
+        const renderImgComponent = (props) => {
             const attr = {
-                key:        `${this.props.x}-${this.props.y}`,
+                key:        `${props.x}-${props.y}`,
                 onClick:    () => this.vote(),
                 className:  'cn-card',
             };
-            if(this.props.revealed) {
-                switch(this.props.color) {
+            if(props.revealed) {
+                switch(props.color) {
                     case 0:
                         attr['src'] = 'images/white.png';
                         break;
@@ -50,11 +52,21 @@ export class Card extends React.Component {
             else 
             {
                 attr['src'] = 'images/card.png';
+                if(!Array.isArray(props.votes))
+                {
+                    console.error("Mauvais format de props.votes");
+                }
                 return (
                     <div>
                         <div className="cn-card-votes">
-                            {this.props.votes.map(v => {
-                               return (<span id={`vote-tag-${v.playerKey}`} key={`vote-tag-${v.playerKey}`} className="badge badge-success">{v.name}</span>) 
+                            {props.votes.map(v => {
+                                if(v.key === props.playerKey){
+                                    return (<span id={`vote-tag-${v.key}`} key={`vote-tag-${v.playerKey}`} className="badge badge-success">{v.name}</span>) 
+
+                                } else {
+                                    return (<span id={`vote-tag-${v.key}`} key={`vote-tag-${v.playerKey}`} className="badge badge-secondary">{v.name}</span>) 
+
+                                }
                             })}
                         </div>
                         <img 
@@ -64,7 +76,7 @@ export class Card extends React.Component {
                             className={attr['className']}
                         />
                         <div key='cn-card-text' className='cn-card-text'>
-                            {this.props.name}
+                            {props.name}
                         </div>
                     </div>
                 );
@@ -76,7 +88,7 @@ export class Card extends React.Component {
                 key={`card-container-${this.props.x}${this.props.y}`}
                 id={`cn-card-${this.props.x}-${this.props.y}`}
                 className={'cn-card-container'}>
-                {renderImgComponent()}
+                {renderImgComponent(this.props)}
             </div>
         );
     }

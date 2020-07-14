@@ -5,9 +5,8 @@ use App\CodeNames\Card;
 use App\CodeNames\GameInfo       as GameInfo;
 use App\CodeNames\Player         as Player;
 use App\Tests\CodeNames\TestData as TestData;
-use Ramsey\Uuid\Guid\Guid;
 use Ramsey\Uuid\Nonstandard\Uuid;
-use Ramsey\Uuid\Uuid as UuidUuid;
+
 
 class GameTest extends TestCase
 {
@@ -175,6 +174,22 @@ class GameTest extends TestCase
         $result = $gameInfo->getPlayer($playerGuid);
 
         $this->assertSame("Jack", $result->name);
+    }
+
+    public function testNextTurnNominal()
+    {
+        $board = new Board(TestData::getCards());
+        $player = new Player(3, "Kirk", 1, 1);
+        $player->guid = Uuid::uuid1()->toString();
+        $gameInfo = new GameInfo($board, 1, '', 1, array($player));
+        $before = $gameInfo->currentTeam();
+
+        $gameInfo->passTurn();
+
+        $this->assertNotSame($before, $gameInfo->currentTeam());
+
+        $gameInfo->passTurn();
+        $this->assertSame($before, $gameInfo->currentTeam());
     }
 }
 

@@ -1,6 +1,5 @@
 
 
-// TODO : utiliser une classe avec un static ?
 const MaxParametersNumber = 6;
 
 export const DataSource = {

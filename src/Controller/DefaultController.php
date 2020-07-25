@@ -201,23 +201,6 @@ class DefaultController extends AbstractController
     }
 
     /**
-     * @Route("/create", methods={"POST"}, name="create_game")
-     */
-    public function create(Request $request)
-    {
-        $identity = $this->playerSession->get(self::PlayerSession);
-        if (!isset($identity))
-        {
-            return $this->redirectToRoute('get_login');
-        }
-
-        $gameInfo = $this->gameFactory->create();
-        $this->gameRepository->add($gameInfo);
-
-        return $this->redirectToRoute('lobby', ['gameKey' => $gameInfo->getPublicKey()]);
-    }
-
-    /**
      * @Route("/login", methods={"GET"}, name="get_login")
      */
     public function login(Request $request)

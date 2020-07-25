@@ -47,6 +47,10 @@ export class Board extends React.Component {
         const self = this;
         this.subscriptions = [
             PubSub.subscribe(Events.HAS_VOTED, (evt, data) => {
+                if('error' in data) {
+                    console.error(data['message'])
+                    return
+                }
                 this.setState({
                     cards: self.state.cards.map(c => {
                         const voterTuple = {key: data.playerKey, name: data.playerName}
@@ -62,8 +66,7 @@ export class Board extends React.Component {
                     })
                 })
             }),
-            PubSub.subscribe('cardReturned', (evt, data) => {
-                // TODO : retourner la carte
+            PubSub.subscribe(Events.CARD_RETURNED, (evt, data) => {
                 this.setState({
                     cards: self.state.cards.map(c => {
                         if(c.x === data.x && c.y === data.y) {

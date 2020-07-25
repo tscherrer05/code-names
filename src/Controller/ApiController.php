@@ -86,6 +86,7 @@ class ApiController extends AbstractController
             // Queries
             $gameEntity  = $this->gameRepository->findByGuid($gameKey);
             $player = $this->playerRepository->findByGuid($playerKey);
+            $gp = $this->gamePlayerRepository->findByGuid($playerKey);
 
             $model = [
                 'gameKey'               => $gameEntity->getPublicKey(),
@@ -94,6 +95,7 @@ class ApiController extends AbstractController
                 'currentTeam'           => $gameEntity->getCurrentTeam(),
                 'playerName'            => $player->getName(),
                 'playerKey'             => $player->getPlayerKey(),
+                'playerTeam'            => $gp->getTeam() ? 1 : 2,
                 'remainingVotes'        => []
             ];
 

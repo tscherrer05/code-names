@@ -29,6 +29,7 @@ class ManualFixtures extends Fixture implements FixtureGroupInterface
         $game->setStatus(GameStatus::Lobby);
         $game->setCurrentWord('potager');
         $game->setCurrentNumber(3);
+        $game->setCurrentTeam(1);
 
         // card
         $dataCards = [

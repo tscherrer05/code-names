@@ -36,15 +36,6 @@ class DefaultControllerTest extends WebTestCase
         $this->assertContains('login', $client->getRequest()->getUri());
     }
 
-    public function testCreateGameAnonymous()
-    {
-        $client = static::createClient();
-        $crawler = $client->request('POST', '/create');
-        $this->assertTrue($client->getResponse()->isRedirect());
-        $client->followRedirect();
-        $this->assertContains('login', $client->getRequest()->getUri());
-    }
-
     public function testRefreshLobby()
     {
         $client = static::createClient();
@@ -60,15 +51,18 @@ class DefaultControllerTest extends WebTestCase
         $this->assertContains('lobby', $client->getRequest()->getUri());
     }
 
-    // public function testLobbyNominal()
-    // {
-    //     $client = static::createClient();
+    public function testLobbyNominal()
+    {
+        $client = static::createClient();
+        $session = static::$container->get('session');
+        $session->set(DefaultController::GameSession, DefaultFixtures::GameKey1);
+        $session->set(DefaultController::PlayerSession, 3);
 
-    //     $client->request('GET', '/lobby?game='.DefaultFixtures::GameKey1);
+        $client->request('GET', '/lobby');
 
-    //     $this->assertEquals(200, $client->getResponse()->getStatusCode());
-    //     $this->assertSelectorExists('#game-guid');
-    // }
+        $this->assertEquals(200, $client->getResponse()->getStatusCode());
+        $this->assertSelectorExists('#game-key');
+    }
 
     // TODO : warning : writes in datasource
     // public function testConnect()

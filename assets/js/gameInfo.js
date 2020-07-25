@@ -8,14 +8,7 @@ export class GameInfo extends React.Component {
             remainingVotes: []
         }
         this.subscriptions = [
-            PubSub.subscribe(Events.TURN_PASSED, (evt, data) => {
-                this.setState({ 
-                    team: data.team,
-                    remainingVotes: data.voters || [],
-                    announcedNumber: 0,
-                    announcedWord: ""
-                 })
-            })
+            
         ]
     }
 
@@ -32,7 +25,7 @@ export class GameInfo extends React.Component {
     render() {
         const votes = () => {
             return this.state.remainingVotes.map(p => {
-                if(p.playerKey == this.state.playerKey)
+                if(p.playerKey == this.props.playerKey)
                     return <span id={`vote-tag-{p.playerKey}`} key={`vote-tag-{p.playerKey}`} className="badge badge-success">{p.name}</span>
                 else
                     return <span id={`vote-tag-{p.playerKey}`} key={`vote-tag-{p.playerKey}`} className="badge badge-secondary">{p.name}</span>
@@ -43,28 +36,26 @@ export class GameInfo extends React.Component {
                 <div className="row">
                     <div className="col">
                         <p>Vous êtes :&nbsp;
-                            <span id="current-player" data-value={this.state.name}>{this.state.name}</span>
+                            <span id="current-player" data-value={this.props.name}>{this.props.name}</span>
                         </p>
                         <p>Votre équipe :&nbsp;
-                            {this.state.team}</p>
+                            {this.props.playerTeam}</p>
                         <p>Votre rôle :&nbsp;
-                            {this.state.role}</p>
+                            {this.props.role}</p>
                     </div>
                     <div className="col">
                         <p>Tour :&nbsp;
-                            <span id="current-team">Equipe
-                                {this.state.currentTeam}
-                            </span>
+                            <span id="current-team">Equipe {this.props.currentTeam}</span>
                         </p>
                         <p>Mot annoncé :&nbsp;
-                            <span id="announced-word">{this.state.announcedWord}
+                            <span id="announced-word">{this.props.announcedWord}
                             </span>
                         </p>
                         <p>Nombre annoncé :&nbsp;
-                            <span id="announced-number">{this.state.announcedNumber}</span>
+                            <span id="announced-number">{this.props.announcedNumber}</span>
                         </p>
-                        <span id="gameKey" data-value={this.gameKey}></span>
-                        <span id="playerKey" data-value={this.playerKey}></span>
+                        <span id="gameKey" data-value={this.props.gameKey}></span>
+                        <span id="playerKey" data-value={this.props.playerKey}></span>
                     </div>
                     <div className="col">
                         <p className="display-block">Votes restants :</p>

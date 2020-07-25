@@ -77,7 +77,11 @@ class RealTimeController extends AbstractController
             $gp = $this->gamePlayerRepository->findOneBy(['id' => $player->id]);
             if($gp == null)
             {
-                throw new Exception("Game player not found with id : " . $player->id);
+                $model = [
+                    'action' => 'error',
+                    'message' => "Erreur lors du vote du joueur $playerKey sur la carte [$x, $y]"
+                ];
+                $this->sendToAllClients($clients, json_encode($model));
             }
             $gp->setX($x);
             $gp->setY($y);
@@ -86,7 +90,12 @@ class RealTimeController extends AbstractController
             $card = $this->cardRepository->findOneBy(['x' => $x, 'y' => $y]);
             if($card == null)
             {
-                throw new Exception("Card not found with coord : x {$x} y {$y}");
+                $model = [
+                    'action' => 'hasVoted',
+                    'error' => true,
+                    'message' => "Erreur lors du vote du joueur $playerKey sur la carte [$x, $y]"
+                ];
+                $this->sendToAllClients($clients, json_encode($model));
             }
             $returned = $gameInfo->board()->isCardReturned($x, $y);
             $card->setReturned($returned);
@@ -120,14 +129,23 @@ class RealTimeController extends AbstractController
         {
             print($e->getMessage());
             print($e->getTraceAsString());
-            // Gérer les éventuelles erreurs retournées par la racine du graphe.
-            $this->sendToAllClients($clients, json_encode(['error' => $e->getMessage()]));
+            $model = [
+                'action' => 'hasVoted',
+                'error' => true,
+                'message' => "Erreur lors du vote du joueur $playerKey sur la carte [$x, $y]"
+            ];            
+            $this->sendToAllClients($clients, json_encode($model));
         }
         catch(\Exception $e)
         {
             print($e->getMessage());
             print($e->getTraceAsString());
-            $this->sendToAllClients($clients, $from, json_encode(['error' => "Une erreur interne s'est produite."]));
+            $model = [
+                'action' => 'hasVoted',
+                'error' => true,
+                'message' => "Erreur lors du vote du joueur $playerKey sur la carte [$x, $y]"
+            ];
+            $this->sendToAllClients($clients, json_encode($model));
         }
     }
 

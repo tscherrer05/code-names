@@ -28,6 +28,7 @@ export class Card extends React.Component {
                 onClick:    () => this.vote(),
                 className:  'cn-card',
             };
+            // TODO : retirer les magic strings
             if(props.returned) {
                 switch(props.color) {
                     case 0:

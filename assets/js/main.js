@@ -31,6 +31,12 @@ conn.onmessage = (e) => {
 
     switch (result.action) {
         case 'hasVoted':
+          if('error' in result) {
+            PubSub.publish(Events.HAS_VOTED, {
+              error: result.error,
+              message: result.message,
+            })
+          }
           PubSub.publish(Events.HAS_VOTED, {
             x: result.x,
             y: result.y,
@@ -71,6 +77,7 @@ $(document).ready(() => {
     }
   ))
   PubSub.subscribe(Events.VOTE, (evt, data) => {
+    debugger
     send(evt, data)
   })
 

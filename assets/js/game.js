@@ -2,6 +2,7 @@ import React, {Component} from 'react'
 import {Board} from './board';
 import {GameInfo} from './gameInfo';
 import { DataSource } from './dataSource';
+import { Events } from './events';
 
 export default class Game extends React.Component {
 
@@ -12,7 +13,14 @@ export default class Game extends React.Component {
             playerKey: props.playerKey,
         }
         this.subscriptions = [
-
+            PubSub.subscribe(Events.TURN_PASSED, (evt, data) => {
+                this.setState({ 
+                    team: data.team,
+                    remainingVotes: data.voters || [],
+                    announcedNumber: 0,
+                    announcedWord: ""
+                 })
+            })
         ]
     }
 
@@ -24,9 +32,18 @@ export default class Game extends React.Component {
         DataSource
             .get('/gameInfos', { gameKey: this.state.gameKey })
             .then(data => {
+                if(typeof data === 'string' || typeof data === 'undefined') {
+                    console.log('Mauvais format de paramètre dans le callback (game)')
+                    return
+                }
+                if(data['action'] === 'error') {
+                    console.log(data['message'])
+                    return
+                }
                 self.setState({
                     gameKey:            data['gameKey'],
                     playerKey:          data['playerKey'],
+                    playerTeam:         data['playerTeam'],
                     name:               data['playerName'],
                     role:               data['role'],
                     currentTeam:        data['currentTeam'],
@@ -52,6 +69,7 @@ export default class Game extends React.Component {
                 <GameInfo 
                     gameKey={this.state.gameKey} 
                     playerKey={this.state.playerKey}
+                    playerTeam={this.state.playerTeam}
                     name={this.state.name}
                     role={this.state.role}
                     currentTeam={this.state.currentTeam}

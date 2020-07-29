@@ -109,5 +109,49 @@ class RealTimeControllerTest extends WebTestCase
         $this->assertSame(true, $card->getReturned());
     }
 
+    public function testStartGameNominal() {
+        $result = $this->service->startGame([
+            'clients' => new SplObjectStorage(),
+            'gameKey' => DefaultFixtures::GameKey1,
+            'players' => [
+                [
+                    'playerKey' => DefaultFixtures::PlayerKey1,
+                    'team' => 2,
+                    'role' => 1
+                ],
+                [
+                    'playerKey' => DefaultFixtures::PlayerKey2,
+                    'team' => 1,
+                    'role' => 2
+                ]
+            ],
+        ]);
+
+        $player1 = $this->entityManager
+        ->getRepository(Player::class)
+        ->findOneBy(['playerKey' => DefaultFixtures::PlayerKey1])
+        ;
+        $gp1 = $this->entityManager
+            ->getRepository(GamePlayer::class)
+            ->findOneBy(['player' => $player1->getId()])
+        ;
+
+        $player2 = $this->entityManager
+        ->getRepository(Player::class)
+        ->findOneBy(['playerKey' => DefaultFixtures::PlayerKey2])
+        ;
+        $gp2 = $this->entityManager
+            ->getRepository(GamePlayer::class)
+            ->findOneBy(['player' => $player2->getId()])
+        ;
+
+        $this->assertSame(DefaultFixtures::GameKey1, $gp1->getGame()->getPublicKey());
+        $this->assertSame(2, $gp1->getTeam());
+        $this->assertSame(1, $gp1->getRole());
+
+        $this->assertSame(DefaultFixtures::GameKey1, $gp2->getGame()->getPublicKey());
+        $this->assertSame(1, $gp2->getTeam());
+        $this->assertSame(2, $gp2->getRole());
+    }
 
 }

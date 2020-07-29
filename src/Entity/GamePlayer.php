@@ -29,12 +29,12 @@ class GamePlayer
     private $game;
 
     /**
-     * @ORM\Column(type="boolean", nullable=true)
+     * @ORM\Column(type="integer", nullable=true)
      */
     private $team;
 
     /**
-     * @ORM\Column(type="boolean", nullable=true)
+     * @ORM\Column(type="integer", nullable=true)
      */
     private $role;
 
@@ -82,24 +82,24 @@ class GamePlayer
         return $this;
     }
 
-    public function getTeam(): ?bool
+    public function getTeam(): ?int
     {
         return $this->team;
     }
 
-    public function setTeam(bool $team): self
+    public function setTeam(int $team): self
     {
         $this->team = $team;
 
         return $this;
     }
 
-    public function getRole(): ?bool
+    public function getRole(): ?int
     {
         return $this->role;
     }
 
-    public function setRole(bool $role): self
+    public function setRole(int $role): self
     {
         $this->role = $role;
 

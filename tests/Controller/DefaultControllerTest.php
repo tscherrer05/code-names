@@ -56,13 +56,15 @@ class DefaultControllerTest extends WebTestCase
         $client = static::createClient();
         $session = static::$container->get('session');
         $session->set(DefaultController::GameSession, DefaultFixtures::GameKey1);
-        $session->set(DefaultController::PlayerSession, 3);
+        $session->set(DefaultController::PlayerSession, DefaultFixtures::PlayerKey1);
 
         $client->request('GET', '/lobby');
 
         $this->assertEquals(200, $client->getResponse()->getStatusCode());
         $this->assertSelectorExists('#game-key');
     }
+
+
 
     // TODO : warning : writes in datasource
     // public function testConnect()

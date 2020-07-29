@@ -57,7 +57,7 @@ class DefaultController extends AbstractController
         {
             return $this->redirectToRoute('start');
         }
-        if (!isset($playerKey)) 
+        if (!isset($playerKey))
         {
             return $this->redirectToRoute(
                 'get_login',

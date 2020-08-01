@@ -5,6 +5,7 @@
 <p id="game-uid">Identifiant de jeu à partager : {{gameKey}}</p>
 <form id="roles" action="/game" method="post">
         <input type="hidden" name="game-key" id="game-key" value="{{gameKey}}" data-value="{{gameKey}}">
+        <input type="hidden" name="player-key" id="player-key" value="{{playerKey}}" data-value="{{playerKey}}">
         <ul>
         {% for player in players %}
             <li class="player">{{player.name}} ({{player.guid}})
@@ -22,7 +23,7 @@
             </li>
         {% endfor %}
     </ul>
-    <button id="start-game" type="button">Démarrer la partie</button>
+    <button id="ready" type="button">Prêt</button>
     <div>
         <a href="/refreshLobby?gameKey={{gameKey}}">Rafraîchir le lobby</a>
     </div>
@@ -39,7 +40,7 @@ $(document).ready(() => {
     var conn = new WebSocket(webSockUrl);
 
     // WebSocket events
-    conn.onopen = function (e) {
+    conn.onopen = function (e){
         console.log("Connection established!");
     };
 
@@ -49,10 +50,14 @@ $(document).ready(() => {
         }
 
         const result = JSON.parse(e.data);
+        const GAME_STARTED = "gameStarted";
+        const PLAYER_READY = "playerReady";
         switch (result.action) {
-            case "gameStarted":
+            case GAME_STARTED:
                 redirectToGame(result.gameKey);
                 break;
+            case PLAYER_READY:
+                // TODO : 
             case null:
             case undefined:
             default:
@@ -64,20 +69,10 @@ $(document).ready(() => {
         window.location.replace('/game?gameKey=' + gameKey);
     };
 
-    $('#start-game').on('click', () => {
+    $('#ready').on('click', () => {
         const gameKey = $('#game-key').data('value');
-        const players = 
-            [...document.getElementsByClassName('player')]
-            .map(li => {
-                const chldrn = [...li.children];
-                return {
-                    playerKey:  $(chldrn.filter(x => $(x).hasClass('player-key'))[0]).data('value'),
-                    team:       $(chldrn.filter(x => $(x).hasClass('team'))[0]).val(),
-                    role:       $(chldrn.filter(x => $(x).hasClass('role'))[0]).val()
-                };
-            });
         const message = {
-            action: 'startGame',
+            action: 'playerReady',
             parameters: {
                 gameKey: gameKey,
                 players: players

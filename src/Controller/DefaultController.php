@@ -179,12 +179,13 @@ class DefaultController extends AbstractController
 
         $viewModel = [
             "gameKey" => $gameKey,
+            "playerKey" => $identity,
             "players" => array_map(function($p) {
                 return [
                     'guid' => $p->guid,
                     'name' => $p->name
                 ];
-            }, $gameInfo->getPlayers())
+            }, $gameInfo->getPlayers()),
         ];
         return $this->render('default/lobby.html.twig', $viewModel);
     }

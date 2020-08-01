@@ -2,7 +2,6 @@
 namespace App\Controller;
 
 use App\CodeNames\GameStatus;
-use App\Entity\GamePlayer;
 use App\Repository\CardRepository;
 use App\Repository\GamePlayerRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -28,33 +27,43 @@ class RealTimeController extends AbstractController
 
     public function startGame($params)
     {
-        // TODO : assainir input
-        $gameKey = $params['gameKey'];
-        $clients = $params['clients'];
-        $players = $params['players'];
-        $entityManager = $this->getDoctrine()->getManager();
+        try {
+            // TODO : assainir input
+            $gameKey = $params['gameKey'];
+            $clients = $params['clients'];
+            $players = $params['players'];
+            $entityManager = $this->getDoctrine()->getManager();
 
-        // Mettre le jeu au statut "OnGoing"
-        $gameEntity = $this->gameRepository->findByGuid($gameKey);
-        $gameEntity->setStatus(GameStatus::OnGoing);
+            // Mettre le jeu au statut "OnGoing"
+            $gameEntity = $this->gameRepository->findByGuid($gameKey);
+            $gameEntity->setStatus(GameStatus::OnGoing);
 
-        // Ajouter les joueurs aux jeu
-        // TODO : extraire cela dans un objet métier
-        foreach($players as $p) {
-            $playerEntity = $this->playerRepository->findOneBy(['playerKey' => $p['playerKey']]);
-            $gpEntity = $this->gamePlayerRepository->findOneBy(['player' => $playerEntity->getId()]);
-            $gpEntity->setRole($p['role']);
-            $gpEntity->setTeam($p['team']);
-        }
+            // Ajouter les joueurs aux jeu
+            // TODO : extraire cela dans un objet métier
+            foreach($players as $p) {
+                $playerEntity = $this->playerRepository->findOneBy(['playerKey' => $p['playerKey']]);
+                $gpEntity = $this->gamePlayerRepository->findOneBy(['player' => $playerEntity->getId()]);
+                $gpEntity->setRole($p['role']);
+                $gpEntity->setTeam($p['team']);
+            }
 
-        $entityManager->flush();
+            $entityManager->flush();
 
-        // Envoyer un message pour dire à tous les clients que le jeu a démarré.
-        $model = [
-            'action' => 'gameStarted',
-            'gameKey' => $gameKey
-        ];
-        $this->sendToAllClients($clients, json_encode($model));
+            // Envoyer un message pour dire à tous les clients que le jeu a démarré.
+            $model = [
+                'action' => 'gameStarted',
+                'gameKey' => $gameKey
+            ];
+            $this->sendToAllClients($clients, json_encode($model));
+        } catch (\Exception $exception) {
+            print($exception->getMessage());
+            $model = [
+                'action' => 'gameStarted',
+                'error' => true,
+                'message' => "Erreur lors du démarrage de la partie."
+            ];
+            $this->sendToAllClients($clients, json_encode($model));
+        }    
     }
 
     public function vote($params)
@@ -88,8 +97,9 @@ class RealTimeController extends AbstractController
             $game->setCurrentTeam($gameInfo->currentTeam());
             
             // Joueur
-            $gp = $this->gamePlayerRepository->findOneBy(['id' => $player->id]);
-            if($gp == null)
+            $playerEntity = $this->playerRepository->findOneBy(['playerKey' => $playerKey]);
+            $gpEntity = $this->gamePlayerRepository->findOneBy(['player' => $playerEntity->getId()]);
+            if($gpEntity == null)
             {
                 $model = [
                     'action' => 'error',
@@ -97,8 +107,8 @@ class RealTimeController extends AbstractController
                 ];
                 $this->sendToAllClients($clients, json_encode($model));
             }
-            $gp->setX($x);
-            $gp->setY($y);
+            $gpEntity->setX($x);
+            $gpEntity->setY($y);
 
             // Carte
             $card = $this->cardRepository->findOneBy(['x' => $x, 'y' => $y]);

@@ -1,6 +1,8 @@
 <?php
 namespace App\CodeNames;
 
+use App\Entity\Roles;
+
 class GameInfo
 {
     function __construct(
@@ -90,14 +92,26 @@ class GameInfo
     public function vote(Player $player, int $x, int $y)
     {
         if($this->team != $player->team)
-            throw new \InvalidArgumentException("Ce n'est pas le tour du joueur " . $player->name . " (#" . $player->id . ")");
+            throw new \InvalidArgumentException("Ce n'est pas le tour du joueur " . $player->name . " (#" . $player->guid . ")");
         $this->board->voteForCard($player, $x, $y, $this);
     }
 
-    public function addPlayer(string $name, int $team = null, int $role = null)
+    public function addPlayer(string $guid, string $name, int $team = null, int $role = null)
     {
-        $player = new Player(0, $name, $team, $role);
-        array_push($this->players, $player);
+        if($role == Roles::Master) 
+        {
+            $masters = array_filter($this->players, 
+                function($p) use($team) 
+                {
+                    if($p->role == Roles::Master && $p->team == $team)
+                        return $p;
+                }
+            );
+
+            if(count($masters) >= 1)
+                throw new \Exception("Il y a déjà un maître espion dans cette équipe.");
+        }
+        $this->players[] = new Player($guid, $name, $team, $role);
     }
 
     public function passTurn()

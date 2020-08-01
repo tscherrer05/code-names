@@ -1,9 +1,11 @@
 <?php
 namespace App\Tests\Controller;
 
+use App\CodeNames\GameStatus;
 use App\Controller\RealTimeController;
 use App\DataFixtures\DefaultFixtures;
 use App\Entity\Card;
+use App\Entity\Game;
 use App\Entity\GamePlayer;
 use App\Entity\Player;
 use SplObjectStorage;
@@ -145,6 +147,12 @@ class RealTimeControllerTest extends WebTestCase
             ->findOneBy(['player' => $player2->getId()])
         ;
 
+        $game = $this->entityManager
+            ->getRepository(Game::class)
+            ->findOneBy(['publicKey' => DefaultFixtures::GameKey1]);
+
+        $this->assertSame(GameStatus::OnGoing, $game->getStatus());
+
         $this->assertSame(DefaultFixtures::GameKey1, $gp1->getGame()->getPublicKey());
         $this->assertSame(2, $gp1->getTeam());
         $this->assertSame(1, $gp1->getRole());
@@ -153,5 +161,39 @@ class RealTimeControllerTest extends WebTestCase
         $this->assertSame(1, $gp2->getTeam());
         $this->assertSame(2, $gp2->getRole());
     }
+
+    // public function testStartGameWithWrongTeams() 
+    // {
+    //     $result = $this->service->startGame([
+    //         'clients' => new SplObjectStorage(),
+    //         'gameKey' => DefaultFixtures::GameKey1,
+    //         'players' => [
+    //             [
+    //                 'playerKey' => DefaultFixtures::PlayerKey1,
+    //                 'team' => 2,
+    //                 'role' => 1
+    //             ],
+    //             [
+    //                 'playerKey' => DefaultFixtures::PlayerKey2,
+    //                 'team' => 1,
+    //                 'role' => 2
+    //             ]
+    //         ],
+    //     ]);
+
+    //     $game = $this->entityManager
+    //         ->getRepository(Game::class)
+    //         ->findOneBy(['publicKey' => DefaultFixtures::GameKey1]);
+
+    //     $this->assertSame(GameStatus::Lobby, $game->getStatus());
+    // }
+
+    // public function testUpdateLobbyInfosWithWrongSetup() {
+    //     // $result = $this->service->updateLobbyInfos([
+    //     //     'clients' => new SplObjectStorage(), // on doit forcément avoir les clients ? Ou il ne faudrait pas que le controller se renseigne lui même auprès du serveur ws ?
+    //     //     'gameKey' => DefaultFixtures::GameKey1,
+    //     //     'playerKey' => DefaultFixtures::PlayerKey1
+    //     // ]);
+    // }
 
 }

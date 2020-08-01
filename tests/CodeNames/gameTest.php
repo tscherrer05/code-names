@@ -4,28 +4,25 @@ use App\CodeNames\Board          as Board;
 use App\CodeNames\Card;
 use App\CodeNames\GameInfo       as GameInfo;
 use App\CodeNames\Player         as Player;
+use App\Entity\Colors;
+use App\Entity\Roles;
+use App\Entity\Teams;
 use App\Tests\CodeNames\TestData as TestData;
 use Ramsey\Uuid\Nonstandard\Uuid;
 
 
 class GameTest extends TestCase
 {
-
-    const BLUE = 1;
-    const RED = 2;
-    const MASTER = 1;
-    const SPY = 2;
-
     public function testPlayerVoteFirstCard()
     {
         // Arrange
         $cards    = TestData::getCards();
         $board    = new Board($cards);
-        $player1  = new Player(1, "nom", 1, 1);
-        $player2  = new Player(2, "nom", 1, 1);
+        $player1  = new Player(1, "nom", Teams::Blue, Roles::Spy);
+        $player2  = new Player(2, "nom", Teams::Blue, Roles::Spy);
         $player1->guid = Uuid::uuid1()->toString();
         $player2->guid = Uuid::uuid1()->toString();
-        $gameInfo = new GameInfo($board, 1, "", 0, array($player1, $player2));
+        $gameInfo = new GameInfo($board, Teams::Blue, "", 0, array($player1, $player2));
 
         // Act
         $gameInfo->vote($player1, 1, 1);
@@ -39,11 +36,11 @@ class GameTest extends TestCase
         // Arrange
         $cards    = TestData::getCards();
         $board    = new Board($cards);
-        $player1  = new Player(1, "nom", 1, 1);
-        $player2  = new Player(2, "nom", 1, 1);
+        $player1  = new Player(1, "nom", Teams::Blue, Roles::Spy);
+        $player2  = new Player(2, "nom", Teams::Blue, Roles::Spy);
         $player1->guid = Uuid::uuid1()->toString();
         $player2->guid = Uuid::uuid1()->toString();
-        $gameInfo = new GameInfo($board, 1, "", 1, array($player1, $player2));
+        $gameInfo = new GameInfo($board, Teams::Blue, "", 1, array($player1, $player2));
 
         // Act
         $gameInfo->vote($player1, 1, 1);
@@ -62,9 +59,9 @@ class GameTest extends TestCase
     public function testTwoPlayersVoteForOneCard()
     {
         // Arrange
-        $player1  = new Player(1, "Jack", 1, 1);
-        $player2  = new Player(2, "Boby", 1, 1);
-        $player3  = new Player(3, "Boby", 1, 1);
+        $player1  = new Player(1, "Jack", Teams::Blue, Roles::Spy);
+        $player2  = new Player(2, "Boby", Teams::Blue, Roles::Spy);
+        $player3  = new Player(3, "Boby", Teams::Blue, Roles::Spy);
         $player1->guid = Uuid::uuid1()->toString();
         $player2->guid = Uuid::uuid1()->toString();
         $player3->guid = Uuid::uuid1()->toString();
@@ -86,7 +83,7 @@ class GameTest extends TestCase
     {
         // Arrange
         $board = new Board(TestData::getCards());
-        $player = new Player(1, "Jack", 2, 1);
+        $player = new Player(1, "Jack", Teams::Red, Roles::Spy);
         $gameInfo = new GameInfo($board, 1, "", 1, array($player));
         $coordX = 1;
         $coordY = 1;
@@ -167,17 +164,31 @@ class GameTest extends TestCase
         $this->assertSame(1, $gameInfo->winner($board));
     }
 
-    public function testAddSpy()
+    public function testAddPlayerNominal()
     {
         $name = "ChuckNorris23";
-        $team = GameTest::RED;
-        $role = GameTest::MASTER;
+        $role = Roles::Master;
+        $team = Teams::Red;
         $board    = new Board(TestData::getCards());
         $gameInfo = new GameInfo($board, 1, "", 1, array());
 
         $gameInfo->addPlayer($name, $team, $role);
 
         $this->assertSame(1, $gameInfo->nbPlayers());
+    }
+
+    public function testAddPlayerInvalid() 
+    {
+        $board    = new Board(TestData::getCards());
+        $gameInfo = new GameInfo($board, 1, "", 1, array());
+
+        // 2 Master spies
+        $gameInfo->addPlayer(Uuid::uuid1()->toString(), "yesyes", Teams::Blue, Roles::Master);
+        $gameInfo->addPlayer(Uuid::uuid1()->toString(), "yesyes", Teams::Red, Roles::Master);
+
+        // Try to add another master spy
+        $this->expectException(\Exception::class);
+        $gameInfo->addPlayer(Uuid::uuid1()->toString(), "whatev", Teams::Blue, Roles::Master);
     }
 
     public function testGetPlayerById()

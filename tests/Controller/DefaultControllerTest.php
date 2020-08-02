@@ -3,10 +3,12 @@ namespace App\Tests\Controller;
 
 use App\Controller\DefaultController;
 use App\DataFixtures\DefaultFixtures;
+use App\Entity\GamePlayer;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class DefaultControllerTest extends WebTestCase
 {
+
     public function testLoginPageNominal()
     {
         $client = static::createClient();
@@ -64,32 +66,49 @@ class DefaultControllerTest extends WebTestCase
         $this->assertSelectorExists('#game-key');
     }
 
-    public function testAutoConnect() 
+    public function testAutoConnectNominal() 
     {
         $client = static::createClient();
-        $client->request('GET', '/autConnect');
+
+        $before = $this->countGamePlayers();
+
+        $client->request('GET', '/autoConnect?gameKey='.DefaultFixtures::GameKey1);
+
+        $this->assertNumberOfGamePlayers($before+1);
+
         $client->followRedirect();
-        $this->assertEquals(200, $client->getResponse()->getStatusCode());
+        $this->assertEquals(302, $client->getResponse()->getStatusCode());
         $this->assertTrue($client->getResponse()->isRedirect(), "Doit rediriger.");
         $this->assertContains('game', $client->getRequest()->getUri(), "Doit être sur la page game");
     }
 
-    // TODO : warning : writes in datasource
-    // public function testConnect()
-    // {
-    //     $client = static::createClient();
+    public function testAutoConnectTwice() 
+    {
+        $client = static::createClient();
+        $before = $this->countGamePlayers();
+        $session = static::$container->get('session');
+        $session->set(DefaultController::PlayerSession, DefaultFixtures::PlayerKey1);
+        $before = $this->countGamePlayers();
+        $client->request('GET', '/autoConnect?gameKey='.DefaultFixtures::GameKey1);
+        $this->assertNumberOfGamePlayers($before);
+        $this->assertEquals(302, $client->getResponse()->getStatusCode());
+        $this->assertTrue($client->getResponse()->isRedirect(), "Doit rediriger.");
+        $this->assertContains('game', $client->getRequest()->getUri(), "Doit être sur la page game");
+    }
 
-    //     // $client->request(
-    //     //     'POST', 
-    //     //     '/login',
-    //     //     [
-    //     //         'gameId' => 1,
-    //     //         'login' => "ChuckNorris78",
-    //     //         'team' => 1,
-    //     //         'role' => 2
-    //     //     ]
-    //     // );
+    private function assertNumberOfGamePlayers(int $expected)
+    {
+        $this->assertSame($expected, (int)$this->countGamePlayers());
+    }
 
-    //     // $this->assertSame(302, $client->getResponse()->getStatusCode());
-    // }
+    private function countGamePlayers()
+    {
+        $em = static::$container->get('doctrine')->getManager();
+        return $em
+            ->getRepository(GamePlayer::class)
+            ->createQueryBuilder('gp')
+            ->select('count(gp.id)')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
 }

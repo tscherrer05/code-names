@@ -43,13 +43,30 @@ class DefaultController extends AbstractController
     }
 
     /**
+     * @Route("/getSession", methods={"GET"}, name="get_session")
+     */
+    public function getSession() 
+    {
+        var_dump($this->playerSession->get(self::PlayerSession));
+        exit;
+    }
+
+    /**
+     * @Route("/setSession", methods={"GET"}, name="set_session")
+     */
+    public function setSession()
+    {
+        $this->playerSession->set(self::PlayerSession, $this->getGUID());
+    }
+
+    /**
      * @Route("/game", methods={"GET"}, name="join_game")
      */
     public function game(Request $request)
     {
         // Parsage des paramètres
         $gameKey = $request->query->get('gameKey');
-        $playerKey = $this->playerSession->get(DefaultController::PlayerSession);
+        $playerKey = $this->playerSession->get(self::PlayerSession);
 
         // Routing
         if(!isset($gameKey))
@@ -231,7 +248,7 @@ class DefaultController extends AbstractController
         {
             throw new \Exception("Game not found with key : ".$gameKey);
         }
-        $playerKey = Guid::uuid1();
+        $playerKey = Guid::uuid4()->toString();
 
         // Save pdo session (save in database)
         $this->playerSession->set(self::PlayerSession, $playerKey);
@@ -252,19 +269,24 @@ class DefaultController extends AbstractController
         return $this->redirectToRoute('lobby');
     }
 
-        /**
+    /**
      * @Route("/autoConnect", methods={"GET"}, name="auto_connect")
      */
     public function autoConnect(Request $request) 
     {
+        $playSession = $this->playerSession->get(self::PlayerSession);
         $gameKey = $request->query->get('gameKey');
+        if($playSession != null)
+        {
+            return $this->redirectToRoute('join_game', ['gameKey' => $gameKey]);
+        }
 
         $game = $this->gameRepository->findByGuid($gameKey);
         if($game == null)
         {
            throw new \Exception("Game not found with key : ".$gameKey);
         }
-        $playerKey = Guid::uuid1();
+        $playerKey = $this->getGUID();
 
         // Save pdo session (save in database)
         $this->playerSession->set(self::PlayerSession, $playerKey);
@@ -274,11 +296,13 @@ class DefaultController extends AbstractController
         $gamePlayer = new GamePlayer();
         $gamePlayer->setGame($game);
         // https://stackoverflow.com/questions/4356289/php-random-string-generator
+        // TODO : friendly name
         $gamePlayer->setName(substr(md5(rand()), 0, 7));
         $gamePlayer->setSessionId($this->playerSession->getId());
-        $gamePlayer->setPublicKey(Uuid::uuid1()->toString());
+        $gamePlayer->setPublicKey($playerKey);
 
         // Determine team and role
+        // TODO : random role and team
         $gamePlayer->setRole(Roles::Master);
         $gamePlayer->setTeam(Teams::Blue);
 
@@ -323,5 +347,24 @@ class DefaultController extends AbstractController
         $this->playerSession->remove(self::PlayerSession);
         $this->playerSession->remove(self::GameSession);
         return $this->redirectToRoute('start');
+    }
+
+    /**
+     * http://guid.us/GUID/PHP
+     */
+    private function getGUID(){
+        if (function_exists('com_create_guid')){
+            return com_create_guid();
+        }else{
+            mt_srand((double)microtime()*10000);//optional for php 4.2.0 and up.
+            $charid = strtoupper(md5(uniqid(rand(), true)));
+            $hyphen = chr(45);// "-"
+            $uuid = substr($charid, 0, 8).$hyphen
+                .substr($charid, 8, 4).$hyphen
+                .substr($charid,12, 4).$hyphen
+                .substr($charid,16, 4).$hyphen
+                .substr($charid,20,12);
+            return $uuid;
+        }
     }
 }

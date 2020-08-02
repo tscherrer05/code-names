@@ -19,29 +19,4 @@ class PlayerRepository extends ServiceEntityRepository
         parent::__construct($registry, Player::class);
     }
 
-    public function findByGuid(string $playerKey)
-    {
-        $playerEntity = $this->createQueryBuilder('g')
-            ->andWhere('g.playerKey = :val')
-            ->setParameter(':val', $playerKey)
-            ->getQuery()
-            ->getOneOrNullResult();
-        return $playerEntity;
-    }
-
-    public function playerSessions()
-    {
-        $rawSql = 'SELECT * FROM sessions;';
-        $stmt = $this->getEntityManager()->getConnection()->prepare($rawSql);
-        $stmt->execute();
-        return $stmt->fetchAll();
-    }
-
-    public function cleanPlayerSessions()
-    {
-        $rawSql = 'DELETE FROM sessions where sess_lifetime - :time < 0';
-        $stmt = $this->getEntityManager()->getConnection()->prepare($rawSql);
-        $params['time'] = time();
-        $stmt->execute($params);
-    }
 }

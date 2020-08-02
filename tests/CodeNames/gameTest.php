@@ -4,7 +4,6 @@ use App\CodeNames\Board          as Board;
 use App\CodeNames\Card;
 use App\CodeNames\GameInfo       as GameInfo;
 use App\CodeNames\Player         as Player;
-use App\Entity\Colors;
 use App\Entity\Roles;
 use App\Entity\Teams;
 use App\Tests\CodeNames\TestData as TestData;

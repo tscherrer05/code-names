@@ -7,7 +7,6 @@ use App\DataFixtures\DefaultFixtures;
 use App\Entity\Card;
 use App\Entity\Game;
 use App\Entity\GamePlayer;
-use App\Entity\Player;
 use SplObjectStorage;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
@@ -36,10 +35,11 @@ class RealTimeControllerTest extends WebTestCase
 
     public function testVoteNominal()
     {
+        $playerKey = DefaultFixtures::PlayerKey1;
         $result = $this->service->vote([
             'x' => 0,
             'y' => 2,
-            'playerKey' => DefaultFixtures::PlayerKey1,
+            'playerKey' => $playerKey,
             'gameKey' => DefaultFixtures::GameKey1,
             'clients' => new SplObjectStorage(),
             'from' => null
@@ -47,13 +47,9 @@ class RealTimeControllerTest extends WebTestCase
 
         $parsed = json_decode($result, true);
 
-        $player = $this->entityManager
-            ->getRepository(Player::class)
-            ->findOneBy(['playerKey' => DefaultFixtures::PlayerKey1])
-        ;
         $gp = $this->entityManager
             ->getRepository(GamePlayer::class)
-            ->findOneBy(['player' => $player->getId()])
+            ->findOneBy(['publicKey' => $playerKey])
         ;
 
         // Assert retour
@@ -129,22 +125,14 @@ class RealTimeControllerTest extends WebTestCase
             ],
         ]);
 
-        $player1 = $this->entityManager
-        ->getRepository(Player::class)
-        ->findOneBy(['playerKey' => DefaultFixtures::PlayerKey1])
-        ;
         $gp1 = $this->entityManager
             ->getRepository(GamePlayer::class)
-            ->findOneBy(['player' => $player1->getId()])
+            ->findOneBy(['publicKey' => DefaultFixtures::PlayerKey1])
         ;
 
-        $player2 = $this->entityManager
-        ->getRepository(Player::class)
-        ->findOneBy(['playerKey' => DefaultFixtures::PlayerKey2])
-        ;
         $gp2 = $this->entityManager
             ->getRepository(GamePlayer::class)
-            ->findOneBy(['player' => $player2->getId()])
+            ->findOneBy(['publicKey' => DefaultFixtures::PlayerKey2])
         ;
 
         $game = $this->entityManager

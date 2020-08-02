@@ -9,17 +9,17 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Ramsey\Uuid\Guid\Guid;
 use App\CodeNames\GameStatus;
 use App\Entity\GamePlayer;
-use App\Entity\Player;
+use App\Entity\Roles;
+use App\Entity\Teams;
 use App\Repository\CardRepository;
 use App\Repository\GamePlayerRepository;
 use App\Repository\GameRepository;
-use App\Repository\PlayerRepository;
+use Ramsey\Uuid\Nonstandard\Uuid;
 
 class DefaultController extends AbstractController
 {
     private $gameRepository;
     private $playerSession;
-    private $playerRepository;
     private $gamePlayerRepository;
     private $cardRepository;
 
@@ -27,13 +27,12 @@ class DefaultController extends AbstractController
     const GameSession = 'gameKey';
 
     public function __construct(SessionInterface $session,
-        GameRepository $gameRepo, PlayerRepository $playerRepo,
+        GameRepository $gameRepo,
         GamePlayerRepository $gamePlayerRepository,
         CardRepository $cardRepository)
     {
         $this->playerSession        = $session;
         $this->gameRepository       = $gameRepo;
-        $this->playerRepository     = $playerRepo;
         $this->gamePlayerRepository = $gamePlayerRepository;
         $this->cardRepository       = $cardRepository;
     }
@@ -117,7 +116,7 @@ class DefaultController extends AbstractController
             "announcedWord"     => $gameEntity->getCurrentWord(),
             "currentTeam"       => $gameEntity->getCurrentTeam(),
             "currentPlayerKey"  => $playerKey,
-            "currentPlayerName" => $currPlayer->getPlayer()->getName(),
+            "currentPlayerName" => $currPlayer->getName(),
             "currentPlayerRole" => $currPlayer->getRole(),
             "currentPlayerTeam" => $currPlayer->getTeam(),
             "isGuesser"         => true,
@@ -125,8 +124,8 @@ class DefaultController extends AbstractController
             "notVoted"          => array_map(function($gp) 
                                     { 
                                         return [
-                                            'playerKey' => $gp->getPlayer()->getPlayerKey(),
-                                            'name'      => $gp->getPlayer()->getName()
+                                            'playerKey' => $gp->getPublicKey(),
+                                            'name'      => $gp->getName()
                                         ];
                                     }, $notVoted)
         ];
@@ -196,7 +195,7 @@ class DefaultController extends AbstractController
     public function refreshLobby()
     {
         // Pas sûr que cela soit utile
-        $this->playerRepository->cleanPlayerSessions();
+        $this->gamePlayerRepository->cleanPlayerSessions();
 
         return $this->redirectToRoute('lobby');
     }
@@ -237,24 +236,59 @@ class DefaultController extends AbstractController
         // Save pdo session (save in database)
         $this->playerSession->set(self::PlayerSession, $playerKey);
         $this->playerSession->set(self::GameSession, $gameKey);
-
-        $player = new Player();
-        $player->setName($playerName);
-        $player->setPlayerKey($playerKey);
-
+        
         $gamePlayer = new GamePlayer();
+        $gamePlayer->setName($playerName);
+        $gamePlayer->setPublicKey($playerKey);
         $gamePlayer->setGame($game);
-        $gamePlayer->setPlayer($player);
         $gamePlayer->setSessionId($this->playerSession->getId());
 
         // Persistance
         $entityManager = $this->getDoctrine()->getManager();
-        $entityManager->persist($player);
         $entityManager->persist($gamePlayer);
         $entityManager->flush();
 
         // Routing
         return $this->redirectToRoute('lobby');
+    }
+
+        /**
+     * @Route("/autoConnect", methods={"GET"}, name="auto_connect")
+     */
+    public function autoConnect(Request $request) 
+    {
+        $gameKey = $request->query->get('gameKey');
+
+        $game = $this->gameRepository->findByGuid($gameKey);
+        if($game == null)
+        {
+           throw new \Exception("Game not found with key : ".$gameKey);
+        }
+        $playerKey = Guid::uuid1();
+
+        // Save pdo session (save in database)
+        $this->playerSession->set(self::PlayerSession, $playerKey);
+        $this->playerSession->set(self::GameSession, $gameKey);
+
+        // Generate player randomly
+        $gamePlayer = new GamePlayer();
+        $gamePlayer->setGame($game);
+        // https://stackoverflow.com/questions/4356289/php-random-string-generator
+        $gamePlayer->setName(substr(md5(rand()), 0, 7));
+        $gamePlayer->setSessionId($this->playerSession->getId());
+        $gamePlayer->setPublicKey(Uuid::uuid1()->toString());
+
+        // Determine team and role
+        $gamePlayer->setRole(Roles::Master);
+        $gamePlayer->setTeam(Teams::Blue);
+
+        // Persistance
+        $entityManager = $this->getDoctrine()->getManager();
+        $entityManager->persist($gamePlayer);
+        $entityManager->flush();
+
+        // Redirect to game
+        return $this->redirectToRoute('join_game', ['gameKey' => $gameKey]);
     }
 
     /**
@@ -267,7 +301,7 @@ class DefaultController extends AbstractController
 
         if(isset($identity))
         {
-            $player = $this->playerRepository->findByGuid($identity);
+            $player = $this->gamePlayerRepository->findByGuid($identity);
             if(!isset($player))
             {
                 return $this->redirectToRoute('user_disconnect');

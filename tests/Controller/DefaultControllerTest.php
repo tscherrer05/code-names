@@ -64,7 +64,15 @@ class DefaultControllerTest extends WebTestCase
         $this->assertSelectorExists('#game-key');
     }
 
-
+    public function testAutoConnect() 
+    {
+        $client = static::createClient();
+        $client->request('GET', '/autConnect');
+        $client->followRedirect();
+        $this->assertEquals(200, $client->getResponse()->getStatusCode());
+        $this->assertTrue($client->getResponse()->isRedirect(), "Doit rediriger.");
+        $this->assertContains('game', $client->getRequest()->getUri(), "Doit être sur la page game");
+    }
 
     // TODO : warning : writes in datasource
     // public function testConnect()

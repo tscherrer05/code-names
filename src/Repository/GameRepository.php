@@ -97,7 +97,7 @@ class GameRepository extends ServiceEntityRepository
             {
                 if($c->getX() == $gp->getX() && $c->getY() == $gp->getY())
                 {
-                    $votes[$gp->getPlayer()->getPlayerKey()] = new Card(
+                    $votes[$gp->getPublicKey()] = new Card(
                         $c->getWord(), $c->getColor(),
                         $c->getX(), $c->getY(), $c->getReturned());
                 }
@@ -105,10 +105,7 @@ class GameRepository extends ServiceEntityRepository
         }
 
         $players = $gamePlayers->map(function($gp) {
-            $playerEntity = $gp->getPlayer();
-            $play = new Player($gp->getId(), $playerEntity->getName(), $gp->getTeam(), $gp->getRole());
-            $play->guid = $playerEntity->getPlayerKey();
-            return $play;
+            return new Player($gp->getPublicKey(), $gp->getName(), $gp->getTeam(), $gp->getRole());
         });
 
         $board = new Board($twoDimCards, $votes);

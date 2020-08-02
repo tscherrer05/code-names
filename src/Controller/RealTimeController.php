@@ -13,16 +13,13 @@ class RealTimeController extends AbstractController
 {
     private $gameRepository;
     private $gamePlayerRepository;
-    private $playerRepository;
 
     public function __construct(GameRepository $gameRepository, 
-    GamePlayerRepository $gamePlayerRepository, CardRepository $cardRepository, 
-    PlayerRepository $playerRepository)
+    GamePlayerRepository $gamePlayerRepository, CardRepository $cardRepository)
     {
         $this->gameRepository       = $gameRepository;
         $this->gamePlayerRepository = $gamePlayerRepository;
         $this->cardRepository       = $cardRepository;
-        $this->playerRepository = $playerRepository;
     }
 
     public function startGame($params)
@@ -41,8 +38,7 @@ class RealTimeController extends AbstractController
             // Ajouter les joueurs aux jeu
             // TODO : extraire cela dans un objet métier
             foreach($players as $p) {
-                $playerEntity = $this->playerRepository->findOneBy(['playerKey' => $p['playerKey']]);
-                $gpEntity = $this->gamePlayerRepository->findOneBy(['player' => $playerEntity->getId()]);
+                $gpEntity = $this->gamePlayerRepository->findByGuid($p['playerKey']);
                 $gpEntity->setRole($p['role']);
                 $gpEntity->setTeam($p['team']);
             }
@@ -97,8 +93,7 @@ class RealTimeController extends AbstractController
             $game->setCurrentTeam($gameInfo->currentTeam());
             
             // Joueur
-            $playerEntity = $this->playerRepository->findOneBy(['playerKey' => $playerKey]);
-            $gpEntity = $this->gamePlayerRepository->findOneBy(['player' => $playerEntity->getId()]);
+            $gpEntity = $this->gamePlayerRepository->findByGuid($playerKey);
             if($gpEntity == null)
             {
                 $model = [

@@ -23,12 +23,12 @@ class ManualFixtures extends Fixture implements FixtureGroupInterface
 
     public function load(ObjectManager $manager)
     {
-        // A game in lobby state
+        // A game in set up state
         $game = new Game();
         $game->setPublicKey(self::GameKey1);
-        $game->setStatus(GameStatus::Lobby);
-        $game->setCurrentWord('potager');
-        $game->setCurrentNumber(3);
+        $game->setStatus(GameStatus::OnGoing);
+        $game->setCurrentWord(null);
+        $game->setCurrentNumber(null);
         $game->setCurrentTeam(1);
 
         // card
@@ -38,7 +38,7 @@ class ManualFixtures extends Fixture implements FixtureGroupInterface
             ['chimpanzé',   0, 1, 2],
             ['orteil',      0, 2, 2],
             ['courgette',   0, 3, 0],
-            ['potiron',   0, 4, 0],
+            ['potiron',     0, 4, 0],
 
             // Ligne 2
             ['courgette',   1, 0, 1],

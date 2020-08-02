@@ -30,16 +30,30 @@ class GamePlayerRepository extends ServiceEntityRepository
         return $gamePlayerEntity;
     }
 
-    public function findByGuid($playerKey)
+    public function findByGuid(string $playerKey)
     {
-        $gamePlayerEntity = $this->createQueryBuilder('gp')
-            ->join('gp.player', 'p')
-            ->where('p.playerKey = :val')
+        $playerEntity = $this->createQueryBuilder('g')
+            ->andWhere('g.publicKey = :val')
             ->setParameter(':val', $playerKey)
             ->getQuery()
-            ->getOneOrNullResult()
-        ;
-        return $gamePlayerEntity;
+            ->getOneOrNullResult();
+        return $playerEntity;
     }
-    
+
+    public function playerSessions()
+    {
+        $rawSql = 'SELECT * FROM sessions;';
+        $stmt = $this->getEntityManager()->getConnection()->prepare($rawSql);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    public function cleanPlayerSessions()
+    {
+        $rawSql = 'DELETE FROM sessions where sess_lifetime - :time < 0';
+        $stmt = $this->getEntityManager()->getConnection()->prepare($rawSql);
+        $params['time'] = time();
+        $stmt->execute($params);
+    }
+   
 }

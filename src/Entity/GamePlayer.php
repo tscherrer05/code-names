@@ -17,12 +17,6 @@ class GamePlayer
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="App\Entity\Player")
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private $player;
-
-    /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Game", inversedBy="gamePlayers")
      * @ORM\JoinColumn(nullable=false)
      */
@@ -53,21 +47,19 @@ class GamePlayer
      */
     private $sessionId;
 
+    /**
+     * @ORM\Column(type="guid")
+     */
+    private $publicKey;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $name;
+
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getPlayer(): ?Player
-    {
-        return $this->player;
-    }
-
-    public function setPlayer(?Player $player): self
-    {
-        $this->player = $player;
-
-        return $this;
     }
 
     public function getGame(): ?Game
@@ -138,6 +130,30 @@ class GamePlayer
     public function setSessionId(string $sessionId): self
     {
         $this->sessionId = $sessionId;
+
+        return $this;
+    }
+
+    public function getPublicKey(): ?string
+    {
+        return $this->publicKey;
+    }
+
+    public function setPublicKey(string $publicKey): self
+    {
+        $this->publicKey = $publicKey;
+
+        return $this;
+    }
+
+    public function getName(): ?string
+    {
+        return $this->name;
+    }
+
+    public function setName(?string $name): self
+    {
+        $this->name = $name;
 
         return $this;
     }

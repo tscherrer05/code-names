@@ -28,7 +28,6 @@ class ApiControllerTest extends WebTestCase
         $session->set(DefaultController::GameSession, DefaultFixtures::GameKey1);
         $session->set(DefaultController::PlayerSession, DefaultFixtures::PlayerKey1);
 
-
         $client->request('GET', '/gameInfos?gameKey='.DefaultFixtures::GameKey1);
 
         $response = $client->getResponse();

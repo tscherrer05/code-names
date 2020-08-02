@@ -9,14 +9,12 @@ use Symfony\Component\Routing\Annotation\Route;
 use App\Repository\CardRepository;
 use App\Repository\GamePlayerRepository;
 use App\Repository\GameRepository;
-use App\Repository\PlayerRepository;
 use Exception;
 
 class ApiController extends AbstractController
 {
     private $gameRepository;
     private $playerSession;
-    private $playerRepository;
     private $gamePlayerRepository;
     private $cardRepository;
 
@@ -24,13 +22,12 @@ class ApiController extends AbstractController
     const GameSession = 'gameKey';
 
     public function __construct(SessionInterface $session,
-        GameRepository $gameRepo, PlayerRepository $playerRepo,
+        GameRepository $gameRepo,
         GamePlayerRepository $gamePlayerRepository,
         CardRepository $cardRepository)
     {
         $this->playerSession        = $session;
         $this->gameRepository       = $gameRepo;
-        $this->playerRepository     = $playerRepo;
         $this->gamePlayerRepository = $gamePlayerRepository;
         $this->cardRepository       = $cardRepository;
     }
@@ -46,7 +43,7 @@ class ApiController extends AbstractController
         // Queries
         $gameEntity  = $this->gameRepository->findByGuid($gameKey);
         $cards       = $this->cardRepository->findBy(['game' => $gameEntity->getId()]);
-        $gamePlayers = $this->gamePlayerRepository->findBy(['game' => $gameEntity->getId()]);
+        $gamePlayers = $gameEntity->getGamePlayers()->toArray();
 
         // Building model
         $models = [];
@@ -59,8 +56,8 @@ class ApiController extends AbstractController
                 'y'         => $c->getY(),
                 'voters'    => array_map(function($gp) {
                                     return [
-                                        'playerKey' => $gp->getPlayer()->getPlayerKey(),
-                                        'name' => $gp->getPlayer()->getName()
+                                        'playerKey' => $gp->getPublicKey(),
+                                        'name' => $gp->getName()
                                     ];
                                 },
                                 array_filter($gamePlayers, function($gp) use($c)
@@ -85,7 +82,6 @@ class ApiController extends AbstractController
 
             // Queries
             $gameEntity  = $this->gameRepository->findByGuid($gameKey);
-            $player = $this->playerRepository->findByGuid($playerKey);
             $gp = $this->gamePlayerRepository->findByGuid($playerKey);
 
             $model = [
@@ -93,8 +89,8 @@ class ApiController extends AbstractController
                 'currentNumber'         => $gameEntity->getCurrentNumber(),
                 'currentWord'           => $gameEntity->getCurrentWord(),
                 'currentTeam'           => $gameEntity->getCurrentTeam(),
-                'playerName'            => $player->getName(),
-                'playerKey'             => $player->getPlayerKey(),
+                'playerName'            => $gp->getName(),
+                'playerKey'             => $gp->getPublicKey(),
                 'playerTeam'            => $gp->getTeam() ? 1 : 2,
                 'remainingVotes'        => []
             ];

@@ -64,17 +64,12 @@ class DefaultFixtures extends Fixture implements FixtureGroupInterface
     private function createFakePlayer(ObjectManager $manager,
         Game $game, string $name, string $playerKey)
     {
-        $player = new Player();
-        $player->setName($name);
-        $player->setPlayerKey($playerKey);
-
         $gamePlayer = new GamePlayer();
         $gamePlayer->setGame($game);
-        $gamePlayer->setPlayer($player);
+        $gamePlayer->setName($name);
+        $gamePlayer->setPublicKey($playerKey);
         $gamePlayer->setSessionId(Uuid::uuid1()->toString());
         $gamePlayer->setTeam(1);
-
-        $manager->persist($player);
         $manager->persist($gamePlayer);
     }
 }

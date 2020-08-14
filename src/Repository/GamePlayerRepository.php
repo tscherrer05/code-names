@@ -3,6 +3,8 @@
 namespace App\Repository;
 
 use App\Entity\GamePlayer;
+use App\Entity\Roles;
+use App\Entity\Teams;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -19,7 +21,7 @@ class GamePlayerRepository extends ServiceEntityRepository
         parent::__construct($registry, GamePlayer::class);
     }
 
-    public function findByGame($gameId)
+    public function findByGame(int $gameId)
     {
         $gamePlayerEntity = $this->createQueryBuilder('g')
             ->where('g.game = :val')
@@ -46,6 +48,45 @@ class GamePlayerRepository extends ServiceEntityRepository
         $stmt = $this->getEntityManager()->getConnection()->prepare($rawSql);
         $stmt->execute();
         return $stmt->fetchAll();
+    }
+
+    public function getMasterSpies(int $gameId)
+    {
+        $gps = $this->createQueryBuilder('gp')
+            ->where('gp.game = :val1')
+            ->andWhere('gp.role = :val2')
+            ->setParameter(':val1', $gameId)
+            ->setParameter(':val2', Roles::Master)
+            ->getQuery()
+            ->getResult()
+        ;
+        return $gps;
+    }
+
+    public function getBlueTeam(int $gameId)
+    {
+        $gps = $this->createQueryBuilder('gp')
+            ->where('gp.game = :val1')
+            ->andWhere('gp.role = :val2')
+            ->setParameter(':val1', $gameId)
+            ->setParameter(':val2', Teams::Blue)
+            ->getQuery()
+            ->getResult()
+        ;
+        return $gps;
+    }
+
+    public function getRedTeam(int $gameId)
+    {
+        $gps = $this->createQueryBuilder('gp')
+            ->where('gp.game = :val1')
+            ->andWhere('gp.role = :val2')
+            ->setParameter(':val1', $gameId)
+            ->setParameter(':val2', Teams::Red)
+            ->getQuery()
+            ->getResult()
+        ;
+        return $gps;
     }
 
     public function cleanPlayerSessions()

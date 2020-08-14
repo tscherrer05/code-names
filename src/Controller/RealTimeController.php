@@ -6,7 +6,6 @@ use App\Repository\CardRepository;
 use App\Repository\GamePlayerRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use App\Repository\GameRepository;
-use App\Repository\PlayerRepository;
 use Ratchet\ConnectionInterface;
 
 class RealTimeController extends AbstractController

@@ -29,7 +29,7 @@ class Router
             case 'startGame':
                 return $realTimeController->startGame($arguments);
             default:
-                throw new \InvalidArgumentException("Cette action n'est pas possible.");
+                throw new \InvalidArgumentException("Cette action n'est pas possible : " . $action->getMethod());
         }
     }
 }

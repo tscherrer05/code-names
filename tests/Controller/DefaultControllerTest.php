@@ -4,96 +4,122 @@ namespace App\Tests\Controller;
 use App\Controller\DefaultController;
 use App\DataFixtures\DefaultFixtures;
 use App\Entity\GamePlayer;
+use App\Repository\GamePlayerRepository;
+use App\Repository\GameRepository;
+use Ramsey\Uuid\Nonstandard\Uuid;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class DefaultControllerTest extends WebTestCase
 {
+    private $gamePlayerRepository;
+    private $client;
+
+    public function setUp() 
+    {
+        $this->client = static::createClient();
+        $this->gamePlayerRepository = static::$container->get('doctrine')
+        ->getManager()
+        ->getRepository(GamePlayer::class);
+    }
 
     public function testLoginPageNominal()
     {
-        $client = static::createClient();
 
-        $client->request('GET', '/login');
+        $this->client->request('GET', '/login');
 
-        $this->assertEquals(200, $client->getResponse()->getStatusCode());
+        $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
         $this->assertSelectorExists('input#login');
     }
 
     public function testStartNominal()
     {
-        $client = static::createClient();
-        $crawler = $client->request('GET', '/start');
+        $crawler = $this->client->request('GET', '/start');
 
         $this->assertSelectorExists('input#gameKey');
         $form = $crawler->selectButton('join-game')->form();
 
         $form['gameKey'] = DefaultFixtures::GameKey1;
 
-        $crawler = $client->submit($form);
-        $client->followRedirects(true);
+        $crawler = $this->client->submit($form);
+        $this->client->followRedirects(true);
 
-        $this->assertTrue($client->getResponse()->isRedirect());
-        $this->assertContains('join', $client->getRequest()->getUri());
-        $client->followRedirect();
-        $this->assertContains('login', $client->getRequest()->getUri());
+        $this->assertTrue($this->client->getResponse()->isRedirect());
+        $this->assertContains('join', $this->client->getRequest()->getUri());
+        $this->client->followRedirect();
+        $this->assertContains('login', $this->client->getRequest()->getUri());
     }
 
     public function testRefreshLobby()
     {
-        $client = static::createClient();
         $session = static::$container->get('session');
         $session->set(DefaultController::PlayerSession, 1);
         
-        $client->request('GET', '/refreshLobby');
+        $this->client->request('GET', '/refreshLobby');
 
-        $client->followRedirect();
+        $this->client->followRedirect();
 
-        $this->assertTrue($client->getResponse()->isRedirect(), "Refresh lobby doit rediriger vers le lobby.");
+        $this->assertTrue($this->client->getResponse()->isRedirect(), "Refresh lobby doit rediriger vers le lobby.");
 
-        $this->assertContains('lobby', $client->getRequest()->getUri());
+        $this->assertContains('lobby', $this->client->getRequest()->getUri());
     }
 
     public function testLobbyNominal()
     {
-        $client = static::createClient();
         $session = static::$container->get('session');
         $session->set(DefaultController::GameSession, DefaultFixtures::GameKey1);
         $session->set(DefaultController::PlayerSession, DefaultFixtures::PlayerKey1);
 
-        $client->request('GET', '/lobby');
+        $this->client->request('GET', '/lobby');
 
-        $this->assertEquals(200, $client->getResponse()->getStatusCode());
+        $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
         $this->assertSelectorExists('#game-key');
     }
 
     public function testAutoConnectNominal() 
     {
-        $client = static::createClient();
-
         $before = $this->countGamePlayers();
 
-        $client->request('GET', '/autoConnect?gameKey='.DefaultFixtures::GameKey1);
+        $this->client->request('GET', '/autoConnect?gameKey='.DefaultFixtures::GameKey1);
 
         $this->assertNumberOfGamePlayers($before+1);
 
-        $client->followRedirect();
-        $this->assertEquals(302, $client->getResponse()->getStatusCode());
-        $this->assertTrue($client->getResponse()->isRedirect(), "Doit rediriger.");
-        $this->assertContains('game', $client->getRequest()->getUri(), "Doit être sur la page game");
+        $this->client->followRedirect();
+        $this->assertEquals(302, $this->client->getResponse()->getStatusCode());
+        $this->assertTrue($this->client->getResponse()->isRedirect(), "Doit rediriger.");
+        $this->assertContains('game', $this->client->getRequest()->getUri(), "Doit être sur la page game");
     }
 
     public function testAutoConnectTwice() 
     {
-        $client = static::createClient();
         $before = $this->countGamePlayers();
-        $session = static::$container->get('session');
-        $session->set(DefaultController::PlayerSession, DefaultFixtures::PlayerKey1);
+        static::$container->get('session')->set(DefaultController::PlayerSession, DefaultFixtures::PlayerKey1);
         $before = $this->countGamePlayers();
-        $client->request('GET', '/autoConnect?gameKey='.DefaultFixtures::GameKey1);
+        $this->client->request('GET', '/autoConnect?gameKey='.DefaultFixtures::GameKey1);
         $this->assertNumberOfGamePlayers($before);
-        $this->assertEquals(302, $client->getResponse()->getStatusCode());
-        $this->assertTrue($client->getResponse()->isRedirect(), "Doit rediriger.");
-        $this->assertContains('game', $client->getRequest()->getUri(), "Doit être sur la page game");
+        $this->assertEquals(302, $this->client->getResponse()->getStatusCode());
+        $this->assertTrue($this->client->getResponse()->isRedirect(), "Doit rediriger.");
+        $this->assertContains('game', $this->client->getRequest()->getUri(), "Doit être sur la page game");
+    }
+
+    public function testAutoConnectWithMissingSpyMaster() 
+    {
+        $session = static::$container->get('session');
+
+        // Préparer un MasterSpy
+        $guid = Uuid::uuid6();
+        // TODO : ajouter le master spy
+        
+        // Connexion auto
+        $this->client->request('GET', '/autoConnect?gameKey='.DefaultFixtures::GameKey1);
+
+        // Vérifier que le MasterSpy de l'autre équipe est ajouté
+        $masterSpies = $this->gamePlayerRepository
+                ->createQueryBuilder('gp')
+                ->where('gp.role = 2')
+                ->select('count(gp.id)')
+                ->getQuery()
+                ->getSingleScalarResult();
+        $this->assertSame(2, $masterSpies);
     }
 
     private function assertNumberOfGamePlayers(int $expected)
@@ -103,8 +129,7 @@ class DefaultControllerTest extends WebTestCase
 
     private function countGamePlayers()
     {
-        $em = static::$container->get('doctrine')->getManager();
-        return $em
+        return static::$container->get('doctrine')->getManager()
             ->getRepository(GamePlayer::class)
             ->createQueryBuilder('gp')
             ->select('count(gp.id)')

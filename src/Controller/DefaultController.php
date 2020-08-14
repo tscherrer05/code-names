@@ -14,7 +14,6 @@ use App\Entity\Teams;
 use App\Repository\CardRepository;
 use App\Repository\GamePlayerRepository;
 use App\Repository\GameRepository;
-use Ramsey\Uuid\Nonstandard\Uuid;
 
 class DefaultController extends AbstractController
 {
@@ -94,7 +93,10 @@ class DefaultController extends AbstractController
 
         // Lecture IO
         $currPlayer = $this->gamePlayerRepository->findByGuid($playerKey);
-        $gameEntity  = $this->gameRepository->findByGuid($gameKey);
+        if($currPlayer == null)
+        {
+            throw new \Exception("Player not found with guid : $playerKey");
+        }
         $gamePlayers = $this->gamePlayerRepository->findBy(['game' => $gameEntity->getId()]);
         $cards       = $this->cardRepository->findBy(['game' => $gameEntity->getId()]);
 
@@ -116,8 +118,8 @@ class DefaultController extends AbstractController
                 'y'         => $c->getY(),
                 'voters'   => array_map(function($gp) {
                     return [
-                        'playerKey' => $gp->getPlayer()->getPlayerKey(),
-                        'name' => $gp->getPlayer()->getName()
+                        'playerKey' => $gp->getPublicKey(),
+                        'name' => $gp->getName()
                     ];
                 },
                 array_filter($gamePlayers, function($gp) use($c)
@@ -274,9 +276,10 @@ class DefaultController extends AbstractController
      */
     public function autoConnect(Request $request) 
     {
-        $playSession = $this->playerSession->get(self::PlayerSession);
+        $playerKey = $this->playerSession->get(self::PlayerSession);
         $gameKey = $request->query->get('gameKey');
-        if($playSession != null)
+
+        if($playerKey != null)
         {
             return $this->redirectToRoute('join_game', ['gameKey' => $gameKey]);
         }
@@ -296,20 +299,38 @@ class DefaultController extends AbstractController
         $gamePlayer = new GamePlayer();
         $gamePlayer->setGame($game);
         // https://stackoverflow.com/questions/4356289/php-random-string-generator
-        // TODO : friendly name
+        // TODO : friendly unique name
         $gamePlayer->setName(substr(md5(rand()), 0, 7));
         $gamePlayer->setSessionId($this->playerSession->getId());
         $gamePlayer->setPublicKey($playerKey);
 
         // Determine team and role
-        // TODO : random role and team
-        $gamePlayer->setRole(Roles::Master);
-        $gamePlayer->setTeam(Teams::Blue);
+        if(\count($this->gamePlayerRepository->getMasterSpies($game->getId())) < 2)
+        {
+            $gamePlayer->setRole(Roles::Master);
+        }
+        else 
+        {
+            $gamePlayer->setRole(Roles::Spy);
+        }
+        
+        $blueTeamNbr = \count($this->gamePlayerRepository->getBlueTeam($game->getId()));
+        $redTeamNbr = \count($this->gamePlayerRepository->getRedTeam($game->getId()));
+        if($blueTeamNbr < $redTeamNbr) 
+        {
+            $gamePlayer->setTeam(Teams::Blue);
+        } 
+        else 
+        {
+            $gamePlayer->setTeam(Teams::Red);
+        }
 
         // Persistance
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->persist($gamePlayer);
         $entityManager->flush();
+
+        $this->playerSession->set(self::PlayerSession, $playerKey);
 
         // Redirect to game
         return $this->redirectToRoute('join_game', ['gameKey' => $gameKey]);

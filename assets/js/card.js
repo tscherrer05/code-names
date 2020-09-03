@@ -20,11 +20,12 @@ export class Card extends React.Component {
         })
     }
 
-    dispatchComponentError() {
+    dispatchComponentError(message) {
         PubSub.publish(Events.GLOBAL_ERROR, {
             x:          this.props.x,
             y:          this.props.y,
             playerKey:  this.props.playerKey,
+            message:    message
         })
     }
 
@@ -37,6 +38,8 @@ export class Card extends React.Component {
             };
             if(props.isClickable) {
                attr.onClick = () => this.vote()
+            } else {
+                attr.onClick = () => this.dispatchComponentError("Hé ! C'est pas ton tour ! è_é");
             }
             // TODO : retirer les magic strings
             if(props.returned) {

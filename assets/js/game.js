@@ -12,7 +12,9 @@ export default class Game extends React.Component {
             gameKey: props.gameKey,
             playerKey: props.playerKey,
             playerTeam: props.playerTeam,
-            isMyTurn: props.isMyTurn
+            isMyTurn: props.isMyTurn,
+            errorMessage: "",
+            displayError: false
         }
         this.subscriptions = 
         [
@@ -27,15 +29,16 @@ export default class Game extends React.Component {
             PubSub.subscribe(Events.GLOBAL_ERROR, (evt, data) => {
                 this.setState({
                     displayError: true,
-                    errorMessage: data.errorMessage
+                    errorMessage: data.message
                 })
-
-                this.setState({
-                    displayError: true,
-                    errorMessage: data.errorMessage
-                })
+                setTimeout(() => {
+                    this.setState({
+                        displayError: false,
+                        errorMessage: data.message
+                    })
+                }, 2500)
             })
-        ]
+         ]
     }
 
     componentDidMount() {
@@ -76,8 +79,31 @@ export default class Game extends React.Component {
     }
 
      render() {
+        var errorMessage;
+        if(this.state.displayError)
+        {
+            errorMessage = (
+                <div style={{position: 'absolute', left: '50%', top: '50%'}}>
+                    <div style={{
+                        position: 'relative', 
+                        left: '-50%', 
+                        zIndex: 1000,
+                        textAlign: 'center', 
+                        background: '#7b2d26',
+                        color: 'whitesmoke',
+                        animation: 'shake 0.5s',
+                        padding: '7px',
+                        borderRadius: '10px'
+                        }}>
+                        <h1>{this.state.errorMessage}</h1>
+                    </div>
+                </div>
+            )
+        }
+
         return (
             <div>
+                {errorMessage}
                 <Board 
                     gameKey={this.state.gameKey} 
                     playerKey={this.state.playerKey}

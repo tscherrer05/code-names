@@ -42,7 +42,6 @@ export class Board extends React.Component {
             gameKey:            props.gameKey,
             playerKey:          props.playerKey,
             cards:              [],
-            currentPlayerName:  props.currentPlayerName
         };
         const self = this;
         this.subscriptions = [
@@ -124,6 +123,7 @@ export class Board extends React.Component {
                                 gameKey=    {this.state.gameKey}
                                 playerKey=  {this.state.playerKey}
                                 votes=      {c.voters}
+                                isClickable={this.props.isMyTurn}
                             />
                         )}
                 </div>

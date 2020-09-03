@@ -5,7 +5,6 @@ export class GameInfo extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            remainingVotes: []
         }
         this.subscriptions = [
             
@@ -22,15 +21,26 @@ export class GameInfo extends React.Component {
         })
     }
 
+    vote(props) {
+        
+    }
+
     render() {
-        const votes = () => {
-            return this.state.remainingVotes.map(p => {
-                if(p.playerKey == this.props.playerKey)
-                    return <span id={`vote-tag-{p.playerKey}`} key={`vote-tag-{p.playerKey}`} className="badge badge-success">{p.name}</span>
-                else
-                    return <span id={`vote-tag-{p.playerKey}`} key={`vote-tag-{p.playerKey}`} className="badge badge-secondary">{p.name}</span>
-            })
-        }
+        var currentPlayerKey = this.props.playerKey;
+        var remainingVotes;
+        if(this.props.remainingVotes === null || typeof(this.props.remainingVotes) === 'undefined')
+            remainingVotes = [];
+        else if(!Array.isArray(this.props.remainingVotes))
+            remainingVotes = Object.values(this.props.remainingVotes);
+        else
+            remainingVotes = this.props.remainingVotes;
+
+        const votes = remainingVotes.map(p => {
+            if(p.playerKey === currentPlayerKey)
+                return <span id={'vote-tag-'+p.playerKey} key={'vote-tag-'+p.playerKey} className="badge badge-success">{p.name}</span>
+            else
+                return <span id={'vote-tag-'+p.playerKey} key={'vote-tag-'+p.playerKey}  className="badge badge-secondary">{p.name}</span>
+        })
         return (
             <div className="container">
                 <div className="row">
@@ -59,11 +69,11 @@ export class GameInfo extends React.Component {
                     </div>
                     <div className="col">
                         <p className="display-block">Votes restants :</p>
-                            {votes()}
+                        {votes}
                     </div>
                 </div>
                 <div className="row">
-                    <button onClick={this.passTurn()}>Passer le tour</button>
+                    <button onClick={this.passTurn}>Passer le tour</button>
                 </div>
             </div>
         );

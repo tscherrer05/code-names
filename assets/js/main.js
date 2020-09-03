@@ -77,7 +77,6 @@ $(document).ready(() => {
     }
   ))
   PubSub.subscribe(Events.VOTE, (evt, data) => {
-    debugger
     send(evt, data)
   })
 

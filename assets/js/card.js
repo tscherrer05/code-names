@@ -16,7 +16,15 @@ export class Card extends React.Component {
             x:          this.props.x,
             y:          this.props.y,
             gameKey:    this.props.gameKey,
-            playerKey:  this.props.playerKey
+            playerKey:  this.props.playerKey,
+        })
+    }
+
+    dispatchComponentError() {
+        PubSub.publish(Events.GLOBAL_ERROR, {
+            x:          this.props.x,
+            y:          this.props.y,
+            playerKey:  this.props.playerKey,
         })
     }
 
@@ -25,9 +33,11 @@ export class Card extends React.Component {
         const renderImgComponent = (props) => {
             const attr = {
                 key:        `${props.x}-${props.y}`,
-                onClick:    () => this.vote(),
                 className:  'cn-card',
             };
+            if(props.isClickable) {
+               attr.onClick = () => this.vote()
+            }
             // TODO : retirer les magic strings
             if(props.returned) {
                 switch(props.color) {

@@ -82,7 +82,15 @@ class ApiController extends AbstractController
 
             // Queries
             $gameEntity  = $this->gameRepository->findByGuid($gameKey);
+            if($gameEntity == null)
+            {
+                throw new Exception("Game not found with guid : $gameKey");
+            }
             $gp = $this->gamePlayerRepository->findByGuid($playerKey);
+            if($gp == null) 
+            {
+                throw new Exception("Player not found with guid : $playerKey");
+            }
 
             $model = [
                 'gameKey'               => $gameEntity->getPublicKey(),
@@ -91,8 +99,18 @@ class ApiController extends AbstractController
                 'currentTeam'           => $gameEntity->getCurrentTeam(),
                 'playerName'            => $gp->getName(),
                 'playerKey'             => $gp->getPublicKey(),
-                'playerTeam'            => $gp->getTeam() ? 1 : 2,
-                'remainingVotes'        => []
+                'playerTeam'            => $gp->getTeam(),
+                'playerRole'            => $gp->getRole(),
+                'remainingVotes'        => array_filter(array_map(function($p) use($gameEntity) {
+                                            if($p->getX() == null && $p->getY() == null
+                                                && $gameEntity->getCurrentTeam() == $p->getTeam())
+                                            {
+                                                return [
+                                                    'name' => $p->getName(),
+                                                    'playerKey' => $p->getPublicKey()
+                                                ];
+                                            }
+                                        }, $gameEntity->getGamePlayers()->toArray()))
             ];
 
             return new JsonResponse($model);

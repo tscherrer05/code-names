@@ -11,8 +11,11 @@ export default class Game extends React.Component {
         this.state = {
             gameKey: props.gameKey,
             playerKey: props.playerKey,
+            playerTeam: props.playerTeam,
+            isMyTurn: props.isMyTurn
         }
-        this.subscriptions = [
+        this.subscriptions = 
+        [
             PubSub.subscribe(Events.TURN_PASSED, (evt, data) => {
                 this.setState({ 
                     team: data.team,
@@ -20,6 +23,17 @@ export default class Game extends React.Component {
                     announcedNumber: 0,
                     announcedWord: ""
                  })
+            }),
+            PubSub.subscribe(Events.GLOBAL_ERROR, (evt, data) => {
+                this.setState({
+                    displayError: true,
+                    errorMessage: data.errorMessage
+                })
+
+                this.setState({
+                    displayError: true,
+                    errorMessage: data.errorMessage
+                })
             })
         ]
     }
@@ -32,24 +46,27 @@ export default class Game extends React.Component {
         DataSource
             .get('/gameInfos', { gameKey: this.state.gameKey })
             .then(data => {
+
                 if(typeof data === 'string' || typeof data === 'undefined') {
                     console.log('Mauvais format de paramètre dans le callback (game)')
                     return
                 }
-                if(data['action'] === 'error') {
-                    console.log(data['message'])
+                if(data.error === true) {
+                    console.log(data.message)
                     return
                 }
+
                 self.setState({
-                    gameKey:            data['gameKey'],
-                    playerKey:          data['playerKey'],
-                    playerTeam:         data['playerTeam'],
-                    name:               data['playerName'],
-                    role:               data['role'],
-                    currentTeam:        data['currentTeam'],
-                    announcedNumber:    data['currentNumber'],
-                    announcedWord:      data['currentWord'],
-                    remainingVotes:     data['remainingVotes'] || []
+                    gameKey:            data.gameKey,
+                    playerKey:          data.playerKey,
+                    playerTeam:         data.playerTeam,
+                    name:               data.playerName,
+                    role:               data.playerRole,
+                    currentTeam:        data.currentTeam,
+                    announcedNumber:    data.currentNumber,
+                    announcedWord:      data.currentWord,
+                    remainingVotes:     data.remainingVotes,
+                    isMyTurn:           data.currentTeam === data.playerTeam
                 })
             })
     }
@@ -59,12 +76,13 @@ export default class Game extends React.Component {
     }
 
      render() {
-         return (
+        return (
             <div>
                 <Board 
                     gameKey={this.state.gameKey} 
                     playerKey={this.state.playerKey}
-                    currentPlayerName= {this.state.currentPlayerName}
+                    name= {this.state.name}
+                    isMyTurn={this.state.isMyTurn}
                 />
                 <GameInfo 
                     gameKey={this.state.gameKey} 
@@ -77,7 +95,7 @@ export default class Game extends React.Component {
                     announcedWord={this.state.announcedWord}
                     remainingVotes={this.state.remainingVotes}
                 />
-          </div>
-         )
+            </div>
+        )
      }
 }

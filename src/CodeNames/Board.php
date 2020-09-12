@@ -2,6 +2,7 @@
 declare(strict_types=1);
 namespace App\CodeNames;
 
+use App\Entity\Colors;
 use Exception;
 
 class Board
@@ -18,12 +19,20 @@ class Board
         $this->cards = $cards;
         $this->votes = $votes;
         // TODO : Init nbColorCards
-        $this->nbColorCards = array(
-            0 => 9, // White
-            1 => 8, // Blue
-            2 => 8, // Red
-            3 => 1  // Black
-        );
+        $this->nbColorCards = [];
+        $this->nbColorCards[Colors::Blue] = count($this->getCards(Colors::Blue));
+        $this->nbColorCards[Colors::Red] = count($this->getCards(Colors::Red));
+        $this->nbColorCards[Colors::White] = count($this->getCards(Colors::White));
+        $this->nbColorCards[Colors::Black] = count($this->getCards(Colors::Black));
+    }  
+    
+    private function getCards(int $color) {
+        return array_filter($this->cards, function($c) use($color) {
+            return array_filter($c, function($c1) use($color) {
+                if($c1->color === $color)
+                    return $c1;
+            });
+        });
     }
 
     // Command

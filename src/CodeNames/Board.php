@@ -18,7 +18,6 @@ class Board
     {
         $this->cards = $cards;
         $this->votes = $votes;
-        // TODO : Init nbColorCards
         $this->nbColorCards = [];
         $this->nbColorCards[Colors::Blue] = count($this->getCards(Colors::Blue));
         $this->nbColorCards[Colors::Red] = count($this->getCards(Colors::Red));

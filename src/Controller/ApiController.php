@@ -1,6 +1,7 @@
 <?php
 namespace App\Controller;
 
+use App\Entity\Roles;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -101,6 +102,7 @@ class ApiController extends AbstractController
                 'playerKey'             => $gp->getPublicKey(),
                 'playerTeam'            => $gp->getTeam(),
                 'playerRole'            => $gp->getRole(),
+                'canPassTurn'           => $gp->getRole() == Roles::Master,
                 'remainingVotes'        => array_filter(array_map(function($p) use($gameEntity) {
                                             if($p->getX() == null && $p->getY() == null
                                                 && $gameEntity->getCurrentTeam() == $p->getTeam())

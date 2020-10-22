@@ -1,4 +1,4 @@
-import React, {Component} from 'react'
+import React from 'react'
 import {Board} from './board';
 import {GameInfo} from './gameInfo';
 import { DataSource } from './dataSource';
@@ -36,7 +36,15 @@ export default class Game extends React.Component {
                         displayError: false,
                         errorMessage: data.message
                     })
-                }, 2500)
+                }, 4000)
+            }),
+            PubSub.subscribe(Events.HAS_VOTED, (evt, data) => {
+                var filteredVotes = Object.values(this.state.remainingVotes).filter(v => {
+                    return v.playerKey !== data.playerKey;
+                })
+                this.setState({
+                    remainingVotes: filteredVotes
+                })
             })
          ]
     }
@@ -51,11 +59,11 @@ export default class Game extends React.Component {
             .then(data => {
 
                 if(typeof data === 'string' || typeof data === 'undefined') {
-                    console.log('Mauvais format de paramètre dans le callback (game)')
+                    console.error('Mauvais format de paramètre dans le callback (game)')
                     return
                 }
                 if(data.error === true) {
-                    console.log(data.message)
+                    console.error(data.message)
                     return
                 }
 
@@ -69,7 +77,8 @@ export default class Game extends React.Component {
                     announcedNumber:    data.currentNumber,
                     announcedWord:      data.currentWord,
                     remainingVotes:     data.remainingVotes,
-                    isMyTurn:           data.currentTeam === data.playerTeam
+                    isMyTurn:           data.currentTeam === data.playerTeam,
+                    canPassTurn:        data.canPassTurn
                 })
             })
     }
@@ -120,6 +129,7 @@ export default class Game extends React.Component {
                     announcedNumber={this.state.announcedNumber}
                     announcedWord={this.state.announcedWord}
                     remainingVotes={this.state.remainingVotes}
+                    canPassTurn={this.state.canPassTurn}
                 />
             </div>
         )

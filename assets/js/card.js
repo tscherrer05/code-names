@@ -7,7 +7,7 @@ export class Card extends React.Component {
         super(props);
         this.state = {
             votes: props.votes
-        };
+        }
     }
 
     vote() {

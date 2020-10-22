@@ -36,13 +36,14 @@ conn.onmessage = (e) => {
               error: result.error,
               message: result.message,
             })
+          } else {
+            PubSub.publish(Events.HAS_VOTED, {
+              x: result.x,
+              y: result.y,
+              playerKey: result.playerKey,
+              playerName: result.playerName
+            })
           }
-          PubSub.publish(Events.HAS_VOTED, {
-            x: result.x,
-            y: result.y,
-            playerKey: result.playerKey,
-            playerName: result.playerName
-          })
           break;
         case 'cardReturned':
           PubSub.publish(Events.CARD_RETURNED, {

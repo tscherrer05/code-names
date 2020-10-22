@@ -46,20 +46,24 @@ class Board
             throw new Exception("Can not return a returned card");
         $this->votes[$player->guid] = $card;
         $everyBodyHasVoted = (\count($this->votes) == $gameInfo->nbPlayers());
-        $lastCard = null;
 
-        if($everyBodyHasVoted)
+        if($everyBodyHasVoted && $this->everybodyVotedForSameCard())
         {
-            foreach($this->votes as $card)
-            {
-                if($lastCard == null)
-                    $lastCard = $card;
-                if($lastCard != $card)
-                    return;
-            }
-
             $this->returnCard($x, $y);
         }
+    }
+
+    private function everybodyVotedForSameCard() 
+    {
+        $lastCard = null;
+        foreach($this->votes as $card)
+        {
+            if($lastCard == null)
+                $lastCard = $card;
+            if($lastCard != $card)
+                return false;
+        }
+        return true;
     }
 
     public function returnCard(int $x, int $y)
@@ -68,6 +72,11 @@ class Board
         $card->returnMe();
         $this->nbColorCards[$card->color]--;
         $this->votes = array();
+    }
+
+    public function getCard(int $x, int $y)
+    {
+        return $this->cards[$x][$y];
     }
 
     public function isCardReturned(int $x, int $y)
@@ -87,6 +96,11 @@ class Board
                 $result[] = $player;
         }
         return $result;
+    }
+
+    public function getVote(string $playerKey)
+    {
+        return $this->votes[$playerKey];
     }
 
     public function cards()

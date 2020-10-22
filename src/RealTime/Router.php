@@ -28,6 +28,8 @@ class Router
                 return $realTimeController->vote($arguments);
             case 'startGame':
                 return $realTimeController->startGame($arguments);
+            case 'passTurn':
+                return $realTimeController->passTurn($arguments);
             default:
                 throw new \InvalidArgumentException("Cette action n'est pas possible : " . $action->getMethod());
         }

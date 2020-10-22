@@ -7,9 +7,9 @@ use App\Entity\Card;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use App\Entity\Game;
-use App\Entity\Player;
 use App\Entity\GamePlayer;
-
+use App\Entity\Roles;
+use App\Entity\Teams;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Ramsey\Uuid\Nonstandard\Uuid;
 
@@ -35,14 +35,14 @@ class DefaultFixtures extends Fixture implements FixtureGroupInterface
         // A game in lobby state
         $game = new Game();
         $game->setPublicKey(self::GameKey1);
-        $game->setStatus(GameStatus::Lobby);
+        $game->setStatus(GameStatus::OnGoing);
         $game->setCurrentWord('Acme');
         $game->setCurrentNumber(42);
-        $game->setCurrentTeam(1);
+        $game->setCurrentTeam(Teams::Blue);
 
         // player
-        $this->createFakePlayer($manager, $game, 'Player1', self::PlayerKey1);
-        $this->createFakePlayer($manager, $game, 'Player2', self::PlayerKey2);
+        $this->createFakeSpy($manager, $game, 'Player1', self::PlayerKey1);
+        $this->createFakeMaster($manager, $game, 'Player2', self::PlayerKey2);
 
         // card
         $dataCards = self::Cards;
@@ -61,7 +61,7 @@ class DefaultFixtures extends Fixture implements FixtureGroupInterface
         $manager->flush();
     }
 
-    private function createFakePlayer(ObjectManager $manager,
+    private function createFakeSpy(ObjectManager $manager,
         Game $game, string $name, string $playerKey)
     {
         $gamePlayer = new GamePlayer();
@@ -69,7 +69,25 @@ class DefaultFixtures extends Fixture implements FixtureGroupInterface
         $gamePlayer->setName($name);
         $gamePlayer->setPublicKey($playerKey);
         $gamePlayer->setSessionId(Uuid::uuid1()->toString());
-        $gamePlayer->setTeam(1);
+        $gamePlayer->setTeam(Teams::Blue);
+        $gamePlayer->setRole(Roles::Spy);
+        $gamePlayer->setX(null);
+        $gamePlayer->setY(null);
+        $manager->persist($gamePlayer);
+    }
+
+    private function createFakeMaster(ObjectManager $manager,
+        Game $game, string $name, string $playerKey)
+    {
+        $gamePlayer = new GamePlayer();
+        $gamePlayer->setGame($game);
+        $gamePlayer->setName($name);
+        $gamePlayer->setPublicKey($playerKey);
+        $gamePlayer->setSessionId(Uuid::uuid1()->toString());
+        $gamePlayer->setTeam(Teams::Blue);
+        $gamePlayer->setRole(Roles::Master);
+        $gamePlayer->setX(null);
+        $gamePlayer->setY(null);
         $manager->persist($gamePlayer);
     }
 }

@@ -61,6 +61,7 @@ class RealTimeController extends AbstractController
         }    
     }
 
+
     public function vote($params)
     {
         // TODO : Sanitize input !
@@ -78,49 +79,51 @@ class RealTimeController extends AbstractController
             $player = $gameInfo->getPlayer($playerKey);
 
             // Exécuter les règles du jeu (change l'état du jeu)
-            $gameInfo->vote($player, $x, $y);
+            $voteResult = $gameInfo->vote($player, $x, $y);
 
-            // Persister le nouvel état du jeu en base
-            // (aucune logique métier à partir d'ici)
-            // Mapper les objets modèle et objets métier
+            if($voteResult['ok'] !== true)
+            {
+                // TODO : Propage évènements d'erreur
+            }
+
+            // Mapping de la racine du graphe avec la persistance
+
+            // TODO : $this->gameRepository->save($gameInfo);
             
-            // Jeu
+            // Mapping jeu
             $game = $this->gameRepository->findOneBy(['publicKey' => $gameKey]);
             $game->setStatus($gameInfo->status);
             $game->setCurrentWord($gameInfo->currentWord());
             $game->setCurrentNumber($gameInfo->currentNumber());
             $game->setCurrentTeam($gameInfo->currentTeam());
-            
-            // Joueur
-            $gpEntity = $this->gamePlayerRepository->findByGuid($playerKey);
-            if($gpEntity == null)
-            {
-                $model = [
-                    'action' => 'error',
-                    'message' => "Erreur lors du vote du joueur $playerKey sur la carte [$x, $y]"
-                ];
-                $this->sendToAllClients($clients, json_encode($model));
-            }
-            $gpEntity->setX($x);
-            $gpEntity->setY($y);
 
-            // Carte
-            $card = $this->cardRepository->findOneBy(['x' => $x, 'y' => $y]);
-            if($card == null)
+            // Mapping joueurs
+            // Sauvegarder les votes de chaque joueur de la partie
+            foreach($game->getGamePlayers() as $gpData)
             {
-                $model = [
-                    'action' => 'hasVoted',
-                    'error' => true,
-                    'message' => "Erreur lors du vote du joueur $playerKey sur la carte [$x, $y]"
-                ];
-                $this->sendToAllClients($clients, json_encode($model));
+                $arr = $gameInfo->getAllVotes();
+                $key = $gpData->getPublicKey();
+                if(array_key_exists($key, $arr))
+                {
+                    $gpData->setX($arr[$key]->x);
+                    $gpData->setY($arr[$key]->y);
+                }
+                else 
+                {
+                    $gpData->setX(null);
+                    $gpData->setY(null);
+                }
             }
-            $returned = $gameInfo->board()->isCardReturned($x, $y);
-            $card->setReturned($returned);
+            $cards = $gameInfo->getAllCards();
+            $cardEntities = $game->getCards();
+            foreach($cardEntities as $c)
+            {
+                $c->setReturned($cards[$c->getX()][$c->getY()]->returned);
+            }
 
             $entityManager = $this->getDoctrine()->getManager();
-            $entityManager->flush();
-            
+            $entityManager->flush();     
+                
             // Propage des évènements aux clients connectés
             $model = [
                 'action'    => 'hasVoted',
@@ -128,17 +131,17 @@ class RealTimeController extends AbstractController
                 'playerName' => $player->name,
                 'x'         => $x,
                 'y'         => $y,
-                'color'     => $card->getColor()
+                'color'     => $voteResult['card']->color
             ];
             $this->sendToAllClients($clients, json_encode($model));
             
-            if($returned)
+            if($voteResult['card']->returned === true)
             {
                 $model = [
                     'action' => 'cardReturned',
                     'x' => $x,
                     'y' => $y,
-                    'color' => $card->getColor()
+                    'color' => $voteResult['card']->color
                 ];
                 $this->sendToAllClients($clients, json_encode($model));
             }
@@ -167,6 +170,49 @@ class RealTimeController extends AbstractController
         }
     }
 
+    private function mapGame($gameKey, $playerKey, $gameInfo, $clients, $x, $y) 
+    {
+        // Jeu
+        $game = $this->gameRepository->findOneBy(['publicKey' => $gameKey]);
+        $game->setStatus($gameInfo->status);
+        $game->setCurrentWord($gameInfo->currentWord());
+        $game->setCurrentNumber($gameInfo->currentNumber());
+        $game->setCurrentTeam($gameInfo->currentTeam());
+        
+        // Joueur
+        $gps = $this->gamePlayerRepository->findByGame($game->getId());
+        foreach($gps as $gpEntity) {
+            $gpDomain = $gameInfo->getPlayer($gpEntity->getPublicKey());
+            if($gpEntity == null)
+            {
+                $model = [
+                    'action' => 'error',
+                    'message' => "Erreur lors du vote du joueur $playerKey sur la carte [$x, $y] : joueur non trouvé."
+                ];
+                $this->sendToAllClients($clients, json_encode($model));
+            }
+            $gpEntity->setX($gpDomain->x);
+            $gpEntity->setY($gpDomain->y);
+        }
+
+        // Carte
+        $card = $this->cardRepository->findOneBy(['x' => $x, 'y' => $y]);
+        if($card == null)
+        {
+            $model = [
+                'action' => 'hasVoted',
+                'error' => true,
+                'message' => "Erreur lors du vote du joueur $playerKey sur la carte [$x, $y] : carte non trouvée."
+            ];
+            $this->sendToAllClients($clients, json_encode($model));
+        }
+        $returned = $gameInfo->board()->isCardReturned($x, $y);
+        $card->setReturned($returned);
+
+        $entityManager = $this->getDoctrine()->getManager();
+        $entityManager->flush();
+    }
+
     public function passTurn($params)
     {
         $gameKey = $params['gameKey'];
@@ -175,9 +221,16 @@ class RealTimeController extends AbstractController
 
         try
         {
-            // Récupérer la racine du graphe
+            // Règle du jeu
             $gameInfo = $this->gameRepository->getByGuid($gameKey);
             $gameInfo->passTurn();
+
+            // Persistance
+            $gameEntity = $this->gameRepository->findByGuid($gameKey);
+            $gameEntity->setCurrentTeam($gameInfo->team);
+
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->flush();
 
             $model = [
                 'team' => $gameInfo->currentTeam()

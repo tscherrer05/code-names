@@ -316,13 +316,13 @@ class DefaultController extends AbstractController
         
         $blueTeamNbr = \count($this->gamePlayerRepository->getBlueTeam($game->getId()));
         $redTeamNbr = \count($this->gamePlayerRepository->getRedTeam($game->getId()));
-        if($blueTeamNbr < $redTeamNbr) 
+        if($redTeamNbr < $blueTeamNbr) 
         {
-            $gamePlayer->setTeam(Teams::Blue);
+            $gamePlayer->setTeam(Teams::Red);
         } 
         else 
         {
-            $gamePlayer->setTeam(Teams::Red);
+            $gamePlayer->setTeam(Teams::Blue);
         }
 
         // Persistance

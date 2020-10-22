@@ -19,7 +19,7 @@ class RealTimeControllerTest extends WebTestCase
      */
     private $entityManager;
 
-    public function setUp()
+    public function setUp() :void
     {
         // start the symfony kernel
         self::bootKernel();
@@ -86,7 +86,7 @@ class RealTimeControllerTest extends WebTestCase
             ->findOneBy(['x' => '0', 'y' => '2'])
         ;
 
-        $this->assertSame(false, $card->getReturned());
+        $this->assertFalse($card->getReturned());
 
         $result = $this->service->vote([
             'x' => 0,
@@ -103,8 +103,18 @@ class RealTimeControllerTest extends WebTestCase
             ->getRepository(Card::class)
             ->findOneBy(['x' => '0', 'y' => '2'])
         ;
+        $game = $this->entityManager
+            ->getRepository(Game::class)
+            ->findOneBy(['publicKey' => DefaultFixtures::GameKey1]);
+        $gamePlayers = $this->entityManager
+            ->getRepository(GamePlayer::class)
+            ->findBy(['game' => $game->getId()]);
 
-        $this->assertSame(true, $card->getReturned());
+        $this->assertTrue($card->getReturned());
+        foreach($gamePlayers as $gp) {
+            $this->assertSame(null, $gp->getX());
+            $this->assertSame(null, $gp->getY());
+        }
     }
 
     public function testStartGameNominal() {
@@ -148,6 +158,26 @@ class RealTimeControllerTest extends WebTestCase
         $this->assertSame(DefaultFixtures::GameKey1, $gp2->getGame()->getPublicKey());
         $this->assertSame(1, $gp2->getTeam());
         $this->assertSame(2, $gp2->getRole());
+    }
+
+    public function testNextTurnNominal() {
+        $this->assertSame(1, 
+                $this->entityManager
+                ->getRepository(Game::class)
+                ->findOneBy(['publicKey' => DefaultFixtures::GameKey1])
+                ->getCurrentTeam());
+
+        $this->service->passTurn([
+            'clients' => new SplObjectStorage(),
+            'gameKey' => DefaultFixtures::GameKey1,
+            'from' => null
+        ]);
+
+        $this->assertSame(2, 
+                $this->entityManager
+                ->getRepository(Game::class)
+                ->findOneBy(['publicKey' => DefaultFixtures::GameKey1])
+                ->getCurrentTeam());
     }
 
     // public function testStartGameWithWrongTeams() 

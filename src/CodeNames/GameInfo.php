@@ -2,6 +2,7 @@
 namespace App\CodeNames;
 
 use App\Entity\Roles;
+use App\Entity\Teams;
 
 class GameInfo
 {
@@ -78,12 +79,25 @@ class GameInfo
         return \count($this->players);
     }
 
+    /**
+     * All votes in a single dim array (playerKey => card)
+     */
+    public function getAllVotes()
+    {
+        return $this->board()->votes;
+    }
+
+    public function getAllCards()
+    {
+        return $this->board()->cards();
+    }
+
     public function winner($board)
     {
-        if ($board->nbColorCards[1] == 0)
-            return 1;
-        else if ($board->nbColorCards[2] == 0)
-            return 2;
+        if ($board->nbColorCards[Teams::Blue] == 0)
+            return Teams::Blue;
+        else if ($board->nbColorCards[Teams::Red] == 0)
+            return Teams::Red;
         else
             return null;
     }
@@ -92,8 +106,12 @@ class GameInfo
     public function vote(Player $player, int $x, int $y)
     {
         if($this->team != $player->team)
-            throw new \InvalidArgumentException("Ce n'est pas le tour du joueur " . $player->name . " (#" . $player->guid . ")");
+            return "WrongTurn";
         $this->board->voteForCard($player, $x, $y, $this);
+        return [
+            'ok' => true,
+            'card' => $this->board()->getCard($x, $y),
+        ];
     }
 
     public function addPlayer(string $guid, string $name, int $team = null, int $role = null)

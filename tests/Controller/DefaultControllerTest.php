@@ -4,9 +4,7 @@ namespace App\Tests\Controller;
 use App\Controller\DefaultController;
 use App\DataFixtures\DefaultFixtures;
 use App\Entity\GamePlayer;
-use App\Repository\GamePlayerRepository;
-use App\Repository\GameRepository;
-use Ramsey\Uuid\Nonstandard\Uuid;
+use App\Entity\Roles;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class DefaultControllerTest extends WebTestCase
@@ -14,7 +12,7 @@ class DefaultControllerTest extends WebTestCase
     private $gamePlayerRepository;
     private $client;
 
-    public function setUp() 
+    public function setUp() :void
     {
         $this->client = static::createClient();
         $this->gamePlayerRepository = static::$container->get('doctrine')
@@ -104,21 +102,17 @@ class DefaultControllerTest extends WebTestCase
     public function testAutoConnectWithMissingSpyMaster() 
     {
         $session = static::$container->get('session');
-
-        // Préparer un MasterSpy
-        $guid = Uuid::uuid6();
-        // TODO : ajouter le master spy
         
         // Connexion auto
         $this->client->request('GET', '/autoConnect?gameKey='.DefaultFixtures::GameKey1);
 
         // Vérifier que le MasterSpy de l'autre équipe est ajouté
-        $masterSpies = $this->gamePlayerRepository
+        $masterSpies = intval($this->gamePlayerRepository
                 ->createQueryBuilder('gp')
-                ->where('gp.role = 2')
+                ->where('gp.role = '.Roles::Spy)
                 ->select('count(gp.id)')
                 ->getQuery()
-                ->getSingleScalarResult();
+                ->getSingleScalarResult());
         $this->assertSame(2, $masterSpies);
     }
 

@@ -51,10 +51,12 @@ conn.onmessage = (e) => {
             y: result.y,
             color: result.color
           })
+          break;
         case 'newTurn':
           PubSub.publish(Events.TURN_PASSED, {
             team: result.team
           })
+          break;
         case null:
         case undefined:
         default:

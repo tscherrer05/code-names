@@ -14,8 +14,12 @@ export default class Game extends React.Component {
             playerTeam: props.playerTeam,
             isMyTurn: props.isMyTurn,
             errorMessage: "",
-            displayError: false
+            displayError: false,
+            currentVotes: [],
+            remainingVotes: [],
+            cards: []
         }
+
         this.subscriptions = 
         [
             PubSub.subscribe(Events.TURN_PASSED, (evt, data) => {
@@ -34,19 +38,47 @@ export default class Game extends React.Component {
                 setTimeout(() => {
                     this.setState({
                         displayError: false,
-                        errorMessage: data.message
+                        errorMessage: null
                     })
                 }, 4000)
             }),
             PubSub.subscribe(Events.HAS_VOTED, (evt, data) => {
-                var filteredVotes = Object.values(this.state.remainingVotes).filter(v => {
-                    return v.playerKey !== data.playerKey;
-                })
+                const remainingVotes = this.state.remainingVotes.filter(v => v.key !== data.playerKey);
+                const currentVotes = [...this.state.currentVotes]
+                currentVotes[data.playerKey] = data.playerName;
+
                 this.setState({
-                    remainingVotes: filteredVotes
+                    remainingVotes: remainingVotes,
+                    currentVotes: currentVotes
                 })
+            }),
+            PubSub.subscribe(Events.CARD_RETURNED, (evt, data) => {        
+                // TODO : require event data to have remaining votes ?
+                const remainingVotes = []
+                for (const [k, n] of Object.entries(this.state.currentVotes)) {
+                    remainingVotes.push({ key: k, name: n })
+                }
+
+                this.setState({
+                    displayError: true,
+                    errorMessage: "Carte retournée !",
+                    cards: this.state.cards.map(c => {
+                        if(c.x === data.x && c.y === data.y) {
+                            c.returned = true
+                        }
+                        return c;
+                    }),
+                    remainingVotes: remainingVotes,
+                    currentVotes: []
+                })
+                setTimeout(() => {
+                    this.setState({
+                        displayError: false,
+                        errorMessage: null
+                    })
+                }, 4000)
             })
-         ]
+        ]
     }
 
     componentDidMount() {
@@ -57,7 +89,6 @@ export default class Game extends React.Component {
         DataSource
             .get('/gameInfos', { gameKey: this.state.gameKey })
             .then(data => {
-
                 if(typeof data === 'string' || typeof data === 'undefined') {
                     console.error('Mauvais format de paramètre dans le callback (game)')
                     return
@@ -80,6 +111,25 @@ export default class Game extends React.Component {
                     isMyTurn:           data.currentTeam === data.playerTeam,
                     canPassTurn:        data.canPassTurn
                 })
+            })
+
+
+        DataSource
+            .get('cards', { gameKey: this.state.gameKey })
+            .then(data => {
+                // data = cartes;
+                // TODO : vérif input
+                self.setState({cards: data.map(x => {
+                    const voters = Array.isArray(x.voters) ? x.voters : Object.values(x.voters);
+                    return {
+                        color: x.color,
+                        returned: x.returned,
+                        name: x.word,
+                        x: x.x,
+                        y: x.y,
+                        voters: voters.map(v => { return {key:v.playerKey, name:v.name} })
+                    }
+                })})
             })
     }
 
@@ -118,6 +168,7 @@ export default class Game extends React.Component {
                     playerKey={this.state.playerKey}
                     name= {this.state.name}
                     isMyTurn={this.state.isMyTurn}
+                    cards={this.state.cards}
                 />
                 <GameInfo 
                     gameKey={this.state.gameKey} 

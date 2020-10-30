@@ -30,7 +30,6 @@ export class Card extends React.Component {
     }
 
     render() {
-
         const renderImgComponent = (props) => {
             const attr = {
                 key:        `${props.x}-${props.y}`,
@@ -74,11 +73,11 @@ export class Card extends React.Component {
                     <div>
                         <div className="cn-card-votes">
                             {props.votes.map(v => {
-                                if(v.key === props.playerKey){
-                                    return (<span id={`vote-tag-${v.key}`} key={`vote-tag-${v.playerKey}`} className="badge badge-success">{v.name}</span>) 
+                                if(v.key === props.playerKey) {
+                                    return (<span id={`vote-tag-${v.key}`} key={`vote-tag-${v.key}`} className="badge badge-success">{v.name}</span>) 
 
                                 } else {
-                                    return (<span id={`vote-tag-${v.key}`} key={`vote-tag-${v.playerKey}`} className="badge badge-secondary">{v.name}</span>) 
+                                    return (<span id={`vote-tag-${v.key}`} key={`vote-tag-${v.key}`} className="badge badge-secondary">{v.name}</span>) 
 
                                 }
                             })}

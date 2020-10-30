@@ -41,7 +41,7 @@ export class Board extends React.Component {
         this.state = {
             gameKey:            props.gameKey,
             playerKey:          props.playerKey,
-            cards:              [],
+            cards:              props.cards,
         };
         const self = this;
         this.subscriptions = [
@@ -64,41 +64,8 @@ export class Board extends React.Component {
                         return c
                     })
                 })
-            }),
-            PubSub.subscribe(Events.CARD_RETURNED, (evt, data) => {
-                this.setState({
-                    cards: self.state.cards.map(c => {
-                        if(c.x === data.x && c.y === data.y) {
-                            c.returned = true;
-                        }
-                        return c;
-                    })
-                })
             })
         ]
-    }
-
-    componentDidMount() {
-        const self = this;
-        DataSource
-            .get('cards', {
-                    gameKey: this.state.gameKey
-            })
-            .then(data => {
-                // data = cartes;
-                // TODO : vérif input
-                self.setState({cards: data.map(x => {
-                    const voters = Array.isArray(x.voters) ? x.voters : Object.values(x.voters);
-                    return {
-                        color: x.color,
-                        returned: x.returned,
-                        name: x.word,
-                        x: x.x,
-                        y: x.y,
-                        voters: voters.map(v => { return {key:v.playerKey, name:v.name} })
-                    }
-                })})
-            })
     }
 
     componentWillUnmount() {
@@ -112,7 +79,7 @@ export class Board extends React.Component {
                     key='cn-cards-row'
                     id='cn-cards-row'
                     className='row'>
-                        {this.state.cards.map(c => 
+                        {this.props.cards.map(c => 
                             <Card
                                 key=        {c.x+'-'+c.y}
                                 name=       {c.name}

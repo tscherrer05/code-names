@@ -57,7 +57,7 @@ class ApiController extends AbstractController
                 'y'         => $c->getY(),
                 'voters'    => array_map(function($gp) {
                                     return [
-                                        'playerKey' => $gp->getPublicKey(),
+                                        'key' => $gp->getPublicKey(),
                                         'name' => $gp->getName()
                                     ];
                                 },
@@ -109,7 +109,7 @@ class ApiController extends AbstractController
                                             {
                                                 return [
                                                     'name' => $p->getName(),
-                                                    'playerKey' => $p->getPublicKey()
+                                                    'key' => $p->getPublicKey()
                                                 ];
                                             }
                                         }, $gameEntity->getGamePlayers()->toArray()))

@@ -23,8 +23,8 @@ class Board
         $this->nbColorCards[Colors::Red] = count($this->getCards(Colors::Red));
         $this->nbColorCards[Colors::White] = count($this->getCards(Colors::White));
         $this->nbColorCards[Colors::Black] = count($this->getCards(Colors::Black));
-    }  
-    
+    }
+
     private function getCards(int $color) {
         return array_filter($this->cards, function($c) use($color) {
             return array_filter($c, function($c1) use($color) {
@@ -53,7 +53,7 @@ class Board
         }
     }
 
-    private function everybodyVotedForSameCard() 
+    private function everybodyVotedForSameCard()
     {
         $lastCard = null;
         foreach($this->votes as $card)
@@ -70,7 +70,6 @@ class Board
     {
         $card = $this->cards[$x][$y];
         $card->returnMe();
-        $this->nbColorCards[$card->color]--;
         $this->votes = array();
     }
 

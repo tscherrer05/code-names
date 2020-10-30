@@ -16,7 +16,7 @@ export class GameInfo extends React.Component {
 
     render() {
         var currentPlayerKey = this.props.playerKey;
-        debugger
+        
         // Votes zone
         // TODO ; Improve this part so we don't have to make so many checks
         var remainingVotes;
@@ -27,10 +27,10 @@ export class GameInfo extends React.Component {
         else
             remainingVotes = this.props.remainingVotes;
         const votes = remainingVotes.map(p => {
-            if(p.playerKey === currentPlayerKey)
-                return <span id={'vote-tag-'+p.playerKey} key={'vote-tag-'+p.playerKey} className="badge badge-success">{p.name}</span>
+            if(p.key === currentPlayerKey)
+                return <span id={'vote-tag-'+p.key} key={'vote-tag-'+p.key} className="badge badge-success">{p.name}</span>
             else
-                return <span id={'vote-tag-'+p.playerKey} key={'vote-tag-'+p.playerKey}  className="badge badge-secondary">{p.name}</span>
+                return <span id={'vote-tag-'+p.key} key={'vote-tag-'+p.key}  className="badge badge-secondary">{p.name}</span>
         })
 
         // Next turn button

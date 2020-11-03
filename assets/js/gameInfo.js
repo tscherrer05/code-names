@@ -14,48 +14,46 @@ export class GameInfo extends React.Component {
         })
     }
 
+
     render() {
+        console.log('Render gameInfo')
+
+        const PRIMARY_COLOR = 'badge-success'
+        const SECONDARY_COLOR = 'badge-secondary'
         var currentPlayerKey = this.props.playerKey;
         
-        // Votes zone
-        // TODO ; Improve this part so we don't have to make so many checks
-        var remainingVotes;
-        if(this.props.remainingVotes === null || typeof(this.props.remainingVotes) === 'undefined')
-            remainingVotes = [];
-        else if(!Array.isArray(this.props.remainingVotes))
-            remainingVotes = Object.values(this.props.remainingVotes);
-        else
-            remainingVotes = this.props.remainingVotes;
-        const votes = remainingVotes.map(p => {
-            if(p.key === currentPlayerKey)
-                return <span id={'vote-tag-'+p.key} key={'vote-tag-'+p.key} className="badge badge-success">{p.name}</span>
-            else
-                return <span id={'vote-tag-'+p.key} key={'vote-tag-'+p.key}  className="badge badge-secondary">{p.name}</span>
-        })
+        
+
+        const votes = this.props.remainingVotes
+                        ?.map(playerKey => {
+                            return { 
+                                key:    playerKey,
+                                name:   this.props.players[playerKey],
+                                color:  playerKey == currentPlayerKey ? PRIMARY_COLOR : SECONDARY_COLOR
+                            }
+                        })
+                        ?.map(p => <span id={'vote-tag-'+p.key} key={'vote-tag-'+p.key} className={'badge '+p.color}>{p.name}</span>)
+
+                        debugger
 
         // Next turn button
-        let nextTurn = null;
-        if(this.props.canPassTurn) {
-            nextTurn = (
-                <div className="row">
-                    <button onClick={() => this.passTurn()}>Passer le tour</button>
-                </div>
-            )
-        }
+        let nextTurn = this.props.canPassTurn
+                        ?   (
+                                <div className="row">
+                                    <button onClick={() => this.passTurn()}>Passer le tour</button>
+                                </div>
+                            )
+                        : null
+        
 
         // Labels
-        let playerTeam = null;
-        if(this.props.playerTeam == 1) {
-            playerTeam = (<span style={{color: "blue"}}>Bleue</span>);
-        } else {
-            playerTeam = (<span style={{color: "red"}}>Rouge</span>);
-        }
-        let currentTeam = null;
-        if(this.props.currentTeam == 1) {
-            currentTeam = (<span style={{color: "blue"}}>Bleue</span>);
-        } else {
-            currentTeam = (<span style={{color: "red"}}>Rouge</span>);
-        }
+        let playerTeam = this.props.playerTeam == 1
+                        ? (<span style={{color: "blue"}}>Bleue</span>)
+                        : (<span style={{color: "red"}}>Rouge</span>)
+
+        let currentTeam = this.props.currentTeam == 1
+                            ? (<span style={{color: "blue"}}>Bleue</span>)
+                            : (<span style={{color: "red"}}>Rouge</span>)
 
         return (
             <div className="container">

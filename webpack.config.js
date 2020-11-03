@@ -53,6 +53,9 @@ Encore
         config.useBuiltIns = 'usage';
         config.corejs = 3;
     })
+    .configureBabel(function(babelConfig) {
+        babelConfig.plugins.push("@babel/plugin-transform-modules-commonjs");
+    })
 
     // enables Sass/SCSS support
     //.enableSassLoader()

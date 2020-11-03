@@ -93,6 +93,32 @@ class ApiController extends AbstractController
                 throw new Exception("Player not found with guid : $playerKey");
             }
 
+            $spies = array_filter(
+                array_map(
+                    function($p) use($gameEntity) { 
+                        if($gameEntity->getCurrentTeam() == $p->getTeam()
+                            && $p->getRole() == Roles::Spy) {
+                            return $p;
+                        }
+                    },
+                    $gameEntity->getGamePlayers()->toArray()
+                )
+            );
+
+            $remainingVotes = [];
+            $currentVotes = [];
+            $playerModels = [];
+            foreach($spies as $p) {
+                $playerModels[$p->getPublicKey()] = $p->getName();
+                if($p->getX() == null && $p->getY() == null) {
+                    $remainingVotes[] = $p->getPublicKey();
+                } else {
+                    $cardKey = $p->getX().$p->getY();
+                    $playerKey = $p->getPublicKey();
+                    $currentVotes[$playerKey] = $cardKey;
+                }
+            }
+
             $model = [
                 'gameKey'               => $gameEntity->getPublicKey(),
                 'currentNumber'         => $gameEntity->getCurrentNumber(),
@@ -103,16 +129,9 @@ class ApiController extends AbstractController
                 'playerTeam'            => $gp->getTeam(),
                 'playerRole'            => $gp->getRole(),
                 'canPassTurn'           => $gp->getRole() == Roles::Master,
-                'remainingVotes'        => array_filter(array_map(function($p) use($gameEntity) {
-                                            if($p->getX() == null && $p->getY() == null
-                                                && $gameEntity->getCurrentTeam() == $p->getTeam())
-                                            {
-                                                return [
-                                                    'name' => $p->getName(),
-                                                    'key' => $p->getPublicKey()
-                                                ];
-                                            }
-                                        }, $gameEntity->getGamePlayers()->toArray()))
+                'players'               => $playerModels,
+                'currentVotes'          => $currentVotes,
+                'remainingVotes'        => $remainingVotes
             ];
 
             return new JsonResponse($model);

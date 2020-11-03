@@ -3,6 +3,8 @@ import {Board} from './board';
 import {GameInfo} from './gameInfo';
 import { DataSource } from './dataSource';
 import { Events } from './events';
+import { vote } from './modules/game';
+
 
 export default class Game extends React.Component {
 
@@ -43,16 +45,12 @@ export default class Game extends React.Component {
                 }, 4000)
             }),
             PubSub.subscribe(Events.HAS_VOTED, (evt, data) => {
-                const remainingVotes = this.state.remainingVotes.filter(v => v.key !== data.playerKey);
-                const currentVotes = [...this.state.currentVotes]
-                currentVotes[data.playerKey] = data.playerName;
-
-                this.setState({
-                    remainingVotes: remainingVotes,
-                    currentVotes: currentVotes
-                })
+                console.log(Events.HAS_VOTED, data);
+                const stateDiff = vote(this.state, data)
+                console.log(Events.HAS_VOTED, stateDiff)
+                this.setState(stateDiff)
             }),
-            PubSub.subscribe(Events.CARD_RETURNED, (evt, data) => {        
+            PubSub.subscribe(Events.CARD_RETURNED, (evt, data) => {
                 // TODO : require event data to have remaining votes ?
                 const remainingVotes = []
                 for (const [k, n] of Object.entries(this.state.currentVotes)) {
@@ -87,7 +85,7 @@ export default class Game extends React.Component {
         const self = this;
 
         DataSource
-            .get('/gameInfos', { gameKey: this.state.gameKey })
+            .get('gameInfos', { gameKey: this.state.gameKey })
             .then(data => {
                 if(typeof data === 'string' || typeof data === 'undefined') {
                     console.error('Mauvais format de paramètre dans le callback (game)')
@@ -97,7 +95,6 @@ export default class Game extends React.Component {
                     console.error(data.message)
                     return
                 }
-
                 self.setState({
                     gameKey:            data.gameKey,
                     playerKey:          data.playerKey,
@@ -107,6 +104,8 @@ export default class Game extends React.Component {
                     currentTeam:        data.currentTeam,
                     announcedNumber:    data.currentNumber,
                     announcedWord:      data.currentWord,
+                    players:            data.players,
+                    currentVotes:       data.currentVotes,
                     remainingVotes:     data.remainingVotes,
                     isMyTurn:           data.currentTeam === data.playerTeam,
                     canPassTurn:        data.canPassTurn
@@ -117,19 +116,19 @@ export default class Game extends React.Component {
         DataSource
             .get('cards', { gameKey: this.state.gameKey })
             .then(data => {
-                // data = cartes;
-                // TODO : vérif input
-                self.setState({cards: data.map(x => {
-                    const voters = Array.isArray(x.voters) ? x.voters : Object.values(x.voters);
-                    return {
-                        color: x.color,
-                        returned: x.returned,
-                        name: x.word,
-                        x: x.x,
-                        y: x.y,
-                        voters: voters.map(v => { return {key:v.playerKey, name:v.name} })
-                    }
-                })})
+                
+                self.setState(
+                {
+                    cards: data.map(x => {
+                                        return {
+                                            color: x.color,
+                                            returned: x.returned,
+                                            name: x.word,
+                                            x: x.x,
+                                            y: x.y
+                                        }}),
+                    currentVotes: this.state.currentVotes
+                })
             })
     }
 
@@ -138,6 +137,8 @@ export default class Game extends React.Component {
     }
 
      render() {
+        console.log('Render game')
+
         var errorMessage;
         if(this.state.displayError)
         {
@@ -168,6 +169,8 @@ export default class Game extends React.Component {
                     playerKey={this.state.playerKey}
                     name= {this.state.name}
                     isMyTurn={this.state.isMyTurn}
+                    players={this.state.players}
+                    currentVotes={this.state.currentVotes}
                     cards={this.state.cards}
                 />
                 <GameInfo 
@@ -179,6 +182,7 @@ export default class Game extends React.Component {
                     currentTeam={this.state.currentTeam}
                     announcedNumber={this.state.announcedNumber}
                     announcedWord={this.state.announcedWord}
+                    players={this.state.players}
                     remainingVotes={this.state.remainingVotes}
                     canPassTurn={this.state.canPassTurn}
                 />

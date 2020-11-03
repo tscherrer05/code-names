@@ -93,13 +93,18 @@ class GameRepository extends ServiceEntityRepository
         $votes = array();
         foreach($gamePlayers as $gp)
         {
-            foreach ($cardEntities as $c)
+            if($gp->getX() !== null 
+                && $gp->getY() !== null) 
             {
-                if($c->getX() == $gp->getX() && $c->getY() == $gp->getY())
+                foreach ($cardEntities as $c)
                 {
-                    $votes[$gp->getPublicKey()] = new Card(
-                        $c->getWord(), $c->getColor(),
-                        $c->getX(), $c->getY(), $c->getReturned());
+                        if($c->getX() == $gp->getX() 
+                            && $c->getY() == $gp->getY())
+                        {
+                            $votes[$gp->getPublicKey()] = new Card(
+                                $c->getWord(), $c->getColor(),
+                                $c->getX(), $c->getY(), $c->getReturned());
+                        }
                 }
             }
         }

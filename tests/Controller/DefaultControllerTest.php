@@ -2,7 +2,7 @@
 namespace App\Tests\Controller;
 
 use App\Controller\DefaultController;
-use App\DataFixtures\DefaultFixtures;
+use App\DataFixtures\TestFixtures;
 use App\Entity\GamePlayer;
 use App\Entity\Roles;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -36,7 +36,7 @@ class DefaultControllerTest extends WebTestCase
         $this->assertSelectorExists('input#gameKey');
         $form = $crawler->selectButton('join-game')->form();
 
-        $form['gameKey'] = DefaultFixtures::GameKey1;
+        $form['gameKey'] = TestFixtures::GameKey1;
 
         $crawler = $this->client->submit($form);
         $this->client->followRedirects(true);
@@ -65,8 +65,8 @@ class DefaultControllerTest extends WebTestCase
     // public function testLobbyNominal()
     // {
     //     $session = static::$container->get('session');
-    //     $session->set(DefaultController::GameSession, DefaultFixtures::GameKey1);
-    //     $session->set(DefaultController::PlayerSession, DefaultFixtures::PlayerKey1);
+    //     $session->set(DefaultController::GameSession, TestFixtures::GameKey1);
+    //     $session->set(DefaultController::PlayerSession, TestFixtures::PlayerKey1);
 
     //     $this->client->request('GET', '/lobby');
 
@@ -79,7 +79,7 @@ class DefaultControllerTest extends WebTestCase
     // {
     //     $before = $this->countGamePlayers();
 
-    //     $this->client->request('GET', '/autoConnect?gameKey='.DefaultFixtures::GameKey1);
+    //     $this->client->request('GET', '/autoConnect?gameKey='.TestFixtures::GameKey1);
 
     //     $this->assertNumberOfGamePlayers($before+1);
 
@@ -92,9 +92,9 @@ class DefaultControllerTest extends WebTestCase
     public function testAutoConnectTwice() 
     {
         $before = $this->countGamePlayers();
-        static::$container->get('session')->set(DefaultController::PlayerSession, DefaultFixtures::PlayerKey1);
+        static::$container->get('session')->set(DefaultController::PlayerSession, TestFixtures::PlayerKey1);
         $before = $this->countGamePlayers();
-        $this->client->request('GET', '/autoConnect?gameKey='.DefaultFixtures::GameKey1);
+        $this->client->request('GET', '/autoConnect?gameKey='.TestFixtures::GameKey1);
         $this->assertNumberOfGamePlayers($before);
         $this->assertEquals(302, $this->client->getResponse()->getStatusCode());
         $this->assertTrue($this->client->getResponse()->isRedirect(), "Doit rediriger.");
@@ -107,7 +107,7 @@ class DefaultControllerTest extends WebTestCase
     //     $session = static::$container->get('session');
         
     //     // Connexion auto
-    //     $this->client->request('GET', '/autoConnect?gameKey='.DefaultFixtures::GameKey1);
+    //     $this->client->request('GET', '/autoConnect?gameKey='.TestFixtures::GameKey1);
 
     //     // Vérifier que le MasterSpy de l'autre équipe est ajouté
     //     $masterSpies = intval($this->gamePlayerRepository

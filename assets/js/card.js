@@ -12,12 +12,14 @@ export class Card extends React.Component {
 
     vote() {
         // Publier un évènement sur le topic 'vote' avec ces données
-        PubSub.publish(Events.VOTE, {
+        const data = {
             x:          this.props.x,
             y:          this.props.y,
             gameKey:    this.props.gameKey,
             playerKey:  this.props.playerKey,
-        })
+        }
+        console.log(Events.VOTE, data)
+        PubSub.publish(Events.VOTE, data)
     }
 
     dispatchComponentError(message) {
@@ -30,6 +32,8 @@ export class Card extends React.Component {
     }
 
     render() {
+        console.log('Render card')
+
         const renderImgComponent = (props) => {
             const attr = {
                 key:        `${props.x}-${props.y}`,
@@ -67,8 +71,10 @@ export class Card extends React.Component {
                 attr['src'] = 'images/card.png';
                 if(!Array.isArray(props.votes))
                 {
-                    console.error("Mauvais format de props.votes");
+                    console.error("Mauvais format de props.votes")
+                    return
                 }
+
                 return (
                     <div>
                         <div className="cn-card-votes">

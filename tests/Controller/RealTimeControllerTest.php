@@ -3,7 +3,7 @@ namespace App\Tests\Controller;
 
 use App\CodeNames\GameStatus;
 use App\Controller\RealTimeController;
-use App\DataFixtures\DefaultFixtures;
+use App\DataFixtures\TestFixtures;
 use App\Entity\Card;
 use App\Entity\Game;
 use App\Entity\GamePlayer;
@@ -36,12 +36,12 @@ class RealTimeControllerTest extends WebTestCase
 
     public function testVoteNominal()
     {
-        $playerKey = DefaultFixtures::PlayerKey1;
+        $playerKey = TestFixtures::PlayerKey1;
         $result = $this->service->vote([
             'x' => 0,
             'y' => 2,
             'playerKey' => $playerKey,
-            'gameKey' => DefaultFixtures::GameKey1,
+            'gameKey' => TestFixtures::GameKey1,
             'clients' => new SplObjectStorage(),
             'from' => null
         ]);
@@ -64,7 +64,7 @@ class RealTimeControllerTest extends WebTestCase
         // $this->assertArrayHasKey('x', $parsed, 'Clé manquante.');
         // $this->assertArrayHasKey('y', $parsed, 'Clé manquante.');
         // $this->assertSame('vote', $parsed['action']);
-        // $this->assertSame(DefaultFixtures::PlayerKey1, $parsed['playerKey'], 'Mauvaise donnée de retour.');
+        // $this->assertSame(TestFixtures::PlayerKey1, $parsed['playerKey'], 'Mauvaise donnée de retour.');
         
         // Assert data
         $this->assertSame(0, $gp->getX());
@@ -76,8 +76,8 @@ class RealTimeControllerTest extends WebTestCase
         $result = $this->service->vote([
             'x' => 0,
             'y' => 2,
-            'playerKey' => DefaultFixtures::PlayerKey1,
-            'gameKey' => DefaultFixtures::GameKey1,
+            'playerKey' => TestFixtures::PlayerKey1,
+            'gameKey' => TestFixtures::GameKey1,
             'clients' => new SplObjectStorage(),
             'from' => null
         ]);
@@ -92,13 +92,19 @@ class RealTimeControllerTest extends WebTestCase
         $result = $this->service->vote([
             'x' => 0,
             'y' => 2,
-            'playerKey' => DefaultFixtures::PlayerKey2,
-            'gameKey' => DefaultFixtures::GameKey1,
+            'playerKey' => TestFixtures::PlayerKey3,
+            'gameKey' => TestFixtures::GameKey1,
             'clients' => new SplObjectStorage(),
             'from' => null
         ]);
-
-        $parsed = json_decode($result, true);
+        $result = $this->service->vote([
+            'x' => 0,
+            'y' => 2,
+            'playerKey' => TestFixtures::PlayerKey4,
+            'gameKey' => TestFixtures::GameKey1,
+            'clients' => new SplObjectStorage(),
+            'from' => null
+        ]);
 
         $card = $this->entityManager
             ->getRepository(Card::class)
@@ -106,7 +112,7 @@ class RealTimeControllerTest extends WebTestCase
         ;
         $game = $this->entityManager
             ->getRepository(Game::class)
-            ->findOneBy(['publicKey' => DefaultFixtures::GameKey1]);
+            ->findOneBy(['publicKey' => TestFixtures::GameKey1]);
         $gamePlayers = $this->entityManager
             ->getRepository(GamePlayer::class)
             ->findBy(['game' => $game->getId()]);
@@ -121,15 +127,15 @@ class RealTimeControllerTest extends WebTestCase
     public function testStartGameNominal() {
         $this->service->startGame([
             'clients' => new SplObjectStorage(),
-            'gameKey' => DefaultFixtures::GameKey1,
+            'gameKey' => TestFixtures::GameKey1,
             'players' => [
                 [
-                    'playerKey' => DefaultFixtures::PlayerKey1,
+                    'playerKey' => TestFixtures::PlayerKey1,
                     'team' => 2,
                     'role' => 1
                 ],
                 [
-                    'playerKey' => DefaultFixtures::PlayerKey2,
+                    'playerKey' => TestFixtures::PlayerKey2,
                     'team' => 1,
                     'role' => 2
                 ]
@@ -138,24 +144,24 @@ class RealTimeControllerTest extends WebTestCase
 
         $gp1 = $this->entityManager
             ->getRepository(GamePlayer::class)
-            ->findOneBy(['publicKey' => DefaultFixtures::PlayerKey1])
+            ->findOneBy(['publicKey' => TestFixtures::PlayerKey1])
         ;
 
         $gp2 = $this->entityManager
             ->getRepository(GamePlayer::class)
-            ->findOneBy(['publicKey' => DefaultFixtures::PlayerKey2])
+            ->findOneBy(['publicKey' => TestFixtures::PlayerKey2])
         ;
 
         $game = $this->entityManager
             ->getRepository(Game::class)
-            ->findOneBy(['publicKey' => DefaultFixtures::GameKey1])
+            ->findOneBy(['publicKey' => TestFixtures::GameKey1])
         ;
 
         $this->assertSame(GameStatus::OnGoing, $game->getStatus());
-        $this->assertSame(DefaultFixtures::GameKey1, $gp1->getGame()->getPublicKey());
+        $this->assertSame(TestFixtures::GameKey1, $gp1->getGame()->getPublicKey());
         $this->assertSame(2, $gp1->getTeam());
         $this->assertSame(1, $gp1->getRole());
-        $this->assertSame(DefaultFixtures::GameKey1, $gp2->getGame()->getPublicKey());
+        $this->assertSame(TestFixtures::GameKey1, $gp2->getGame()->getPublicKey());
         $this->assertSame(1, $gp2->getTeam());
         $this->assertSame(2, $gp2->getRole());
     }
@@ -164,51 +170,48 @@ class RealTimeControllerTest extends WebTestCase
         $this->assertSame(Teams::Blue, 
                 $this->entityManager
                 ->getRepository(Game::class)
-                ->findOneBy(['publicKey' => DefaultFixtures::GameKey1])
+                ->findOneBy(['publicKey' => TestFixtures::GameKey1])
                 ->getCurrentTeam());
 
         $this->service->vote([
             'x' => 0,
             'y' => 2,
-            'playerKey' => DefaultFixtures::PlayerKey2,
-            'gameKey' => DefaultFixtures::GameKey1,
+            'playerKey' => TestFixtures::PlayerKey2,
+            'gameKey' => TestFixtures::GameKey1,
             'clients' => new SplObjectStorage(),
             'from' => null
         ]);
         $this->service->passTurn([
             'clients' => new SplObjectStorage(),
-            'gameKey' => DefaultFixtures::GameKey1,
+            'gameKey' => TestFixtures::GameKey1,
             'from' => null
         ]);
 
         $this->assertSame(Teams::Red, 
                 $this->entityManager
                 ->getRepository(Game::class)
-                ->findOneBy(['publicKey' => DefaultFixtures::GameKey1])
+                ->findOneBy(['publicKey' => TestFixtures::GameKey1])
                 ->getCurrentTeam());
-        foreach($this->entityManager->getRepository(GamePlayer::class)->findBy(['game' => DefaultFixtures::GameKey1]) as $gp)
+        foreach($this->entityManager->getRepository(GamePlayer::class)->findBy(['game' => TestFixtures::GameKey1]) as $gp)
         {
             $this->assertNull($gp->getX());
             $this->assertNull($gp->getY());
         }
     }
 
- 
-
-
     // public function testStartGameWithWrongTeams() 
     // {
     //     $result = $this->service->startGame([
     //         'clients' => new SplObjectStorage(),
-    //         'gameKey' => DefaultFixtures::GameKey1,
+    //         'gameKey' => TestFixtures::GameKey1,
     //         'players' => [
     //             [
-    //                 'playerKey' => DefaultFixtures::PlayerKey1,
+    //                 'playerKey' => TestFixtures::PlayerKey1,
     //                 'team' => 2,
     //                 'role' => 1
     //             ],
     //             [
-    //                 'playerKey' => DefaultFixtures::PlayerKey2,
+    //                 'playerKey' => TestFixtures::PlayerKey2,
     //                 'team' => 1,
     //                 'role' => 2
     //             ]
@@ -217,7 +220,7 @@ class RealTimeControllerTest extends WebTestCase
 
     //     $game = $this->entityManager
     //         ->getRepository(Game::class)
-    //         ->findOneBy(['publicKey' => DefaultFixtures::GameKey1]);
+    //         ->findOneBy(['publicKey' => TestFixtures::GameKey1]);
 
     //     $this->assertSame(GameStatus::Lobby, $game->getStatus());
     // }
@@ -225,8 +228,8 @@ class RealTimeControllerTest extends WebTestCase
     // public function testUpdateLobbyInfosWithWrongSetup() {
     //     // $result = $this->service->updateLobbyInfos([
     //     //     'clients' => new SplObjectStorage(), // on doit forcément avoir les clients ? Ou il ne faudrait pas que le controller se renseigne lui même auprès du serveur ws ?
-    //     //     'gameKey' => DefaultFixtures::GameKey1,
-    //     //     'playerKey' => DefaultFixtures::PlayerKey1
+    //     //     'gameKey' => TestFixtures::GameKey1,
+    //     //     'playerKey' => TestFixtures::PlayerKey1
     //     // ]);
     // }
 

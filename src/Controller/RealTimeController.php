@@ -151,14 +151,15 @@ class RealTimeController extends AbstractController
 
         // Mapping joueurs
         // Sauvegarder les votes de chaque joueur de la partie
-        foreach($game->getGamePlayers() as $gpData)
+        $gamePlayers = $this->gamePlayerRepository->findBy(['game' => $game->getId()]);
+        foreach($gamePlayers as $gpData)
         {
-            $arr = $gameInfo->getAllVotes();
+            $votes = $gameInfo->getAllVotes();
             $key = $gpData->getPublicKey();
-            if(array_key_exists($key, $arr))
+            if(array_key_exists($key, $votes))
             {
-                $gpData->setX($arr[$key]->x);
-                $gpData->setY($arr[$key]->y);
+                $gpData->setX($votes[$key]->x);
+                $gpData->setY($votes[$key]->y);
             }
             else 
             {

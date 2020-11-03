@@ -1,10 +1,14 @@
 {
     "devDependencies": {
-        "@babel/preset-react": "^7.10.1",
+        "@babel/plugin-transform-modules-commonjs": "^7.12.1",
+        "@babel/preset-env": "^7.12.1",
+        "@babel/preset-react": "^7.12.1",
         "@symfony/webpack-encore": "^0.30.0",
         "core-js": "^3.0.0",
+        "jest": "^26.6.1",
         "react": "^16.13.1",
         "react-dom": "^16.13.1",
+        "react-test-renderer": "^17.0.1",
         "regenerator-runtime": "^0.13.2",
         "webpack-notifier": "^1.6.0"
     },
@@ -14,7 +18,8 @@
         "dev-server": "encore dev-server",
         "dev": "encore dev",
         "watch": "encore dev --watch",
-        "build": "encore production --progress"
+        "build": "encore production --progress",
+        "test": "jest"
     },
     "dependencies": {
         "jquery-slim": "^3.0.0",

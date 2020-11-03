@@ -223,7 +223,8 @@ const voteEventData =  {
 }
 
 const returnEventData = {
-
+    x: 2,
+    y: 3
 }
 
 test('vote with null data', () => {
@@ -321,5 +322,24 @@ test('player vote for other card nominal', () => {
     expect(result).toStrictEqual({
         currentVotes:  {[playerOneKey]: 23, [playerTwoKey]: 23},
         remainingVotes: []
+    })
+})
+
+
+test('return a card nominal', () => {
+
+    const state = {
+        ...baseState,
+        cards: [{x:2, y: 3, returned: false}],
+        currentVotes: {[playerOneKey]: 23, [playerTwoKey]: 23},
+        remainingVotes: []
+    }
+
+    var result = returnCard(state, returnEventData);
+
+    expect(result).toStrictEqual({
+        currentVotes: {},
+        remainingVotes: [playerOneKey, playerTwoKey],
+        cards: [{x:2, y:3, returned: true}]
     })
 })

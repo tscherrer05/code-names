@@ -49,13 +49,13 @@ Encore
     .enableVersioning(Encore.isProduction())
 
     // enables @babel/preset-env polyfills
-    .configureBabelPresetEnv((config) => {
-        config.useBuiltIns = 'usage';
-        config.corejs = 3;
-    })
-    .configureBabel(function(babelConfig) {
-        babelConfig.plugins.push("@babel/plugin-transform-modules-commonjs");
-    })
+    // .configureBabelPresetEnv((config) => {
+    //     config.useBuiltIns = 'usage';
+    //     config.corejs = 3;
+    // })
+    // .configureBabel(function(babelConfig) {
+    //     babelConfig.plugins.push("@babel/plugin-transform-modules-commonjs");
+    // })
 
     // enables Sass/SCSS support
     //.enableSassLoader()

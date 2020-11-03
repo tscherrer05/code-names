@@ -21,6 +21,18 @@ const vote = (state, eventData) => {
 }
 
 const returnCard = (state, eventData) => {
+    return {
+        currentVotes: {},
+        remainingVotes: Object.entries(state.currentVotes).map(v => {
+            return v[0]
+        }),
+        cards: state.cards.map(c => {
+            if(c.x === eventData.x && c.y === eventData.y) {
+                c.returned = true
+            }
+            return c
+        })
+    }
 }
 
 export {vote, returnCard}

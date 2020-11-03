@@ -305,25 +305,25 @@ class DefaultController extends AbstractController
         $gamePlayer->setPublicKey($playerKey);
 
         // Determine team and role
-        if(\count($this->gamePlayerRepository->getMasterSpies($game->getId())) < 2)
-        {
-            $gamePlayer->setRole(Roles::Master);
-        }
-        else 
-        {
+        // if(\count($this->gamePlayerRepository->getMasterSpies($game->getId())) < 2)
+        // {
+        //     $gamePlayer->setRole(Roles::Master);
+        // }
+        // else 
+        // {
             $gamePlayer->setRole(Roles::Spy);
-        }
+        // }
         
-        $blueTeamNbr = \count($this->gamePlayerRepository->getBlueTeam($game->getId()));
-        $redTeamNbr = \count($this->gamePlayerRepository->getRedTeam($game->getId()));
-        if($redTeamNbr < $blueTeamNbr) 
-        {
-            $gamePlayer->setTeam(Teams::Red);
-        } 
-        else 
-        {
+        // $blueTeamNbr = \count($this->gamePlayerRepository->getBlueTeam($game->getId()));
+        // $redTeamNbr = \count($this->gamePlayerRepository->getRedTeam($game->getId()));
+        // if($redTeamNbr < $blueTeamNbr) 
+        // {
+        //     $gamePlayer->setTeam(Teams::Red);
+        // } 
+        // else 
+        // {
             $gamePlayer->setTeam(Teams::Blue);
-        }
+        // }
 
         // Persistance
         $entityManager = $this->getDoctrine()->getManager();

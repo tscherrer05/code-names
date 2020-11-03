@@ -3,7 +3,7 @@ import {Board} from './board';
 import {GameInfo} from './gameInfo';
 import { DataSource } from './dataSource';
 import { Events } from './events';
-import { vote } from './modules/game';
+import { returnCard, vote } from './modules/game';
 
 
 export default class Game extends React.Component {
@@ -52,22 +52,10 @@ export default class Game extends React.Component {
             }),
             PubSub.subscribe(Events.CARD_RETURNED, (evt, data) => {
                 // TODO : require event data to have remaining votes ?
-                const remainingVotes = []
-                for (const [k, n] of Object.entries(this.state.currentVotes)) {
-                    remainingVotes.push({ key: k, name: n })
-                }
-
                 this.setState({
                     displayError: true,
                     errorMessage: "Carte retournée !",
-                    cards: this.state.cards.map(c => {
-                        if(c.x === data.x && c.y === data.y) {
-                            c.returned = true
-                        }
-                        return c;
-                    }),
-                    remainingVotes: remainingVotes,
-                    currentVotes: []
+                    ...returnCard(this.state, data)
                 })
                 setTimeout(() => {
                     this.setState({

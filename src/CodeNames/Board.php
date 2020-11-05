@@ -45,7 +45,7 @@ class Board
         if($this->isCardReturned($x, $y))
             throw new Exception("Can not return a returned card");
         $this->votes[$player->guid] = $card;
-        $everyBodyHasVoted = (\count($this->votes) == $gameInfo->nbPlayers());
+        $everyBodyHasVoted = (\count($this->votes) == $gameInfo->nbSpies());
 
         if($everyBodyHasVoted && $this->everybodyVotedForSameCard())
         {

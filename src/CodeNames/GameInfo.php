@@ -74,10 +74,10 @@ class GameInfo
         }))[0];
     }
 
-    public function nbPlayers()
+    public function nbSpies()
     {
         return \count(array_filter($this->players, function($p) {
-            if($p->role == Roles::Spy)
+            if($p->role === Roles::Spy)
                 return $p;
         }));
     }

@@ -86,13 +86,15 @@ class GameRepository extends ServiceEntityRepository
             $twoDimCards[$card->x][$card->y] = $card;
         }
 
-        $gamePlayers = $gameEntity->getGamePlayers();
-
+        
         // Build votes
         // TODO : change db model so it is not so awkward.
-        $votes = array();
+        $gamePlayers = $gameEntity->getGamePlayers();
+        $votes = [];
+        $players = [];
         foreach($gamePlayers as $gp)
         {
+            $players[] = new Player($gp->getPublicKey(), $gp->getName(), $gp->getTeam(), $gp->getRole());
             if($gp->getX() !== null 
                 && $gp->getY() !== null) 
             {
@@ -109,17 +111,13 @@ class GameRepository extends ServiceEntityRepository
             }
         }
 
-        $players = $gamePlayers->map(function($gp) {
-            return new Player($gp->getPublicKey(), $gp->getName(), $gp->getTeam(), $gp->getRole());
-        });
-
         $board = new Board($twoDimCards, $votes);
         $gameInfo = new GameInfo(
             $board,
             $gameEntity->getCurrentTeam(),
             $gameEntity->getCurrentWord(),
             $gameEntity->getCurrentNumber(),
-            $players->toArray());
+            $players);
         $gameInfo->id = $gameEntity->getId();
         $gameInfo->guid = $gameEntity->getPublicKey();
         $gameInfo->status = $gameEntity->getStatus();

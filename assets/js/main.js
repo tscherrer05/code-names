@@ -9,8 +9,8 @@ import { Events } from './events'
 // OK Réagir à la réception de messages depuis le serveur
 // OK Pouvoir se connecter par web socket à un serveur
 // OK Pouvoir envoyer des messages au serveur
-// - Gérer les erreurs
-// - Avoir des composants testables
+// OK Gérer les erreurs
+// OK Avoir des composants testables
 
 // TODO : où gérer la connection ws ?
 // WebSocket connection

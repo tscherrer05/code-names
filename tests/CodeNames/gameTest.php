@@ -161,17 +161,17 @@ class GameTest extends TestCase
     //     $this->assertSame(1, $gameInfo->winner($board));
     // }
 
-    public function testAddPlayerNominal()
+    public function testAddSpyNominal()
     {
         $name = "ChuckNorris23";
-        $role = Roles::Master;
+        $role = Roles::Spy;
         $team = Teams::Red;
         $board    = new Board(TestData::getCards());
         $gameInfo = new GameInfo($board, 1, "", 1, array());
 
-        $gameInfo->addPlayer($name, $team, $role);
+        $gameInfo->addPlayer(Uuid::uuid1()->toString(), $name, $team, $role);
 
-        $this->assertSame(1, $gameInfo->nbPlayers());
+        $this->assertSame(1, $gameInfo->nbSpies());
     }
 
     public function testAddPlayerInvalid() 

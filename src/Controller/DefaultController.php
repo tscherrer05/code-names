@@ -304,27 +304,39 @@ class DefaultController extends AbstractController
         $gamePlayer->setSessionId($this->playerSession->getId());
         $gamePlayer->setPublicKey($playerKey);
 
+        $gamePlayers = $game->getGamePlayers()->toArray();
+        $masterSpies = array_values(array_filter($gamePlayers, function($gp) {
+            return $gp->getRole() === Roles::Master;
+        }));
         // Determine team and role
-        // if(\count($this->gamePlayerRepository->getMasterSpies($game->getId())) < 2)
-        // {
-        //     $gamePlayer->setRole(Roles::Master);
-        // }
-        // else 
-        // {
+        if(\count($masterSpies) < 2)
+        {
+            $gamePlayer->setRole(Roles::Master);
+            if(\count($masterSpies) === 0
+                || $masterSpies[0]->getTeam() === Teams::Blue)
+            {
+                $gamePlayer->setTeam(Teams::Red);
+            } 
+            else 
+            {
+                $gamePlayer->setTeam(Teams::Blue);
+            }
+        }
+        else 
+        {
             $gamePlayer->setRole(Roles::Spy);
-        // }
-        
-        // $blueTeamNbr = \count($this->gamePlayerRepository->getBlueTeam($game->getId()));
-        // $redTeamNbr = \count($this->gamePlayerRepository->getRedTeam($game->getId()));
-        // if($redTeamNbr < $blueTeamNbr) 
-        // {
-        //     $gamePlayer->setTeam(Teams::Red);
-        // } 
-        // else 
-        // {
-            $gamePlayer->setTeam(Teams::Blue);
-        // }
-
+            $blueTeamNbr = \count($this->gamePlayerRepository->getBlueTeam($game->getId()));
+            $redTeamNbr = \count($this->gamePlayerRepository->getRedTeam($game->getId()));
+            if($redTeamNbr < $blueTeamNbr) 
+            {
+                $gamePlayer->setTeam(Teams::Red);
+            } 
+            else
+            {
+                $gamePlayer->setTeam(Teams::Blue);
+            }
+        }
+    
         // Persistance
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->persist($gamePlayer);

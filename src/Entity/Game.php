@@ -44,12 +44,12 @@ class Game
     private $currentTeam;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Card", mappedBy="game")
+     * @ORM\OneToMany(targetEntity="App\Entity\Card", mappedBy="game", fetch="EAGER")
      */
     private $cards;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\GamePlayer", mappedBy="game")
+     * @ORM\OneToMany(targetEntity="App\Entity\GamePlayer", mappedBy="game", fetch="EAGER")
      */
     private $gamePlayers;
 

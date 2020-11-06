@@ -3,21 +3,25 @@ namespace App\Tests\Controller;
 
 use App\Controller\DefaultController;
 use App\DataFixtures\TestFixtures;
+use App\Entity\Game;
 use App\Entity\GamePlayer;
-use App\Entity\Roles;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class DefaultControllerTest extends WebTestCase
 {
     private $gamePlayerRepository;
+    private $gameRepository;
     private $client;
 
     public function setUp() :void
     {
         $this->client = static::createClient();
         $this->gamePlayerRepository = static::$container->get('doctrine')
-        ->getManager()
-        ->getRepository(GamePlayer::class);
+            ->getManager()
+            ->getRepository(GamePlayer::class);
+        $this->gameRepository = static::$container->get('doctrine')
+            ->getManager()
+            ->getRepository(Game::class);
     }
 
     public function testLoginPageNominal()
@@ -61,67 +65,82 @@ class DefaultControllerTest extends WebTestCase
         $this->assertContains('lobby', $this->client->getRequest()->getUri());
     }
 
-    // TODO : Make fixture with game in lobby state
-    // public function testLobbyNominal()
-    // {
-    //     $session = static::$container->get('session');
-    //     $session->set(DefaultController::GameSession, TestFixtures::GameKey1);
-    //     $session->set(DefaultController::PlayerSession, TestFixtures::PlayerKey1);
+    public function testLobbyNominal()
+    {
+        $session = static::$container->get('session');
+        $session->set(DefaultController::GameSession, TestFixtures::GameKey2);
+        $session->set(DefaultController::PlayerSession, TestFixtures::PlayerKey7);
 
-    //     $this->client->request('GET', '/lobby');
+        $this->client->request('GET', '/lobby');
 
-    //     $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
-    //     $this->assertSelectorExists('#game-key');
-    // }
+        $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
+        $this->assertSelectorExists('#game-key');
+    }
 
-    // TODO : Make fixture with game in lobby state
-    // public function testAutoConnectNominal() 
-    // {
-    //     $before = $this->countGamePlayers();
+    public function testAutoConnectNominal() 
+    {
+        $before = $this->countGamePlayers();
+        $this->assertNumberOfGamePlayers(intval($before));
 
-    //     $this->client->request('GET', '/autoConnect?gameKey='.TestFixtures::GameKey1);
+        $this->client->request('GET', '/autoConnect?gameKey='.TestFixtures::GameKey2);
 
-    //     $this->assertNumberOfGamePlayers($before+1);
+        $this->assertNumberOfGamePlayers(intval($before)+1);
 
-    //     $this->client->followRedirect();
-    //     $this->assertEquals(302, $this->client->getResponse()->getStatusCode());
-    //     $this->assertTrue($this->client->getResponse()->isRedirect(), "Doit rediriger.");
-    //     $this->assertContains('game', $this->client->getRequest()->getUri(), "Doit être sur la page game");
-    // }
+        $this->client->followRedirect();
+        $this->assertEquals(302, $this->client->getResponse()->getStatusCode());
+        $this->assertTrue($this->client->getResponse()->isRedirect(), "Doit rediriger.");
+        $this->assertContains('game', $this->client->getRequest()->getUri(), "Doit être sur la page game");
+    }
+
+    public function testFirstAutoConnect()
+    {
+        $before = intval($this->countGamePlayers());
+        $this->client->request('GET', '/autoConnect?gameKey='.TestFixtures::GameKey3);
+
+        $this->assertNumberOfGamePlayers($before+1);
+    }
 
     public function testAutoConnectTwice() 
     {
         $before = $this->countGamePlayers();
         static::$container->get('session')->set(DefaultController::PlayerSession, TestFixtures::PlayerKey1);
         $before = $this->countGamePlayers();
-        $this->client->request('GET', '/autoConnect?gameKey='.TestFixtures::GameKey1);
-        $this->assertNumberOfGamePlayers($before);
+        $this->client->request('GET', '/autoConnect?gameKey='.TestFixtures::GameKey2);
+        $this->assertNumberOfGamePlayers(intval($before));
         $this->assertEquals(302, $this->client->getResponse()->getStatusCode());
         $this->assertTrue($this->client->getResponse()->isRedirect(), "Doit rediriger.");
         $this->assertContains('game', $this->client->getRequest()->getUri(), "Doit être sur la page game");
     }
 
-    // TODO : Make fixture with game in lobby state
+    // TODO : résoudre le mystère de ce bug
     // public function testAutoConnectWithMissingSpyMaster() 
     // {
-    //     $session = static::$container->get('session');
-        
     //     // Connexion auto
-    //     $this->client->request('GET', '/autoConnect?gameKey='.TestFixtures::GameKey1);
+    //     $this->client->request('GET', '/autoConnect?gameKey='.TestFixtures::GameKey2);
 
     //     // Vérifier que le MasterSpy de l'autre équipe est ajouté
-    //     $masterSpies = intval($this->gamePlayerRepository
-    //             ->createQueryBuilder('gp')
-    //             ->where('gp.role = '.Roles::Spy)
-    //             ->select('count(gp.id)')
-    //             ->getQuery()
-    //             ->getSingleScalarResult());
-    //     $this->assertSame(2, $masterSpies);
+    //     $gamePlayers = static::$container->get('doctrine')->getManager()
+    //                     ->getRepository(GamePlayer::class)
+    //                     ->createQueryBuilder('gp')
+    //                     ->getQuery()
+    //                     ->getResult();
+
+    //     $masterSpies = intval(
+    //         array_filter(
+    //             $gamePlayers,
+    //             function($gp) {
+    //                 return $gp->getRole() === Roles::Master
+    //                         && $gp->getGame()->getPublicKey() === TestFixtures::GameKey2;
+    //             }
+    //         )
+    //     );
+    //     $this->assertSame(2, $masterSpies, 'Autoconnect should prioritize MasterSpies');
     // }
 
     private function assertNumberOfGamePlayers(int $expected)
     {
-        $this->assertSame($expected, (int)$this->countGamePlayers());
+        $actual = (int)$this->countGamePlayers();
+        $this->assertSame($expected, $actual);
     }
 
     private function countGamePlayers()

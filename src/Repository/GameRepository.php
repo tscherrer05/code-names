@@ -89,7 +89,7 @@ class GameRepository extends ServiceEntityRepository
         
         // Build votes
         // TODO : change db model so it is not so awkward.
-        $gamePlayers = $gameEntity->getGamePlayers();
+        $gamePlayers = $gameEntity->getGamePlayers()->toArray();
         $votes = [];
         $players = [];
         foreach($gamePlayers as $gp)

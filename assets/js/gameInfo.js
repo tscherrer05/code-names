@@ -11,6 +11,7 @@ export class GameInfo extends React.Component {
     passTurn() {
         PubSub.publish(Events.PASS_TURN, {
             gameKey:    this.props.gameKey,
+            playerKey:  this.props.playerKey
         })
     }
 
@@ -21,8 +22,6 @@ export class GameInfo extends React.Component {
         const PRIMARY_COLOR = 'badge-success'
         const SECONDARY_COLOR = 'badge-secondary'
         var currentPlayerKey = this.props.playerKey;
-        
-        
 
         const votes = this.props.remainingVotes
                         ?.map(playerKey => {
@@ -34,10 +33,8 @@ export class GameInfo extends React.Component {
                         })
                         ?.map(p => <span id={'vote-tag-'+p.key} key={'vote-tag-'+p.key} className={'badge '+p.color}>{p.name}</span>)
 
-                        debugger
-
         // Next turn button
-        let nextTurn = this.props.canPassTurn
+        let nextTurnButton = this.props.canPassTurn
                         ?   (
                                 <div className="row">
                                     <button onClick={() => this.passTurn()}>Passer le tour</button>
@@ -87,7 +84,7 @@ export class GameInfo extends React.Component {
                         {votes}
                     </div>
                 </div>
-                {nextTurn}
+                {nextTurnButton}
             </div>
         );
     }

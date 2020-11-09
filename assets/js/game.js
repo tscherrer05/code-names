@@ -3,7 +3,7 @@ import {Board} from './board';
 import {GameInfo} from './gameInfo';
 import { DataSource } from './dataSource';
 import { Events } from './events';
-import { returnCard, vote } from './modules/game';
+import { returnCard, vote, addNewPlayer, passTurn } from './modules/game';
 
 
 export default class Game extends React.Component {
@@ -24,14 +24,6 @@ export default class Game extends React.Component {
 
         this.subscriptions = 
         [
-            PubSub.subscribe(Events.TURN_PASSED, (evt, data) => {
-                this.setState({ 
-                    team: data.team,
-                    remainingVotes: data.voters || [],
-                    announcedNumber: 0,
-                    announcedWord: ""
-                 })
-            }),
             PubSub.subscribe(Events.GLOBAL_ERROR, (evt, data) => {
                 this.setState({
                     displayError: true,
@@ -63,6 +55,25 @@ export default class Game extends React.Component {
                         errorMessage: null
                     })
                 }, 4000)
+            }),
+            PubSub.subscribe(Events.PLAYER_JOINED, (evt, data) => {
+                this.setState(
+                    addNewPlayer(
+                        this.state,
+                        {playerKey: data.playerKey, playerName: data.playerName}
+                    )
+                )
+            }),
+            PubSub.subscribe(Events.TURN_PASSED, (evt, data) => {
+                console.log(Events.TURN_PASSED, data)
+                debugger
+                var res =                    passTurn(
+                    this.state, 
+                    {remainingVotes: data.remainingVotes}
+                )
+                this.setState(
+                    res
+                )
             })
         ]
     }

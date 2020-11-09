@@ -10,6 +10,7 @@ use App\CodeNames\GameInfo;
 use App\CodeNames\Board;
 use App\CodeNames\Card;
 use App\CodeNames\Player;
+use App\Entity\GamePlayer;
 
 /**
  * @method Game|null find($id, $lockMode = null, $lockVersion = null)
@@ -20,7 +21,6 @@ use App\CodeNames\Player;
  */
 class GameRepository extends ServiceEntityRepository
 {
-    private $entityManager;
 
     public function __construct(ManagerRegistry $registry)
     {
@@ -86,10 +86,11 @@ class GameRepository extends ServiceEntityRepository
             $twoDimCards[$card->x][$card->y] = $card;
         }
 
-        
         // Build votes
         // TODO : change db model so it is not so awkward.
-        $gamePlayers = $gameEntity->getGamePlayers()->toArray();
+        $gamePlayers = $this->getEntityManager()
+                        ->getRepository(GamePlayer::class)
+                        ->findBy(['game' => $gameEntity->getId()]);
         $votes = [];
         $players = [];
         foreach($gamePlayers as $gp)

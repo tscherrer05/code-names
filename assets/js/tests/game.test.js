@@ -1,5 +1,6 @@
-import { vote, returnCard } from '../modules/game';
-
+import { vote, returnCard, addNewPlayer, passTurn } from '../modules/game'
+import {Roles} from '../roles'
+import {Teams} from '../teams'
 
 const cards = [
     {
@@ -204,16 +205,13 @@ const cards = [
     }
 ];
 
-const playerOneKey = 'bc3932e8-4318-46ec-ad7c-76cc7c3e6596'
-const playerTwoKey = 'eb405817-9987-46f9-bf32-e6af01865ee6'
+const playerOneKey      = 'bc3932e8-4318-46ec-ad7c-76cc7c3e6596'
+const playerTwoKey      = 'eb405817-9987-46f9-bf32-e6af01865ee6'
+const playerThreeKey    = 'eb405817-9987-46f9-bf32-e6af01865sso'
 
 const baseState = {
     gameKey: '2c3f62bb-1532-4840-a71a-65f3b1f25c0a',
     playerKey: playerOneKey,
-    players: {
-        [playerOneKey]: 'Chuck',
-        [playerTwoKey]: 'Pat'
-    }
 }
 
 const voteEventData =  {
@@ -227,6 +225,11 @@ const returnEventData = {
     y: 3
 }
 
+const addPlayerEvent = {
+    playerKey: playerThreeKey,
+    playerName: 'PLAYER_TEST'
+}
+
 test('vote with null data', () => {
     const votes = {
         currentVotes: {},
@@ -234,7 +237,11 @@ test('vote with null data', () => {
     }
     const state = { 
         ...baseState,
-        ...votes
+        ...votes,
+        players: {
+            [playerOneKey]: 'Chuck',
+            [playerTwoKey]: 'Pat'
+        }
     }
 
     var result = vote(state, null)
@@ -246,7 +253,11 @@ test('vote with incorrect state', () => {
     const state = {
         ...baseState,
         currentVotes: {},
-        remainingVotes: null
+        remainingVotes: null,
+        players: {
+            [playerOneKey]: 'Chuck',
+            [playerTwoKey]: 'Pat'
+        }
     }
 
     var result = vote(state, voteEventData)
@@ -265,7 +276,11 @@ test('vote with incorrect data', () => {
     }
     const state = {
         ...baseState,
-        ...votes
+        ...votes,
+        players: {
+            [playerOneKey]: 'Chuck',
+            [playerTwoKey]: 'Pat'
+        }
     }
 
     const eventData = {
@@ -282,7 +297,11 @@ test('player first vote', () => {
     const state = {
         ...baseState,
         currentVotes: {},
-        remainingVotes: [playerOneKey, playerTwoKey]
+        remainingVotes: [playerOneKey, playerTwoKey],
+        players: {
+            [playerOneKey]: 'Chuck',
+            [playerTwoKey]: 'Pat'
+        }
     }
 
     var result = vote(state, voteEventData)
@@ -298,7 +317,11 @@ test('player vote for card nominal', () => {
     const state = {
         ...baseState,
         currentVotes: {[playerOneKey]: 23},
-        remainingVotes: [playerTwoKey]
+        remainingVotes: [playerTwoKey],
+        players: {
+            [playerOneKey]: 'Chuck',
+            [playerTwoKey]: 'Pat'
+        }
     }
 
     var result = vote(state, voteEventData)
@@ -314,7 +337,11 @@ test('player vote for other card nominal', () => {
     const state = {
         ...baseState,
         currentVotes: {[playerOneKey]: 23, [playerTwoKey]: 12},
-        remainingVotes: []
+        remainingVotes: [],
+        players: {
+            [playerOneKey]: 'Chuck',
+            [playerTwoKey]: 'Pat'
+        }
     }
 
     var result = vote(state, voteEventData)
@@ -332,7 +359,11 @@ test('return a card nominal', () => {
         ...baseState,
         cards: [{x:2, y: 3, returned: false}],
         currentVotes: {[playerOneKey]: 23, [playerTwoKey]: 23},
-        remainingVotes: []
+        remainingVotes: [],
+        players: {
+            [playerOneKey]: 'Chuck',
+            [playerTwoKey]: 'Pat'
+        }
     }
 
     var result = returnCard(state, returnEventData);
@@ -342,4 +373,166 @@ test('return a card nominal', () => {
         remainingVotes: [playerOneKey, playerTwoKey],
         cards: [{x:2, y:3, returned: true}]
     })
+})
+
+
+test('player joined first', () => {
+    const state = {
+        ...baseState,
+        remainingVotes: []
+    }
+
+    var result = addNewPlayer(state, addPlayerEvent)
+
+    expect(result).toStrictEqual({
+        players: [{key: playerThreeKey, name: addPlayerEvent.playerName}],
+        remainingVotes: [playerThreeKey]
+    })
+})
+
+test('player joined nominal', () => {
+    const state = {
+        ...baseState,
+        players: [{key: playerOneKey, name: 'PLAYER_TEST'+playerOneKey}],
+        remainingVotes: [playerOneKey]
+    }
+
+    var result = addNewPlayer(state, addPlayerEvent)
+
+    expect(result).toStrictEqual({
+        players: [
+            {key: playerOneKey, name: 'PLAYER_TEST'+playerOneKey},
+            {key: playerThreeKey, name: 'PLAYER_TEST'}
+        ],
+        remainingVotes: [playerOneKey, playerThreeKey]
+    })
+})
+
+test('player joined invalid state', () => {
+    const state = {
+        ...baseState,
+        players: null,
+        remainingVotes: null
+    }
+
+    var result = addNewPlayer(state, addPlayerEvent)
+
+    expect(result).toStrictEqual({
+        players: [{key: playerThreeKey, name: 'PLAYER_TEST'}],
+        remainingVotes: [playerThreeKey]
+    })
+})
+
+
+test('pass turn with invalid state', () => {
+    expect(passTurn({
+        ...baseState,
+        currentVotes: null,
+        currentTeam: null
+    }, {
+        remainingVotes: null
+    }))
+    .toStrictEqual({})
+})
+
+test('passTurn with no votes', () => {
+
+    expect(
+        passTurn(
+        {
+            ...baseState,
+            canPassTurn: true,
+            remainingVotes: [],
+            currentTeam: 1
+        },
+        {
+            remainingVotes: [playerOneKey, playerTwoKey]
+        })
+    ).toStrictEqual({
+        currentTeam: 2,
+        currentVotes: {},
+        remainingVotes: [playerOneKey, playerTwoKey],
+        canPassTurn: false
+    })
+
+    expect(passTurn(
+        {
+            ...baseState,
+            canPassTurn: false,
+            remainingVotes: [],
+            currentTeam: 2
+        },
+        {
+            remainingVotes: [playerOneKey, playerTwoKey],
+        })
+    )
+    .toStrictEqual({
+        currentTeam: 1,
+        currentVotes: {},
+        remainingVotes: [playerOneKey, playerTwoKey],
+        canPassTurn: false
+    })
+
+})
+
+test('passTurn with votes', () => {
+
+    expect(
+        passTurn(
+        {
+            ...baseState,
+            players: [],
+            currentVotes: {[playerOneKey]: 33},
+            currentTeam: 1
+        },
+        {
+            remainingVotes: [playerOneKey, playerTwoKey],
+        })
+    )
+    .toStrictEqual(
+    {
+        currentTeam: 2,
+        currentVotes: {},
+        remainingVotes: [playerOneKey, playerTwoKey],
+        canPassTurn: false
+    })
+
+})
+
+test('pass turn to master spy team', () => {
+
+    expect(passTurn({
+        ...baseState,
+        role: Roles.Master,
+        playerTeam: Teams.Blue,
+        currentTeam: Teams.Red,
+        canPassTurn: false
+    }, {
+        remainingVotes: [playerOneKey, playerTwoKey]
+    })).toStrictEqual({
+        currentTeam: Teams.Blue,
+        currentVotes: {},
+        remainingVotes: [playerOneKey, playerTwoKey],
+        canPassTurn: true
+    })
+
+})
+
+test('pass turn to master spy adverse team', () => {
+
+    expect(passTurn({
+        ...baseState,
+        role: Roles.Master,
+        playerTeam: Teams.Red,
+        currentTeam: Teams.Red,
+        canPassTurn: true
+    }, {
+        remainingVotes: [playerOneKey, playerTwoKey]
+    })).toStrictEqual({
+        currentTeam: Teams.Blue,
+        currentVotes: {},
+        remainingVotes: [playerOneKey, playerTwoKey],
+        canPassTurn: false
+    })
+
 })

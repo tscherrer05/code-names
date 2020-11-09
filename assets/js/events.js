@@ -4,5 +4,6 @@ export const Events = {
     CARD_RETURNED: 'cardReturned',
     PASS_TURN: 'passTurn',
     TURN_PASSED: 'turnPassed',
-    GLOBAL_ERROR: 'globalError'
+    GLOBAL_ERROR: 'globalError',
+    PLAYER_JOINED: 'playerJoined'
   }

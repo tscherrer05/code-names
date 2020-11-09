@@ -2,6 +2,7 @@
 namespace App\Controller;
 
 use App\CodeNames\GameStatus;
+use App\Entity\Roles;
 use App\Repository\CardRepository;
 use App\Repository\GamePlayerRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -138,6 +139,79 @@ class RealTimeController extends AbstractController
         }
     }
 
+    /**
+     * Passes a team turn
+     * @return TurnPassedEvent
+     * [
+     *  'action',
+     *  'team',
+     *  'remainingVotes'
+     * ]
+     */
+    public function passTurn($params)
+    {
+        $gameKey = $params['gameKey'];
+        $playerKey = $params['playerKey'];
+        $clients = $params['clients'];
+        $from = $params['from'];
+
+        try
+        {
+            // Game rules
+            $gameInfo = $this->gameRepository->getByGuid($gameKey);
+            $gameInfo->passTurn();
+
+            // Persistance
+            $gameEntity = $this->gameRepository->findByGuid($gameKey);
+            $gameEntity->setCurrentTeam($gameInfo->team);
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->flush();
+
+            // Event dispatch
+            // TODO : refactor into proper class
+            $spies = array_filter(
+                array_map(
+                    function($p) use($gameEntity) { 
+                        if($gameEntity->getCurrentTeam() == $p->getTeam()
+                            && $p->getRole() == Roles::Spy) {
+                            return $p;
+                        }
+                    },
+                    $gameEntity->getGamePlayers()->toArray()
+                )
+            );
+            $remainingVotes = [];
+            foreach($spies as $p) {
+                if($p->getX() == null && $p->getY() == null) {
+                    $remainingVotes[] = $p->getPublicKey();
+                }
+            }
+
+            $gp = $this->gamePlayerRepository->findByGuid($playerKey);
+            if($gp == null) 
+            {
+                throw new \Exception("Player not found with guid : $playerKey");
+            }
+
+            // TODO : how to test event dispatch ?
+            $model = [
+                'action'            => 'turnPassed',
+                'team'              => $gameInfo->currentTeam(),
+                'canPassTurn'       => $gp->getRole() === Roles::Master
+                                         && $gp->getTeam() === $gameEntity->getCurrentTeam(),
+                'remainingVotes'    => $remainingVotes
+            ];
+            $this->sendToAllClients($clients, json_encode($model));
+        }
+        catch(\Exception $e)
+        {
+            print($e->getMessage());
+            print($e->getTraceAsString());
+            $this->sendToOtherClients($clients, $from, json_encode(['error' => "Une erreur interne s'est produite."]));
+        }
+    }
+
+    // TODO : move into repo ?
     private function persist($gameInfo) 
     {
         $gameKey = $gameInfo->getGuid();
@@ -178,38 +252,6 @@ class RealTimeController extends AbstractController
 
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->flush();
-    }
-
-    public function passTurn($params)
-    {
-        $gameKey = $params['gameKey'];
-        $clients = $params['clients'];
-        $from = $params['from'];
-
-        try
-        {
-            // Règle du jeu
-            $gameInfo = $this->gameRepository->getByGuid($gameKey);
-            $gameInfo->passTurn();
-
-            // Persistance
-            $gameEntity = $this->gameRepository->findByGuid($gameKey);
-            $gameEntity->setCurrentTeam($gameInfo->team);
-
-            $entityManager = $this->getDoctrine()->getManager();
-            $entityManager->flush();
-
-            $model = [
-                'team' => $gameInfo->currentTeam()
-            ];
-            $this->sendToAllClients($clients, json_encode($model));
-        }
-        catch(\Exception $e)
-        {
-            print($e->getMessage());
-            print($e->getTraceAsString());
-            $this->sendToOtherClients($clients, $from, json_encode(['error' => "Une erreur interne s'est produite."]));
-        }
     }
 
     private function sendToOtherClients(\SplObjectStorage $clients, ConnectionInterface $from, string $message)

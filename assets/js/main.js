@@ -1,7 +1,7 @@
 import React, {Component} from 'react'
-import ReactDOM from 'react-dom';
+import ReactDOM from 'react-dom'
+import { Events } from './events';
 import Game from './game'
-import { Events } from './events'
 
 // Le système doit :
 // OK Avoir des composants qui s'initialisent au chargement de la page
@@ -52,11 +52,18 @@ conn.onmessage = (e) => {
             color: result.color
           })
           break;
-        case 'newTurn':
+        case Events.TURN_PASSED:
+          console.log(Events.TURN_PASSED, result)
           PubSub.publish(Events.TURN_PASSED, {
-            team: result.team
+            team: result.team,
+            remainingVotes: result.remainingVotes
           })
           break;
+        case Events.PLAYER_JOINED:
+          PubSub.publish(Events.PLAYER_JOINED, {
+            playerKey: result.playerKey,
+            playerName: result.playerName
+          })
         case null:
         case undefined:
         default:
@@ -79,6 +86,7 @@ $(document).ready(() => {
       parameters: data
     }
   ))
+
   PubSub.subscribe(Events.VOTE, (evt, data) => {
     send(evt, data)
   })

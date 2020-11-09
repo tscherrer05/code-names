@@ -173,6 +173,27 @@ class RealTimeControllerTest extends WebTestCase
                 ->findOneBy(['publicKey' => TestFixtures::GameKey1])
                 ->getCurrentTeam());
 
+        $this->service->passTurn([
+            'clients' => new SplObjectStorage(),
+            'gameKey' => TestFixtures::GameKey1,
+            'from' => null
+        ]);
+
+        $this->assertSame(Teams::Red, 
+                $this->entityManager
+                ->getRepository(Game::class)
+                ->findOneBy(['publicKey' => TestFixtures::GameKey1])
+                ->getCurrentTeam());
+    }
+
+    public function testNextTurnWithVotes() 
+    {
+        $this->assertSame(Teams::Blue, 
+                $this->entityManager
+                ->getRepository(Game::class)
+                ->findOneBy(['publicKey' => TestFixtures::GameKey1])
+                ->getCurrentTeam());
+
         $this->service->vote([
             'x' => 0,
             'y' => 2,

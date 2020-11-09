@@ -97,37 +97,6 @@ class DefaultController extends AbstractController
         {
             throw new \Exception("Player not found with guid : $playerKey");
         }
-        $gamePlayers = $this->gamePlayerRepository->findBy(['game' => $gameEntity->getId()]);
-        $cards       = $this->cardRepository->findBy(['game' => $gameEntity->getId()]);
-
-        // Construction de la réponse
-
-        // Joueurs qui ont pas voté
-        $notVoted = array_filter($gamePlayers, function($gp) 
-        {
-            return $gp->getX() == null && $gp->getY() == null;
-        });
-
-        $twoDimCards = [];
-        foreach ($cards as $c) {
-            $twoDimCards[$c->getX()][$c->getY()] = [
-                'color'     => $c->getColor(),
-                'returned'  => $c->getReturned(),
-                'word'      => $c->getWord(),
-                'x'         => $c->getX(),
-                'y'         => $c->getY(),
-                'voters'   => array_map(function($gp) {
-                    return [
-                        'playerKey' => $gp->getPublicKey(),
-                        'name' => $gp->getName()
-                    ];
-                },
-                array_filter($gamePlayers, function($gp) use($c)
-                {
-                    return $gp->getX() === $c->getX() && $gp->getY() === $c->getY();
-                }))
-            ];
-        }
 
         $viewModel = [
             "gameKey"           => $gameKey,
@@ -137,16 +106,7 @@ class DefaultController extends AbstractController
             "currentPlayerKey"  => $playerKey,
             "currentPlayerName" => $currPlayer->getName(),
             "currentPlayerRole" => $currPlayer->getRole(),
-            "currentPlayerTeam" => $currPlayer->getTeam(),
-            "isGuesser"         => true,
-            "cards"             => $twoDimCards,
-            "notVoted"          => array_map(function($gp) 
-                                    { 
-                                        return [
-                                            'playerKey' => $gp->getPublicKey(),
-                                            'name'      => $gp->getName()
-                                        ];
-                                    }, $notVoted)
+            "currentPlayerTeam" => $currPlayer->getTeam()
         ];
         return $this->render('default/game.html.twig', $viewModel);
     }
@@ -304,7 +264,8 @@ class DefaultController extends AbstractController
         $gamePlayer->setSessionId($this->playerSession->getId());
         $gamePlayer->setPublicKey($playerKey);
 
-        $gamePlayers = $game->getGamePlayers()->toArray();
+        $gamePlayers = $this->gamePlayerRepository
+                        ->findBy(['game' => $game->getId()]);
         $masterSpies = array_values(array_filter($gamePlayers, function($gp) {
             return $gp->getRole() === Roles::Master;
         }));
@@ -341,7 +302,6 @@ class DefaultController extends AbstractController
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->persist($gamePlayer);
         $entityManager->flush();
-
         $this->playerSession->set(self::PlayerSession, $playerKey);
 
         // Redirect to game

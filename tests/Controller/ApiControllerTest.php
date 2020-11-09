@@ -2,6 +2,7 @@
 
 use App\Controller\DefaultController;
 use App\DataFixtures\TestFixtures;
+use App\Entity\Teams;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class ApiControllerTest extends WebTestCase
@@ -22,7 +23,7 @@ class ApiControllerTest extends WebTestCase
         $this->assertSame('orange', $content[0]['word']);
     }
 
-    public function testGameInfosEndPointNominal()
+    public function testGameInfosWithSpy()
     {
         $client = static::createClient(); // à invoquer avant d'écrire dans la session
         $session = static::$container->get('session');
@@ -38,7 +39,7 @@ class ApiControllerTest extends WebTestCase
         $content = json_decode($response->getContent(), true);
 
         $this->assertSame(TestFixtures::GameKey1, $content['gameKey']);
-        $this->assertSame(1, $content['currentTeam']);
+        $this->assertSame(Teams::Blue, $content['currentTeam']);
         $this->assertSame('Acme', $content['currentWord']);
         $this->assertSame(42, $content['currentNumber']);
         $this->assertSame(1, $content['playerTeam']);
@@ -48,6 +49,65 @@ class ApiControllerTest extends WebTestCase
             TestFixtures::PlayerKey4], 
             $content['remainingVotes']);
         $this->assertSame([], $content['currentVotes']);
+        $this->assertSame(false, $content['canPassTurn']);
+    }
+
+    public function testGameInfosWithMasterSpyOfCurrentTeam() 
+    {
+        $client = static::createClient(); // à invoquer avant d'écrire dans la session
+        $session = static::$container->get('session');
+        $session->set(DefaultController::GameSession, TestFixtures::GameKey1);
+        $session->set(DefaultController::PlayerSession, TestFixtures::PlayerKey2);
+
+        $client->request('GET', '/gameInfos?gameKey='.TestFixtures::GameKey1);
+
+        $response = $client->getResponse();
+
+        $this->assertSame(200, $response->getStatusCode());
+
+        $content = json_decode($response->getContent(), true);
+
+        $this->assertSame(TestFixtures::GameKey1, $content['gameKey']);
+        $this->assertSame(Teams::Blue, $content['currentTeam']);
+        $this->assertSame('Acme', $content['currentWord']);
+        $this->assertSame(42, $content['currentNumber']);
+        $this->assertSame(1, $content['playerTeam']);
+        $this->assertSame([
+            TestFixtures::PlayerKey1, 
+            TestFixtures::PlayerKey3,
+            TestFixtures::PlayerKey4], 
+            $content['remainingVotes']);
+        $this->assertSame([], $content['currentVotes']);
+        $this->assertSame(true, $content['canPassTurn']);
+    }
+
+    public function testGameInfosWithMasterSpyOfOppositeTeam()
+    {
+        $client = static::createClient(); // à invoquer avant d'écrire dans la session
+        $session = static::$container->get('session');
+        $session->set(DefaultController::GameSession, TestFixtures::GameKey1);
+        $session->set(DefaultController::PlayerSession, TestFixtures::PlayerKey9);
+
+        $client->request('GET', '/gameInfos?gameKey='.TestFixtures::GameKey1);
+
+        $response = $client->getResponse();
+
+        $this->assertSame(200, $response->getStatusCode());
+
+        $content = json_decode($response->getContent(), true);
+
+        $this->assertSame(TestFixtures::GameKey1, $content['gameKey']);
+        $this->assertSame(Teams::Blue, $content['currentTeam']);
+        $this->assertSame('Acme', $content['currentWord']);
+        $this->assertSame(42, $content['currentNumber']);
+        $this->assertSame(Teams::Red, $content['playerTeam']);
+        $this->assertSame([
+            TestFixtures::PlayerKey1, 
+            TestFixtures::PlayerKey3,
+            TestFixtures::PlayerKey4], 
+            $content['remainingVotes']);
+        $this->assertSame([], $content['currentVotes']);
+        $this->assertSame(false, $content['canPassTurn']);
     }
 
     public function testGameInfosWithVotes()

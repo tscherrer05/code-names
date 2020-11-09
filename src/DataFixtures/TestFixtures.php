@@ -20,9 +20,20 @@ class TestFixtures extends Fixture implements FixtureGroupInterface
         return ['test'];
     }
  
+    /**
+     * Ongoing game
+     */
     const GameKey1 = "ad0abce2-f458-4d02-8cb4-ee3e0df495e6";
+    /**
+     * Lobby game
+     */
     const GameKey2 = "ad0abce2-f458-4d02-8cb4-ee3e0dkdsa0z";
+    /**
+     * Empty game
+     */
     const GameKey3 = "ad0abce2-f458-4d02-8cb4-ee3e0dkdsdc9";
+
+
     const PlayerKey1 = "299c6679-62a9-43d0-9a28-4299d25672eb";
     const PlayerKey2 = "900c6679-62a9-43d0-9a28-4299d25672ai";
     const PlayerKey3 = "900c6679-62a9-43d0-9a28-4299d25609ja";
@@ -31,6 +42,8 @@ class TestFixtures extends Fixture implements FixtureGroupInterface
     const PlayerKey6 = "900c6679-62a9-43d0-9a28-4299d213x0sc";
     const PlayerKey7 = "900c6679-62a9-43d0-9a28-4299d2131csq";
     const PlayerKey8 = "900c6679-62a9-43d0-9a28-4299d2130dsq";
+    const PlayerKey9 = "900c6679-62a9-43d0-9a28-4299d211dzsx";
+    
     const Cards = [
         ['orange', 0, 0, 1],
         ['chimpanzé', 0, 1, 2],
@@ -80,10 +93,11 @@ class TestFixtures extends Fixture implements FixtureGroupInterface
         $game->setCurrentTeam(Teams::Blue);
 
         // player
-        $this->createFakeSpy($manager, $game, 'Spy'.self::PlayerKey1, self::PlayerKey1);
-        $this->createFakeSpy($manager, $game, 'Spy'.self::PlayerKey3, self::PlayerKey3);
-        $this->createFakeSpy($manager, $game, 'Spy'.self::PlayerKey4, self::PlayerKey4);
-        $this->createFakeMaster($manager, $game, 'Player2', self::PlayerKey2);
+        $this->createFakePlayer($manager, $game, Teams::Blue, Roles::Spy, 'Spy'.self::PlayerKey1, self::PlayerKey1);
+        $this->createFakePlayer($manager, $game, Teams::Blue, Roles::Spy, 'Spy'.self::PlayerKey3, self::PlayerKey3);
+        $this->createFakePlayer($manager, $game, Teams::Blue, Roles::Spy,'Spy'.self::PlayerKey4, self::PlayerKey4);
+        $this->createFakePlayer($manager, $game, Teams::Blue, Roles::Master,'Player2', self::PlayerKey2);
+        $this->createFakePlayer($manager, $game, Teams::Red, Roles::Master,'Player2', self::PlayerKey9);
 
         // card
         $dataCards = self::Cards;
@@ -110,10 +124,10 @@ class TestFixtures extends Fixture implements FixtureGroupInterface
         $game->setCurrentTeam(null);
 
         // player
-        $this->createFakeSpy($manager, $game, 'Spy'.self::PlayerKey5, self::PlayerKey5);
-        $this->createFakeSpy($manager, $game, 'Spy'.self::PlayerKey6, self::PlayerKey6);
-        $this->createFakeSpy($manager, $game, 'Spy'.self::PlayerKey7, self::PlayerKey7);
-        $this->createFakeMaster($manager, $game, 'Master'.self::PlayerKey8, self::PlayerKey8);
+        $this->createFakePlayer($manager, $game, Teams::Blue, Roles::Spy, 'Spy'.self::PlayerKey5, self::PlayerKey5);
+        $this->createFakePlayer($manager, $game, Teams::Blue, Roles::Spy, 'Spy'.self::PlayerKey6, self::PlayerKey6);
+        $this->createFakePlayer($manager, $game, Teams::Blue, Roles::Spy, 'Spy'.self::PlayerKey7, self::PlayerKey7);
+        $this->createFakePlayer($manager, $game, Teams::Blue, Roles::Master, 'Master'.self::PlayerKey8, self::PlayerKey8);
 
         // card
         $dataCards = self::Cards;
@@ -130,31 +144,16 @@ class TestFixtures extends Fixture implements FixtureGroupInterface
         return $game;
     }
 
-    private function createFakeSpy(ObjectManager $manager,
-        Game $game, string $name, string $playerKey)
+    private function createFakePlayer(ObjectManager $manager,
+        Game $game, int $team, int $role, string $name, string $playerKey)
     {
         $gamePlayer = new GamePlayer();
         $gamePlayer->setGame($game);
         $gamePlayer->setName($name);
         $gamePlayer->setPublicKey($playerKey);
         $gamePlayer->setSessionId(Uuid::uuid1()->toString());
-        $gamePlayer->setTeam(Teams::Blue);
-        $gamePlayer->setRole(Roles::Spy);
-        $gamePlayer->setX(null);
-        $gamePlayer->setY(null);
-        $manager->persist($gamePlayer);
-    }
-
-    private function createFakeMaster(ObjectManager $manager,
-        Game $game, string $name, string $playerKey)
-    {
-        $gamePlayer = new GamePlayer();
-        $gamePlayer->setGame($game);
-        $gamePlayer->setName($name);
-        $gamePlayer->setPublicKey($playerKey);
-        $gamePlayer->setSessionId(Uuid::uuid1()->toString());
-        $gamePlayer->setTeam(Teams::Blue);
-        $gamePlayer->setRole(Roles::Master);
+        $gamePlayer->setTeam($team);
+        $gamePlayer->setRole($role);
         $gamePlayer->setX(null);
         $gamePlayer->setY(null);
         $manager->persist($gamePlayer);

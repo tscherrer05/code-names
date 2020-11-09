@@ -104,7 +104,6 @@ class ApiController extends AbstractController
                     $gameEntity->getGamePlayers()->toArray()
                 )
             );
-
             $remainingVotes = [];
             $currentVotes = [];
             $playerModels = [];
@@ -128,7 +127,8 @@ class ApiController extends AbstractController
                 'playerKey'             => $gp->getPublicKey(),
                 'playerTeam'            => $gp->getTeam(),
                 'playerRole'            => $gp->getRole(),
-                'canPassTurn'           => $gp->getRole() == Roles::Master,
+                'canPassTurn'           => $gp->getRole() === Roles::Master
+                                            && $gp->getTeam() === $gameEntity->getCurrentTeam(),
                 'players'               => $playerModels,
                 'currentVotes'          => $currentVotes,
                 'remainingVotes'        => $remainingVotes

@@ -18,7 +18,6 @@ export class Card extends React.Component {
             gameKey:    this.props.gameKey,
             playerKey:  this.props.playerKey,
         }
-        console.log(Events.VOTE, data)
         PubSub.publish(Events.VOTE, data)
     }
 
@@ -32,7 +31,6 @@ export class Card extends React.Component {
     }
 
     render() {
-        console.log('Render card')
 
         const renderImgComponent = (props) => {
             const attr = {

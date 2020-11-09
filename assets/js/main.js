@@ -53,7 +53,6 @@ conn.onmessage = (e) => {
           })
           break;
         case Events.TURN_PASSED:
-          console.log(Events.TURN_PASSED, result)
           PubSub.publish(Events.TURN_PASSED, {
             team: result.team,
             remainingVotes: result.remainingVotes

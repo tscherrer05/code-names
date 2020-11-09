@@ -9,7 +9,6 @@ export class Board extends React.Component {
     }
 
     render() {
-        console.log('Render board')
 
         const cardVotes = {}
         const votes = this.props.currentVotes || []

@@ -17,7 +17,6 @@ export class GameInfo extends React.Component {
 
 
     render() {
-        console.log('Render gameInfo')
 
         const PRIMARY_COLOR = 'badge-success'
         const SECONDARY_COLOR = 'badge-secondary'

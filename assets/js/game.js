@@ -37,9 +37,7 @@ export default class Game extends React.Component {
                 }, 4000)
             }),
             PubSub.subscribe(Events.HAS_VOTED, (evt, data) => {
-                console.log(Events.HAS_VOTED, data);
                 const stateDiff = vote(this.state, data)
-                console.log(Events.HAS_VOTED, stateDiff)
                 this.setState(stateDiff)
             }),
             PubSub.subscribe(Events.CARD_RETURNED, (evt, data) => {
@@ -64,15 +62,12 @@ export default class Game extends React.Component {
                     )
                 )
             }),
-            PubSub.subscribe(Events.TURN_PASSED, (evt, data) => {
-                console.log(Events.TURN_PASSED, data)
-                debugger
-                var res =                    passTurn(
-                    this.state, 
-                    {remainingVotes: data.remainingVotes}
-                )
+            PubSub.subscribe(Events.TURN_PASSED, (evt, data) => {            
                 this.setState(
-                    res
+                    passTurn(
+                        this.state, 
+                        {remainingVotes: data.remainingVotes}
+                    )
                 )
             })
         ]
@@ -136,7 +131,6 @@ export default class Game extends React.Component {
     }
 
      render() {
-        console.log('Render game')
 
         var errorMessage;
         if(this.state.displayError)

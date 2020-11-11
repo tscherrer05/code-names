@@ -1,10 +1,11 @@
 import React from 'react'
-import {Board} from './board';
-import {GameInfo} from './gameInfo';
-import { DataSource } from './dataSource';
-import { Events } from './events';
-import { returnCard, vote, addNewPlayer, passTurn } from './modules/game';
-
+import {Board} from './board'
+import {GameInfo} from './gameInfo'
+import { DataSource } from './dataSource'
+import { Events } from './events'
+import { Schema } from './map'
+import { returnCard, vote, addNewPlayer, passTurn } from './modules/game'
+import { Roles } from './roles'
 
 export default class Game extends React.Component {
 
@@ -154,13 +155,20 @@ export default class Game extends React.Component {
             )
         }
 
+        let schema = null
+        if(this.state.role == Roles.Master ){
+            schema = (<Schema cards={this.state.cards}/>)
+        }
+
         return (
             <div>
                 {errorMessage}
+                {schema}
                 <Board 
                     gameKey={this.state.gameKey} 
                     playerKey={this.state.playerKey}
                     name= {this.state.name}
+                    role={this.state.role}
                     isMyTurn={this.state.isMyTurn}
                     players={this.state.players}
                     currentVotes={this.state.currentVotes}

@@ -1,5 +1,6 @@
 import React, {Component} from 'react'
 import {Card} from './card';
+import { Roles } from './roles';
 
 export class Board extends React.Component {
     constructor(props) {
@@ -40,12 +41,12 @@ export class Board extends React.Component {
                                     gameKey=    {this.props.gameKey}
                                     playerKey=  {this.props.playerKey}
                                     votes=      {cardVotes[''+c.x+c.y] || []}
-                                    isClickable={this.props.isMyTurn}
+                                    isClickable={this.props.isMyTurn && this.props.role == Roles.Spy}
                                 />
                             }
                         )}
                 </div>
             </div>
-        );
+        )
     }
 }

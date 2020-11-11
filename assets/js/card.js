@@ -1,6 +1,7 @@
 import React, {Component} from 'react'
-import PubSub from 'pubsub-js';
-import {Events} from './events';
+import PubSub from 'pubsub-js'
+import {Events} from './events'
+import { Colors } from './colors';
 
 export class Card extends React.Component {
     constructor(props) {
@@ -40,28 +41,31 @@ export class Card extends React.Component {
             if(props.isClickable) {
                attr.onClick = () => this.vote()
             } else {
-                attr.onClick = () => this.dispatchComponentError("Hé ! C'est pas ton tour ! è_é");
+                attr.onClick = () => this.dispatchComponentError("Pas toucher ! è_é");
             }
             // TODO : retirer les magic strings
             if(props.returned) {
+                let src = 'images/'
                 switch(props.color) {
-                    case 0:
-                        attr['src'] = 'images/white.png';
+                    case Colors.White:
+                        src += 'white'
                         break;
-                    case 1:
-                        attr['src'] = 'images/blue1.png';
+                    case Colors.Blue:
+                        src += 'blue1'
                         break;
-                    case 2:
-                        attr['src'] = 'images/red0.png';
+                    case Colors.Red:
+                        src += 'red0'
                         break;
-                    case 3:
-                        attr['src'] = 'images/black.png';
+                    case Colors.Blue:
+                        src += 'black'
                         break;
                 }
+                src += '.png'
+                attr.src = src
                 return <img 
-                    key={attr['key']} 
-                    src={attr['src']}
-                    className={attr['className']}
+                    key={attr.key} 
+                    src={attr.src}
+                    className={attr.className}
                 />;
             }
             else 

@@ -44,7 +44,6 @@ class ApiController extends AbstractController
         // Queries
         $gameEntity  = $this->gameRepository->findByGuid($gameKey);
         $cards       = $this->cardRepository->findBy(['game' => $gameEntity->getId()]);
-        $gamePlayers = $gameEntity->getGamePlayers()->toArray();
 
         // Building model
         $models = [];
@@ -54,17 +53,7 @@ class ApiController extends AbstractController
                 'returned'  => $c->getReturned(),
                 'word'      => $c->getWord(),
                 'x'         => $c->getX(),
-                'y'         => $c->getY(),
-                'voters'    => array_map(function($gp) {
-                                    return [
-                                        'key' => $gp->getPublicKey(),
-                                        'name' => $gp->getName()
-                                    ];
-                                },
-                                array_filter($gamePlayers, function($gp) use($c)
-                                {
-                                    return $gp->getX() === $c->getX() && $gp->getY() === $c->getY();
-                                }))
+                'y'         => $c->getY()
             ];
         }
 

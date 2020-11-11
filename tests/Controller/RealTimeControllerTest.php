@@ -175,6 +175,7 @@ class RealTimeControllerTest extends WebTestCase
 
         $this->service->passTurn([
             'clients' => new SplObjectStorage(),
+            'playerKey' => TestFixtures::PlayerKey3,
             'gameKey' => TestFixtures::GameKey1,
             'from' => null
         ]);
@@ -197,13 +198,14 @@ class RealTimeControllerTest extends WebTestCase
         $this->service->vote([
             'x' => 0,
             'y' => 2,
-            'playerKey' => TestFixtures::PlayerKey2,
+            'playerKey' => TestFixtures::PlayerKey3,
             'gameKey' => TestFixtures::GameKey1,
             'clients' => new SplObjectStorage(),
             'from' => null
         ]);
         $this->service->passTurn([
             'clients' => new SplObjectStorage(),
+            'playerKey' => TestFixtures::PlayerKey2,
             'gameKey' => TestFixtures::GameKey1,
             'from' => null
         ]);
@@ -219,39 +221,5 @@ class RealTimeControllerTest extends WebTestCase
             $this->assertNull($gp->getY());
         }
     }
-
-    // public function testStartGameWithWrongTeams() 
-    // {
-    //     $result = $this->service->startGame([
-    //         'clients' => new SplObjectStorage(),
-    //         'gameKey' => TestFixtures::GameKey1,
-    //         'players' => [
-    //             [
-    //                 'playerKey' => TestFixtures::PlayerKey1,
-    //                 'team' => 2,
-    //                 'role' => 1
-    //             ],
-    //             [
-    //                 'playerKey' => TestFixtures::PlayerKey2,
-    //                 'team' => 1,
-    //                 'role' => 2
-    //             ]
-    //         ],
-    //     ]);
-
-    //     $game = $this->entityManager
-    //         ->getRepository(Game::class)
-    //         ->findOneBy(['publicKey' => TestFixtures::GameKey1]);
-
-    //     $this->assertSame(GameStatus::Lobby, $game->getStatus());
-    // }
-
-    // public function testUpdateLobbyInfosWithWrongSetup() {
-    //     // $result = $this->service->updateLobbyInfos([
-    //     //     'clients' => new SplObjectStorage(), // on doit forcément avoir les clients ? Ou il ne faudrait pas que le controller se renseigne lui même auprès du serveur ws ?
-    //     //     'gameKey' => TestFixtures::GameKey1,
-    //     //     'playerKey' => TestFixtures::PlayerKey1
-    //     // ]);
-    // }
 
 }

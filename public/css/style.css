@@ -3,11 +3,12 @@ body {
     padding-top: 10px;
     height: 100%;
 }
-#cn-schema .row {
-    padding-left: 50px;
+#cn-schema {
+    /* padding-left: 50px; */
+    width: 200px;
 }
 .cn-schema-img {
-    width: 15%;
+    width: 20%;
 }
 .cn-card {
     width: 100%;

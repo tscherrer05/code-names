@@ -4,12 +4,13 @@ namespace App\DataFixtures;
 
 use App\CodeNames\GameStatus;
 use App\Entity\Card;
+use App\Entity\Colors;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use App\Entity\Game;
-
+use App\Entity\Teams;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
-
+use PHPUnit\Util\Color;
 
 class ManualFixtures extends Fixture implements FixtureGroupInterface
 {
@@ -34,39 +35,39 @@ class ManualFixtures extends Fixture implements FixtureGroupInterface
         // card
         $dataCards = [
             // Ligne 1
-            ['orange',      0, 0, 1],
-            ['chimpanzé',   0, 1, 2],
-            ['orteil',      0, 2, 2],
-            ['courgette',   0, 3, 0],
-            ['potiron',     0, 4, 0],
+            ['orange',      0, 0, Colors::Blue],
+            ['chimpanzé',   0, 1, Colors::Red],
+            ['orteil',      0, 2, Colors::Red],
+            ['courgette',   0, 3, Colors::White],
+            ['potiron',     0, 4, Colors::White],
 
             // Ligne 2
-            ['courgette',   1, 0, 1],
-            ['télévision',   1, 1, 2],
-            ['patate',   1, 2, 1],
-            ['chat',   1, 3, 1],
-            ['courgette',   1, 4, 2],
+            ['courgette',   1, 0, Colors::White],
+            ['télévision',   1, 1, Colors::Red],
+            ['patate',   1, 2, Colors::Blue],
+            ['chat',   1, 3, Colors::Blue],
+            ['courgette',   1, 4, Colors::White],
 
             // Ligne 3
-            ['peinture',   2, 0, 1],
-            ['fraise',   2, 1, 3],
-            ['armoire',   2, 2, 2],
-            ['cortège',   2, 3, 1],
-            ['multiplication',   2, 4, 1],
+            ['peinture',   2, 0, Colors::Red],
+            ['fraise',   2, 1, Colors::Black],
+            ['armoire',   2, 2, Colors::Red],
+            ['cortège',   2, 3, Colors::Blue],
+            ['multiplication',   2, 4, Colors::Blue],
 
             // Ligne 4
-            ['poubelle',   3, 0, 1],
-            ['portable',   3, 1, 2],
-            ['maximum',   3, 2, 0],
-            ['poterie',   3, 3, 1],
-            ['rome',   3, 4, 1],
+            ['poubelle',   3, 0, Colors::Blue],
+            ['portable',   3, 1, Colors::Red],
+            ['maximum',   3, 2, Colors::White],
+            ['poterie',   3, 3, Colors::Blue],
+            ['rome',   3, 4, Colors::Blue],
 
             // Ligne 5
-            ['Potentiel',   4, 0, 1],
-            ['Serviette',   4, 1, 2],
-            ['Pied',   4, 2, 3],
-            ['Feuille',   4, 3, 0],
-            ['Voiture',   4, 4, 1],
+            ['Potentiel',   4, 0, Colors::Red],
+            ['Serviette',   4, 1, Colors::Red],
+            ['Pied',   4, 2, Colors::Red],
+            ['Feuille',   4, 3, Colors::White],
+            ['Voiture',   4, 4, Colors::Blue],
         ];
         foreach ($dataCards as $value) {
             $card = new Card();

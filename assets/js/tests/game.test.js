@@ -480,7 +480,25 @@ test('master spy joined', () => {
     })
 })
 
+test('opposite team joined', () => {
+    const state = {
+        ...baseState,
+        currentTeam: Teams.Blue,
+        remainingVotes: [],
+        currentVotes: {}
+    }
 
+    addPlayerEvent.playerTeam = Teams.Red
+    addPlayerEvent.playerRole = Roles.Spy
+
+    var result = addNewPlayer(state, addPlayerEvent)
+
+    expect(result).toStrictEqual({
+        players: {[addPlayerEvent.playerKey]: addPlayerEvent.playerName},
+        remainingVotes: state.remainingVotes,
+        currentVotes: state.currentVotes
+    })
+})
 
 
 // PASS TURN

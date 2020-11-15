@@ -141,7 +141,7 @@ export default class Game extends React.Component {
         if(this.state.displayError)
         {
             errorMessage = (
-                <div style={{position: 'absolute', left: '50%', top: '50%'}}>
+                <div style={{position: 'fixed', left: '50%', top: '50%', zIndex: 1000}}>
                     <div style={{
                         position: 'relative', 
                         left: '-50%', 

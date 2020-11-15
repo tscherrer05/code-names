@@ -13,6 +13,7 @@ import Game from './game'
 // OK Avoir des composants testables
 
 // TODO : où gérer la connection ws ?
+// TODO : config env
 // WebSocket connection
 const webSockUrl = 'ws://localhost:8080'
 const conn = new WebSocket(webSockUrl)
@@ -82,7 +83,7 @@ conn.onmessage = (e) => {
         default:
             break
     }
-} 
+}
 
 $(document).ready(() => {
   const domContainer  = document.querySelector('#game')

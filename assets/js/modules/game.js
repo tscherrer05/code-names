@@ -70,9 +70,10 @@ const returnCard = (state, eventData) => {
 const addNewPlayer = (state, eventData) => {
     const hasVoted = (state.currentVotes?.hasOwnProperty(eventData.playerKey) || false)
     const isMaster = eventData.playerRole === Roles.Master
+    const isOppositeTeam = eventData.playerTeam != state.currentTeam
     return {
         players: {...state.players || {}, [eventData.playerKey]: eventData.playerName},
-        remainingVotes:  hasVoted || isMaster 
+        remainingVotes:  hasVoted || isMaster || isOppositeTeam
                             ? state.remainingVotes 
                             : [...new Set(state.remainingVotes).add(eventData.playerKey)],
         currentVotes: state.currentVotes || {}

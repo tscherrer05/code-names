@@ -17,7 +17,6 @@ class Player
 
     function __construct(string $guid, string $name, int $team = null, int $role = null)
     {
-        // TODO : throw exception if invalid values
         $this->guid = $guid;
         $this->name = $name;
         $this->team = $team;

@@ -14,17 +14,29 @@ import Game from './game'
 
 // TODO : où gérer la connection ws ?
 // WebSocket connection
-const webSockUrl = 'ws://localhost:8080';
-const conn = new WebSocket(webSockUrl);
+const webSockUrl = 'ws://localhost:8080'
+const conn = new WebSocket(webSockUrl)
+const send = (evt, data) => conn.send(JSON.stringify(
+  {
+    action: evt,
+    parameters: data
+  }
+))
 
 // WebSocket events
 conn.onopen = (e) => {
-    console.log("Connection established!");
-};
+    const gameKey = document.querySelector('#gameKey').dataset.value
+    const playerKey = document.querySelector('#playerKey').dataset.value
+    
+    send(Events.PLAYER_CONNECTED, {
+      gameKey: gameKey,
+      playerKey: playerKey
+    })
+}
 
 conn.onmessage = (e) => {
     if (e === null || e === undefined) {
-        return;
+        return
     }
 
     const result = JSON.parse(e.data)
@@ -44,48 +56,43 @@ conn.onmessage = (e) => {
               playerName: result.playerName
             })
           }
-          break;
+          break
         case 'cardReturned':
           PubSub.publish(Events.CARD_RETURNED, {
             x: result.x,
             y: result.y,
             color: result.color
           })
-          break;
+          break
         case Events.TURN_PASSED:
           PubSub.publish(Events.TURN_PASSED, {
             team: result.team,
             remainingVotes: result.remainingVotes
           })
-          break;
+          break
         case Events.PLAYER_JOINED:
           PubSub.publish(Events.PLAYER_JOINED, {
             playerKey: result.playerKey,
-            playerName: result.playerName
+            playerName: result.playerName,
+            playerRole: result.playerRole,
+            playerTeam: result.playerTeam
           })
         case null:
         case undefined:
         default:
-            break;
+            break
     }
-};
+} 
 
 $(document).ready(() => {
-  const domContainer  = document.querySelector('#game');
-  const gameKey = document.querySelector('#gameKey').dataset.value;
-  const playerKey = document.querySelector('#playerKey').dataset.value;
+  const domContainer  = document.querySelector('#game')
+  const gameKey = document.querySelector('#gameKey').dataset.value
+  const playerKey = document.querySelector('#playerKey').dataset.value
 
-  // Rendu du jeu
+  // DOM rendering
   ReactDOM.render(<Game gameKey={gameKey} playerKey={playerKey} />, domContainer)
 
-  // Evènements
-  var send = (evt, data) => conn.send(JSON.stringify(
-    {
-      action: evt,
-      parameters: data
-    }
-  ))
-
+  // Events subscriptions
   PubSub.subscribe(Events.VOTE, (evt, data) => {
     send(evt, data)
   })

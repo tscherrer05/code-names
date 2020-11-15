@@ -221,5 +221,4 @@ class RealTimeControllerTest extends WebTestCase
             $this->assertNull($gp->getY());
         }
     }
-
 }

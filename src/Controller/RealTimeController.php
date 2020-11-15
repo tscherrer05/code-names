@@ -211,6 +211,32 @@ class RealTimeController extends AbstractController
         }
     }
 
+    /**
+     * Notifies clients about a connected player
+     */
+    public function connectPlayer($params)
+    {
+        $gameKey = $params['gameKey'];
+        $playerKey = $params['playerKey'];
+        $clients = $params['clients'];
+
+        $gp = $this->gamePlayerRepository->findByGuid($playerKey);
+        if($gp == null) 
+        {
+            throw new \Exception("Player not found with guid : $playerKey");
+        }
+
+        $model = [
+            'action' => 'playerJoined',
+            'playerKey' => $playerKey,
+            'playerName' => $gp->getName(),
+            'playerRole' => $gp->getRole(),
+            'playerTeam' => $gp->getTeam(),
+            'gameKey' => $gameKey,
+        ];
+        $this->sendToAllClients($clients, json_encode($model));
+    }
+
     // TODO : move into repo ?
     private function persist($gameInfo) 
     {

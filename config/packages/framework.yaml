@@ -6,11 +6,11 @@ framework:
     # Enables session support. Note that the session will ONLY be started if you read or write from it.
     # Remove or comment this section to explicitly disable session support.
     session:
-        handler_id: null
         cookie_secure: auto
         cookie_samesite: lax
-        handler_id: Symfony\Component\HttpFoundation\Session\Storage\Handler\PdoSessionHandler
-        gc_maxlifetime: 1440
+        handler_id: 'session.handler.pdo'
+        # handler_id: Symfony\Component\HttpFoundation\Session\Storage\Handler\PdoSessionHandler # https://symfony.com/doc/current/session/database.html#store-sessions-in-a-relational-database-mysql-postgresql
+        cookie_lifetime: 0 # Setting this value to 0 means the cookie is valid for the length of the browser session. (https://symfony.com/doc/current/reference/configuration/framework.html#cookie-lifetime)
 
     #esi: true
     #fragments: true

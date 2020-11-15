@@ -3,9 +3,13 @@ import { Teams } from "../teams"
 
 
 /**
- * 
- * @param {currentVotes, remainingVotes, cards} state 
- * @param {x, y, playerKey} eventData 
+ * Vote for a card
+ * @param {Object} state 
+ * @param {{}} state.currentVotes
+ * @param {string[]} state.remainingVotes
+ * @param {Object} eventData
+ * @param {string} eventData.x
+ * @param {string} eventData.y
  */
 const vote = (state, eventData) => {
     if(eventData == null || eventData.x == null || eventData.y == null) {
@@ -14,23 +18,27 @@ const vote = (state, eventData) => {
             remainingVotes: state.remainingVotes
         }
     }
-    const key = parseInt("" + eventData.x + eventData.y)
+    const key = "" + eventData.x + eventData.y
 
     return {
         currentVotes: state.remainingVotes == null 
         ? state.currentVotes
         : { 
             ...state.currentVotes,
-            [eventData.playerKey]: key       
+            [eventData.playerKey]: key
         },
         remainingVotes: state.remainingVotes?.filter(v => { if(v !== eventData.playerKey) return v }) || []
     }
 }
 
 /**
- * 
- * @param {*} state 
- * @param {*} eventData 
+ * Return a card and clears all its votes
+ * @param {Object} state 
+ * @param {{}} state.currentVotes
+ * @param {string[]} state.remainingVotes
+ * @param {Object} eventData
+ * @param {string} eventData.x
+ * @param {string} eventData.y 
  */
 const returnCard = (state, eventData) => {
     return {
@@ -48,17 +56,28 @@ const returnCard = (state, eventData) => {
 }
 
 /**
- * 
- * @param {*} state 
- * @param {*} eventData 
+ * Adds a player to the game in an idempotent way.
+ * @param {Object} state 
+ * @param {{}} state.players
+ * @param {{}} state.currentVotes
+ * @param {string[]} state.remainingVotes
+ * @param {Object} eventData 
+ * @param {string} eventData.playerName 
+ * @param {string} eventData.playerKey
+ * @param {number} eventData.playerRole
+ * @param {number} eventData.playerTeam
  */
 const addNewPlayer = (state, eventData) => {
+    const hasVoted = (state.currentVotes?.hasOwnProperty(eventData.playerKey) || false)
+    const isMaster = eventData.playerRole === Roles.Master
     return {
-        players: [...state.players || [], {key: eventData.playerKey, name: eventData.playerName}],
-        remainingVotes: [...state.remainingVotes || [], eventData.playerKey]
+        players: {...state.players || {}, [eventData.playerKey]: eventData.playerName},
+        remainingVotes:  hasVoted || isMaster 
+                            ? state.remainingVotes 
+                            : [...new Set(state.remainingVotes).add(eventData.playerKey)],
+        currentVotes: state.currentVotes || {}
     }
 }
-
 
 /**
  * 

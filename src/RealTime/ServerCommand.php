@@ -3,11 +3,13 @@ namespace App\RealTime;
 
 use Ratchet\Http\HttpServer;
 use Ratchet\Server\IoServer;
+use Ratchet\Session\SessionProvider;
 use Ratchet\WebSocket\WsServer;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\Session\Storage\Handler\PdoSessionHandler;
 
 class ServerCommand extends Command
 {
@@ -33,8 +35,11 @@ class ServerCommand extends Command
     {
         $server = IoServer::factory(
             new HttpServer(
-                new WsServer(
-                    new Messager($this->container)
+                new SessionProvider(
+                    new WsServer(
+                        new Messager($this->container)
+                    ),
+                    new PdoSessionHandler()
                 )
             ),
             8080

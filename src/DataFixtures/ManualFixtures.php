@@ -10,7 +10,6 @@ use Doctrine\Persistence\ObjectManager;
 use App\Entity\Game;
 use App\Entity\Teams;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
-use PHPUnit\Util\Color;
 
 class ManualFixtures extends Fixture implements FixtureGroupInterface
 {
@@ -30,7 +29,7 @@ class ManualFixtures extends Fixture implements FixtureGroupInterface
         $game->setStatus(GameStatus::OnGoing);
         $game->setCurrentWord(null);
         $game->setCurrentNumber(null);
-        $game->setCurrentTeam(1);
+        $game->setCurrentTeam(Teams::Blue);
 
         // card
         $dataCards = [

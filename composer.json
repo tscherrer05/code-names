@@ -9,6 +9,7 @@
         "ramsey/uuid": "^4.0",
         "sensio/framework-extra-bundle": "^5.5",
         "symfony/asset": "5.0.*",
+        "symfony/config": "5.0.*",
         "symfony/console": "5.0.*",
         "symfony/dotenv": "5.0.*",
         "symfony/expression-language": "5.0.*",

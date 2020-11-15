@@ -30,6 +30,8 @@ class Router
                 return $realTimeController->startGame($arguments);
             case 'passTurn':
                 return $realTimeController->passTurn($arguments);
+            case 'playerConnected':
+                return $realTimeController->connectPlayer($arguments);
             default:
                 throw new \InvalidArgumentException("Cette action n'est pas possible : " . $action->getMethod());
         }

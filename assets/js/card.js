@@ -56,7 +56,7 @@ export class Card extends React.Component {
                     case Colors.Red:
                         src += 'red0'
                         break;
-                    case Colors.Blue:
+                    case Colors.Black:
                         src += 'black'
                         break;
                 }

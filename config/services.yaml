@@ -10,7 +10,9 @@ services:
     _defaults:
         autowire: true      # Automatically injects dependencies in your services.
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
-    Symfony\Component\HttpFoundation\Session\Storage\Handler\PdoSessionHandler:
+    
+    session.handler.pdo:
+        class: Symfony\Component\HttpFoundation\Session\Storage\Handler\PdoSessionHandler
         arguments:
             - !service { class: PDO, factory: ['@database_connection', 'getWrappedConnection'] }
             - { lock_mode: 1 }

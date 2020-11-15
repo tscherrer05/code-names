@@ -44,7 +44,6 @@ export class Schema extends React.Component {
                                         src += 'black'
                                         break
                                     default:
-                                        debugger
                                 }
 
                                 attr.src = src+'.png'

@@ -10,8 +10,6 @@ class Messager implements MessageComponentInterface
     protected $clients;
     protected $container;
 
-    // TODO : action queue !
-
     public function __construct(ContainerInterface $container)
     {
         $this->container = $container;

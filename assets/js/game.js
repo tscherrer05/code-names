@@ -42,7 +42,6 @@ export default class Game extends React.Component {
                 this.setState(stateDiff)
             }),
             PubSub.subscribe(Events.CARD_RETURNED, (evt, data) => {
-                // TODO : require event data to have remaining votes ?
                 this.setState({
                     displayError: true,
                     errorMessage: "Carte retournée !",
@@ -59,7 +58,12 @@ export default class Game extends React.Component {
                 this.setState(
                     addNewPlayer(
                         this.state,
-                        {playerKey: data.playerKey, playerName: data.playerName}
+                        {   
+                            playerKey: data.playerKey, 
+                            playerName: data.playerName,
+                            playerRole: data.playerRole,
+                            playerTeam: data.playerTeam
+                        }
                     )
                 )
             }),

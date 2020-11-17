@@ -78,6 +78,7 @@ conn.onmessage = (e) => {
             playerRole: result.playerRole,
             playerTeam: result.playerTeam
           })
+          break
         case null:
         case undefined:
         default:

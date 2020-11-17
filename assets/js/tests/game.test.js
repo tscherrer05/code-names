@@ -241,8 +241,8 @@ test('vote with null data', () => {
         ...baseState,
         ...votes,
         players: {
-            [playerOneKey]: 'Chuck',
-            [playerTwoKey]: 'Pat'
+            [playerOneKey]: {name:'Chuck', role:Roles.Spy, team:Teams.Blue},
+            [playerTwoKey]: {name:'Pat', role:Roles.Spy, team:Teams.Blue}
         }
     }
 
@@ -257,8 +257,8 @@ test('vote with incorrect state', () => {
         currentVotes: {},
         remainingVotes: null,
         players: {
-            [playerOneKey]: 'Chuck',
-            [playerTwoKey]: 'Pat'
+            [playerOneKey]: {name:'Chuck', role:Roles.Spy, team:Teams.Blue},
+            [playerTwoKey]: {name:'Pat', role:Roles.Spy, team:Teams.Blue}
         }
     }
 
@@ -280,8 +280,8 @@ test('vote with incorrect data', () => {
         ...baseState,
         ...votes,
         players: {
-            [playerOneKey]: 'Chuck',
-            [playerTwoKey]: 'Pat'
+            [playerOneKey]: {name:'Chuck', role:Roles.Spy, team:Teams.Blue},
+            [playerTwoKey]: {name:'Pat', role:Roles.Spy, team:Teams.Blue}
         }
     }
 
@@ -301,8 +301,8 @@ test('player first vote', () => {
         currentVotes: {},
         remainingVotes: [playerOneKey, playerTwoKey],
         players: {
-            [playerOneKey]: 'Chuck',
-            [playerTwoKey]: 'Pat'
+            [playerOneKey]: {name:'Chuck', role:Roles.Spy, team:Teams.Blue},
+            [playerTwoKey]: {name:'Pat', role:Roles.Spy, team:Teams.Blue}
         }
     }
 
@@ -321,8 +321,8 @@ test('player vote for card nominal', () => {
         currentVotes: {[playerOneKey]: '02'},
         remainingVotes: [playerTwoKey],
         players: {
-            [playerOneKey]: 'Chuck',
-            [playerTwoKey]: 'Pat'
+            [playerOneKey]: {name:'Chuck', role:Roles.Spy, team:Teams.Blue},
+            [playerTwoKey]: {name:'Pat', role:Roles.Spy, team:Teams.Blue}
         }
     }
 
@@ -341,8 +341,8 @@ test('player vote for other card nominal', () => {
         currentVotes: {[playerOneKey]: '02', [playerTwoKey]: '02'},
         remainingVotes: [],
         players: {
-            [playerOneKey]: 'Chuck',
-            [playerTwoKey]: 'Pat'
+            [playerOneKey]: {name:'Chuck', role:Roles.Spy, team:Teams.Blue},
+            [playerTwoKey]: {name:'Pat', role:Roles.Spy, team:Teams.Blue}
         }
     }
 
@@ -363,8 +363,8 @@ test('return a card nominal', () => {
         currentVotes: {[playerOneKey]: '02', [playerTwoKey]: '02'},
         remainingVotes: [],
         players: {
-            [playerOneKey]: 'Chuck',
-            [playerTwoKey]: 'Pat'
+            [playerOneKey]: {name:'Chuck', role:Roles.Spy, team:Teams.Blue},
+            [playerTwoKey]: {name:'Pat', role:Roles.Spy, team:Teams.Blue}
         }
     }
 
@@ -387,7 +387,7 @@ test('player joined first', () => {
     var result = addNewPlayer(state, addPlayerEvent)
 
     expect(result).toStrictEqual({
-        players: {[playerThreeKey]: addPlayerEvent.playerName},
+        players: {[playerThreeKey]: {name:addPlayerEvent.playerName, team:addPlayerEvent.playerTeam, role:addPlayerEvent.playerRole}},
         remainingVotes: [playerThreeKey],
         currentVotes: {}
     })
@@ -396,7 +396,7 @@ test('player joined first', () => {
 test('player joined nominal', () => {
     const state = {
         ...baseState,
-        players: {[playerOneKey]: 'PLAYER_TEST'+playerOneKey},
+        players: {[playerOneKey]: {name:'PLAYER_TEST'+playerOneKey, role:Roles.Spy,team:Teams.Blue}},
         remainingVotes: [playerOneKey]
     }
 
@@ -405,8 +405,8 @@ test('player joined nominal', () => {
     expect(result).toStrictEqual({
         players: 
             {
-                [playerOneKey]: 'PLAYER_TEST'+playerOneKey,
-                [playerThreeKey]: 'PLAYER_TEST'
+                [playerOneKey]: {name:'PLAYER_TEST'+playerOneKey, role:Roles.Spy,team:Teams.Blue},
+                [addPlayerEvent.playerKey]: {name:addPlayerEvent.playerName, role:addPlayerEvent.playerRole,team:addPlayerEvent.playerTeam}
             },
         remainingVotes: [playerOneKey, playerThreeKey],
         currentVotes: {}
@@ -421,7 +421,7 @@ test('player joined invalid state', () => {
     var result = addNewPlayer(state, addPlayerEvent)
 
     expect(result).toStrictEqual({
-        players: {[playerThreeKey]: 'PLAYER_TEST'},
+        players: {[addPlayerEvent.playerKey]: {name:addPlayerEvent.playerName, role:addPlayerEvent.playerRole,team:addPlayerEvent.playerTeam}    },
         remainingVotes: [playerThreeKey],
         currentVotes: {}
     })
@@ -431,14 +431,18 @@ test('player joined invalid state', () => {
 test('new player already joined', () => {
     const state = {
         ...baseState,
-        players: { [addPlayerEvent.playerKey]: addPlayerEvent.playerName },
+        players: { 
+            [addPlayerEvent.playerKey]: {name:addPlayerEvent.playerName, role:addPlayerEvent.playerRole,team:addPlayerEvent.playerTeam}
+        },
         remainingVotes: [addPlayerEvent.playerKey]
     }
 
     var result = addNewPlayer(state, addPlayerEvent)
 
     expect(result).toStrictEqual({
-        players: {[playerThreeKey]: 'PLAYER_TEST'},
+        players: {
+            [addPlayerEvent.playerKey]: {name:addPlayerEvent.playerName, role:addPlayerEvent.playerRole,team:addPlayerEvent.playerTeam}
+        },
         remainingVotes: [playerThreeKey],
         currentVotes: {}
     })
@@ -447,7 +451,9 @@ test('new player already joined', () => {
 test('new player already voted', () => {
     const state = {
         ...baseState,
-        players: { [addPlayerEvent.playerKey]: addPlayerEvent.playerName },
+        players: { 
+            [addPlayerEvent.playerKey]: {name:addPlayerEvent.playerName, role:addPlayerEvent.playerRole,team:addPlayerEvent.playerTeam}
+        },
         remainingVotes: [],
         currentVotes: {[addPlayerEvent.playerKey]: '02'}
     }
@@ -455,7 +461,9 @@ test('new player already voted', () => {
     var result = addNewPlayer(state, addPlayerEvent)
 
     expect(result).toStrictEqual({
-        players: {[playerThreeKey]: 'PLAYER_TEST'},
+        players: {
+            [addPlayerEvent.playerKey]: {name:addPlayerEvent.playerName, role:addPlayerEvent.playerRole,team:addPlayerEvent.playerTeam}
+        },
         remainingVotes: [],
         currentVotes: state.currentVotes
     })
@@ -474,7 +482,9 @@ test('master spy joined', () => {
     var result = addNewPlayer(state, addPlayerEvent)
 
     expect(result).toStrictEqual({
-        players: {[addPlayerEvent.playerKey]: addPlayerEvent.playerName},
+        players: {
+            [addPlayerEvent.playerKey]: {name:addPlayerEvent.playerName, role:addPlayerEvent.playerRole,team:addPlayerEvent.playerTeam}
+        },
         remainingVotes: state.remainingVotes,
         currentVotes: state.currentVotes
     })
@@ -494,7 +504,9 @@ test('opposite team joined', () => {
     var result = addNewPlayer(state, addPlayerEvent)
 
     expect(result).toStrictEqual({
-        players: {[addPlayerEvent.playerKey]: addPlayerEvent.playerName},
+        players: {
+            [addPlayerEvent.playerKey]: {name:addPlayerEvent.playerName, role:addPlayerEvent.playerRole,team:addPlayerEvent.playerTeam}
+        },
         remainingVotes: state.remainingVotes,
         currentVotes: state.currentVotes
     })

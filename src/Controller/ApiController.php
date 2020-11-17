@@ -82,28 +82,34 @@ class ApiController extends AbstractController
                 throw new Exception("Player not found with guid : $playerKey");
             }
 
-            $spies = array_filter(
-                array_map(
-                    function($p) use($gameEntity) { 
-                        if($gameEntity->getCurrentTeam() == $p->getTeam()
-                            && $p->getRole() == Roles::Spy) {
-                            return $p;
-                        }
-                    },
-                    $gameEntity->getGamePlayers()->toArray()
-                )
-            );
+            $currentTeam = $gameEntity->getCurrentTeam();
+            $gamePlayers = $gameEntity->getGamePlayers()->toArray();
+            $allPlayers = [];
+            $currentTeamSpies = [];
+            $currentTeamPlayers = [];
             $remainingVotes = [];
             $currentVotes = [];
-            $playerModels = [];
-            foreach($spies as $p) {
-                $playerModels[$p->getPublicKey()] = $p->getName();
-                if($p->getX() == null && $p->getY() == null) {
-                    $remainingVotes[] = $p->getPublicKey();
-                } else {
-                    $cardKey = $p->getX().$p->getY();
-                    $playerKey = $p->getPublicKey();
-                    $currentVotes[$playerKey] = $cardKey;
+
+            foreach($gamePlayers as $p) 
+            {
+                $playerModel = ['name' => $p->getName(), 'team' => $p->getTeam(), 'role' => $p->getRole()];
+                $allPlayers[$p->getPublicKey()] = $playerModel;
+                if($currentTeam === $p->getTeam())
+                {
+                    $currentTeamPlayers[$p->getPublicKey()] = $playerModel;
+                }
+                if(Roles::Spy === $p->getRole())
+                {
+                    $currentTeamSpies[$p->getPublicKey()] = $playerModel;
+                    if($p->getX() == null && $p->getY() == null) 
+                    {
+                        $remainingVotes[] = $p->getPublicKey();
+                    } 
+                    else 
+                    {
+                        $cardKey = $p->getX().$p->getY();
+                        $currentVotes[$p->getPublicKey()] = $cardKey;
+                    }
                 }
             }
 
@@ -118,7 +124,9 @@ class ApiController extends AbstractController
                 'playerRole'            => $gp->getRole(),
                 'canPassTurn'           => $gp->getRole() === Roles::Master
                                             && $gp->getTeam() === $gameEntity->getCurrentTeam(),
-                'players'               => $playerModels,
+                'allPlayers'            => $allPlayers,
+                'currentTeamPlayers'    => $currentTeamPlayers,
+                'currentTeamSpies'          => $currentTeamSpies,    
                 'currentVotes'          => $currentVotes,
                 'remainingVotes'        => $remainingVotes
             ];

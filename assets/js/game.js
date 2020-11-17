@@ -103,7 +103,9 @@ export default class Game extends React.Component {
                     currentTeam:        data.currentTeam,
                     announcedNumber:    data.currentNumber,
                     announcedWord:      data.currentWord,
-                    players:            data.players,
+                    players:            data.allPlayers,
+                    currentTeamSpies:   data.currentTeamSpies,
+                    currentTeamPlayers: data.currentTeamPlayers,
                     currentVotes:       data.currentVotes,
                     remainingVotes:     data.remainingVotes,
                     isMyTurn:           data.currentTeam === data.playerTeam,
@@ -115,7 +117,6 @@ export default class Game extends React.Component {
         DataSource
             .get('cards', { gameKey: this.state.gameKey })
             .then(data => {
-                
                 self.setState(
                 {
                     cards: data.map(x => {
@@ -160,7 +161,7 @@ export default class Game extends React.Component {
         }
 
         let schema = null
-        if(this.state.role == Roles.Master ){
+        if(this.state.role == Roles.Master) {
             schema = (<Schema cards={this.state.cards}/>)
         }
 

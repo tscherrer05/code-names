@@ -1,5 +1,7 @@
 import React, {Component} from 'react'
 import {Events} from './events';
+import { Roles } from './roles';
+import { Teams } from './teams';
 
 export class GameInfo extends React.Component {
     constructor(props) {
@@ -22,11 +24,31 @@ export class GameInfo extends React.Component {
         const SECONDARY_COLOR = 'badge-secondary'
         var currentPlayerKey = this.props.playerKey;
 
+        // Connected players
+        debugger
+        const playerModels = Object.entries(this.props.players || [])
+        const players = 
+            playerModels.map(([key, model]) => {
+                let color
+                if(model.team === Teams.Blue) {
+                    color = "blue"
+                } else {
+                    color = "red"
+                }
+                return <li 
+                    id={'player-'+key} 
+                    key={'player-'+key} 
+                    style={{color: model.team === Teams.Blue ? 'blue' : 'red'}}>
+                        {model.name} ({model.role === Roles.Spy ? 'Espion' : 'Agent'})
+                    </li>
+        })
+
+        // Remaining votes
         const votes = this.props.remainingVotes
                         ?.map(playerKey => {
                             return { 
                                 key:    playerKey,
-                                name:   this.props.players[playerKey],
+                                name:   this.props.players[playerKey].name,
                                 color:  playerKey == currentPlayerKey ? PRIMARY_COLOR : SECONDARY_COLOR
                             }
                         })
@@ -62,7 +84,8 @@ export class GameInfo extends React.Component {
                             {playerTeam}
                         </p>
                         <p>Votre rôle :&nbsp;
-                            {this.props.role == 1 ? "Espion" : "Maître espion"}</p>
+                            {this.props.role == 1 ? "Espion" : "Maître espion"}
+                        </p>
                     </div>
                     <div className="col">
                         <p>Tour :&nbsp;
@@ -81,6 +104,12 @@ export class GameInfo extends React.Component {
                     <div className="col">
                         <p className="display-block">Votes restants :</p>
                         {votes}
+                    </div>
+                    <div className="col">
+                        <p className="display-bloc">Joueurs connectés :</p>
+                        <ul>
+                            {players}
+                        </ul>
                     </div>
                 </div>
                 {nextTurnButton}

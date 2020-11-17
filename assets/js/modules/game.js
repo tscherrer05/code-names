@@ -72,7 +72,7 @@ const addNewPlayer = (state, eventData) => {
     const isMaster = eventData.playerRole === Roles.Master
     const isOppositeTeam = eventData.playerTeam != state.currentTeam
     return {
-        players: {...state.players || {}, [eventData.playerKey]: eventData.playerName},
+        players: {...state.players || {}, [eventData.playerKey]: {name:eventData.playerName, role:eventData.playerRole, team:eventData.playerTeam}},
         remainingVotes:  hasVoted || isMaster || isOppositeTeam
                             ? state.remainingVotes 
                             : [...new Set(state.remainingVotes).add(eventData.playerKey)],

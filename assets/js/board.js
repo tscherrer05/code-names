@@ -16,7 +16,7 @@ export class Board extends React.Component {
         for (var playerKey in votes) {
             if (votes.hasOwnProperty(playerKey)) {
                 var cardKey = votes[playerKey]
-                var playerName = this.props.players[playerKey]
+                var playerName = this.props.players[playerKey].name
                 if(cardVotes[cardKey] == null)
                     cardVotes[cardKey] = [{ key: playerKey, name: playerName}]   
                 else

@@ -6,9 +6,6 @@ import { Colors } from './colors';
 export class Card extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {
-            votes: props.votes
-        }
     }
 
     vote() {

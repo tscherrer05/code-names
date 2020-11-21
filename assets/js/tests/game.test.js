@@ -2,6 +2,7 @@ import { vote, returnCard, addNewPlayer, passTurn } from '../modules/game'
 import {Roles} from '../roles'
 import {Teams} from '../teams'
 
+// DATA
 const cards = [
     {
         "color": 1,
@@ -232,6 +233,10 @@ const addPlayerEvent = {
     playerTeam: null
 }
 
+
+
+// VOTE
+
 test('vote with null data', () => {
     const votes = {
         currentVotes: {},
@@ -355,6 +360,8 @@ test('player vote for other card nominal', () => {
 })
 
 
+// RETURN CARD
+
 test('return a card nominal', () => {
 
     const state = {
@@ -377,6 +384,8 @@ test('return a card nominal', () => {
     })
 })
 
+
+// CONNECT PLAYER
 
 test('player joined first', () => {
     const state = {

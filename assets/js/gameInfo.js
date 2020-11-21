@@ -91,13 +91,6 @@ export class GameInfo extends React.Component {
                         <p>Tour :&nbsp;
                             <span id="current-team">Equipe {currentTeam}</span>
                         </p>
-                        <p>Mot annoncé :&nbsp;
-                            <span id="announced-word">{this.props.announcedWord}
-                            </span>
-                        </p>
-                        <p>Nombre annoncé :&nbsp;
-                            <span id="announced-number">{this.props.announcedNumber}</span>
-                        </p>
                         <span id="gameKey" data-value={this.props.gameKey}></span>
                         <span id="playerKey" data-value={this.props.playerKey}></span>
                     </div>

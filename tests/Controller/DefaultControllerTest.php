@@ -5,6 +5,7 @@ use App\Controller\DefaultController;
 use App\DataFixtures\TestFixtures;
 use App\Entity\Game;
 use App\Entity\GamePlayer;
+use App\Service\Random;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class DefaultControllerTest extends WebTestCase
@@ -22,6 +23,7 @@ class DefaultControllerTest extends WebTestCase
         $this->gameRepository = static::$container->get('doctrine')
             ->getManager()
             ->getRepository(Game::class);
+            // TODO : mock la classe random
     }
 
     public function testLoginPageNominal()
@@ -110,6 +112,16 @@ class DefaultControllerTest extends WebTestCase
         $this->assertEquals(302, $this->client->getResponse()->getStatusCode());
         $this->assertTrue($this->client->getResponse()->isRedirect(), "Doit rediriger.");
         $this->assertContains('game', $this->client->getRequest()->getUri(), "Doit être sur la page game");
+    }
+
+    public function testAutoConnectUniqueName() 
+    {
+        $randomService = $this->createMock(Random::class);
+        $randomService->expects($this->any())
+            ->method('name')
+            ->willReturn('NomUnique');
+
+            // TODO : how to mock services in functional tests
     }
 
     // TODO : résoudre le mystère de ce bug

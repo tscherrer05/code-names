@@ -101,7 +101,7 @@ class ApiController extends AbstractController
                 if(Roles::Spy === $p->getRole())
                 {
                     $currentTeamSpies[$p->getPublicKey()] = $playerModel;
-                    if($p->getX() == null && $p->getY() == null) 
+                    if($p->getX() == null && $p->getY() == null && $p->getTeam() === $currentTeam) 
                     {
                         $remainingVotes[] = $p->getPublicKey();
                     } 

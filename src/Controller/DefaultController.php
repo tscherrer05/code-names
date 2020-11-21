@@ -11,16 +11,16 @@ use App\CodeNames\GameStatus;
 use App\Entity\GamePlayer;
 use App\Entity\Roles;
 use App\Entity\Teams;
-use App\Repository\CardRepository;
 use App\Repository\GamePlayerRepository;
 use App\Repository\GameRepository;
+use App\Service\Random;
 
 class DefaultController extends AbstractController
 {
     private $gameRepository;
     private $playerSession;
     private $gamePlayerRepository;
-    private $cardRepository;
+    private $random;
 
     const PlayerSession = 'playerKey';
     const GameSession = 'gameKey';
@@ -28,12 +28,12 @@ class DefaultController extends AbstractController
     public function __construct(SessionInterface $session,
         GameRepository $gameRepo,
         GamePlayerRepository $gamePlayerRepository,
-        CardRepository $cardRepository)
+        Random $random)
     {
         $this->playerSession        = $session;
         $this->gameRepository       = $gameRepo;
         $this->gamePlayerRepository = $gamePlayerRepository;
-        $this->cardRepository       = $cardRepository;
+        $this->random               = $random;
     }
 
     public function index()
@@ -258,18 +258,21 @@ class DefaultController extends AbstractController
         // Generate player randomly
         $gamePlayer = new GamePlayer();
         $gamePlayer->setGame($game);
-        // https://stackoverflow.com/questions/4356289/php-random-string-generator
-        // TODO : friendly unique name
-        $gamePlayer->setName(substr(md5(rand()), 0, 7));
         $gamePlayer->setSessionId($this->playerSession->getId());
         $gamePlayer->setPublicKey($playerKey);
 
-        $gamePlayers = $this->gamePlayerRepository
-                        ->findBy(['game' => $game->getId()]);
+        $gamePlayers = $this->gamePlayerRepository->findBy(['game' => $game->getId()]);
+
+        // Choose player name
+        $playerNames = array_map(function($p) {
+            return $p->getName();
+        }, $gamePlayers);
+        $gamePlayer->setName($this->random->name($playerNames));
+
+        // Determine team and role
         $masterSpies = array_values(array_filter($gamePlayers, function($gp) {
             return $gp->getRole() === Roles::Master;
         }));
-        // Determine team and role
         if(\count($masterSpies) < 2)
         {
             $gamePlayer->setRole(Roles::Master);
@@ -360,4 +363,6 @@ class DefaultController extends AbstractController
             return $uuid;
         }
     }
+
+ 
 }

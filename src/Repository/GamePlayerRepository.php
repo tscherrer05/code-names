@@ -67,7 +67,7 @@ class GamePlayerRepository extends ServiceEntityRepository
     {
         $gps = $this->createQueryBuilder('gp')
             ->where('gp.game = :val1')
-            ->andWhere('gp.role = :val2')
+            ->andWhere('gp.team = :val2')
             ->setParameter(':val1', $gameId)
             ->setParameter(':val2', Teams::Blue)
             ->getQuery()
@@ -80,7 +80,7 @@ class GamePlayerRepository extends ServiceEntityRepository
     {
         $gps = $this->createQueryBuilder('gp')
             ->where('gp.game = :val1')
-            ->andWhere('gp.role = :val2')
+            ->andWhere('gp.team = :val2')
             ->setParameter(':val1', $gameId)
             ->setParameter(':val2', Teams::Red)
             ->getQuery()

@@ -19,7 +19,7 @@ export class Card extends React.Component {
         PubSub.publish(Events.VOTE, data)
     }
 
-    dispatchComponentError(message) {
+    dispatchError(message) {
         PubSub.publish(Events.GLOBAL_ERROR, {
             x:          this.props.x,
             y:          this.props.y,
@@ -30,20 +30,13 @@ export class Card extends React.Component {
 
     render() {
 
-        const renderImgComponent = (props) => {
-            const attr = {
-                key:        `${props.x}-${props.y}`,
-                className:  'cn-card',
-            };
-            if(props.isClickable) {
-               attr.onClick = () => this.vote()
-            } else {
-                attr.onClick = () => this.dispatchComponentError("Pas toucher ! è_é");
-            }
-            // TODO : retirer les magic strings
-            if(props.returned) {
-                let src = 'images/'
-                switch(props.color) {
+        const buildImgAttr = (props) => {
+            let src = 'images/'
+            if(props.returned) 
+            {
+                // TODO : retirer les magic strings
+                switch(props.color) 
+                {
                     case Colors.White:
                         src += 'white'
                         break;
@@ -57,24 +50,32 @@ export class Card extends React.Component {
                         src += 'black'
                         break;
                 }
-                src += '.png'
-                attr.src = src
-                return <img 
-                    key={attr.key} 
-                    src={attr.src}
-                    className={attr.className}
-                />;
             }
             else 
             {
-                attr['src'] = 'images/card.png';
-                if(!Array.isArray(props.votes))
-                {
-                    console.error("Mauvais format de props.votes")
-                    return
-                }
+                src += 'card'
+            }
+            src += '.png'
 
-                return (
+            return {
+                key:        `${props.x}-${props.y}`,
+                className:  'cn-card',
+                onClick:    props.isClickable ? () => this.vote() : () => this.dispatchError("Pas toucher ! è_é"),
+                src:        src
+            }
+        }
+
+        const renderImgComponent = (props) => {
+            const attr = buildImgAttr(props);
+            
+            return (props.returned) 
+            ? <img 
+                    key={attr.key}
+                    src={attr.src}
+                    onClick={attr.onClick}
+                    className={attr.className}
+                />
+             : (
                     <div>
                         <div className="cn-card-votes">
                             {props.votes.map(v => {
@@ -88,17 +89,16 @@ export class Card extends React.Component {
                             })}
                         </div>
                         <img 
-                            key={attr['key']} 
-                            src={attr['src']}
-                            onClick={attr['onClick']}
-                            className={attr['className']}
+                            key={attr.key} 
+                            src={attr.src}
+                            onClick={attr.onClick}
+                            className={attr.className}
                         />
                         <div key='cn-card-text' className='cn-card-text'>
                             {props.name}
                         </div>
                     </div>
                 );
-            }
         }
 
         return (

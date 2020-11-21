@@ -25,7 +25,6 @@ export class GameInfo extends React.Component {
         var currentPlayerKey = this.props.playerKey;
 
         // Connected players
-        debugger
         const playerModels = Object.entries(this.props.players || [])
         const players = 
             playerModels.map(([key, model]) => {

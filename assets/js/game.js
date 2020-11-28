@@ -3,9 +3,12 @@ import {Board} from './board'
 import {GameInfo} from './gameInfo'
 import { DataSource } from './dataSource'
 import { Events } from './events'
-import { Schema } from './map'
+import { Schema } from './schema'
 import { returnCard, vote, addNewPlayer, passTurn } from './modules/game'
 import { Roles } from './roles'
+import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Button';
+
 
 export default class Game extends React.Component {
 
@@ -20,7 +23,8 @@ export default class Game extends React.Component {
             displayError: false,
             currentVotes: [],
             remainingVotes: [],
-            cards: []
+            cards: [],
+            displayParameters: false
         }
 
         this.subscriptions = 
@@ -74,6 +78,9 @@ export default class Game extends React.Component {
                         {remainingVotes: data.remainingVotes}
                     )
                 )
+            }),
+            PubSub.subscribe(Events.GAME_HAS_RESET, (evt, data) => {
+                location.reload()
             })
         ]
     }
@@ -136,8 +143,25 @@ export default class Game extends React.Component {
         this.subscriptions.forEach(PubSub.unsubscribe);
     }
 
-     render() {
+    openParameters() {
+        this.setState({
+            displayParameters: true
+        })
+    }
 
+    closeParameters() {
+        this.setState({
+            displayParameters: false
+        })
+    }
+
+    resetGame() {
+        PubSub.publish(Events.RESET_GAME, {
+            gameKey: this.state.gameKey
+        })
+    }
+    
+    render() {
         var errorMessage;
         if(this.state.displayError)
         {
@@ -162,36 +186,66 @@ export default class Game extends React.Component {
 
         let schema = null
         if(this.state.role == Roles.Master) {
-            schema = (<Schema cards={this.state.cards}/>)
+            schema = (
+                <div className='col'>
+                    <Schema cards={this.state.cards}/>
+                </div>
+            )
         }
 
+        let parameters = (
+            <Modal
+                show={this.state.displayParameters}
+                backdrop="static"
+                keyboard={true}
+                onHide={() => this.closeParameters()}
+            >
+                <Modal.Header closeButton>
+                    Paramètres du jeu
+                </Modal.Header>
+                <Modal.Body>
+                    <button className='btn btn-secondary' onClick={() => this.resetGame()}>Recommencer la partie</button>
+                </Modal.Body>
+            </Modal>
+        )
+
         return (
-            <div>
+            <div className='container-fluid'>
                 {errorMessage}
-                {schema}
-                <Board 
-                    gameKey={this.state.gameKey} 
-                    playerKey={this.state.playerKey}
-                    name= {this.state.name}
-                    role={this.state.role}
-                    isMyTurn={this.state.isMyTurn}
-                    players={this.state.players}
-                    currentVotes={this.state.currentVotes}
-                    cards={this.state.cards}
-                />
-                <GameInfo 
-                    gameKey={this.state.gameKey} 
-                    playerKey={this.state.playerKey}
-                    playerTeam={this.state.playerTeam}
-                    name={this.state.name}
-                    role={this.state.role}
-                    currentTeam={this.state.currentTeam}
-                    announcedNumber={this.state.announcedNumber}
-                    announcedWord={this.state.announcedWord}
-                    players={this.state.players}
-                    remainingVotes={this.state.remainingVotes}
-                    canPassTurn={this.state.canPassTurn}
-                />
+                {parameters}
+                <div className='row'>
+                    <a href='#' onClick={() => this.openParameters()}>Paramètres</a>
+                </div>
+                <div className='row'>
+                    {schema}
+                    <div className='col'>
+                        <Board 
+                            gameKey={this.state.gameKey} 
+                            playerKey={this.state.playerKey}
+                            name= {this.state.name}
+                            role={this.state.role}
+                            isMyTurn={this.state.isMyTurn}
+                            players={this.state.players}
+                            currentVotes={this.state.currentVotes}
+                            cards={this.state.cards}
+                        />
+                    </div>
+                </div>
+                <div className='row'>
+                    <GameInfo 
+                            gameKey={this.state.gameKey} 
+                            playerKey={this.state.playerKey}
+                            playerTeam={this.state.playerTeam}
+                            name={this.state.name}
+                            role={this.state.role}
+                            currentTeam={this.state.currentTeam}
+                            announcedNumber={this.state.announcedNumber}
+                            announcedWord={this.state.announcedWord}
+                            players={this.state.players}
+                            remainingVotes={this.state.remainingVotes}
+                            canPassTurn={this.state.canPassTurn}
+                        />
+                </div>
             </div>
         )
      }

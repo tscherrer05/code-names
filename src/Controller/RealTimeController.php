@@ -2,26 +2,34 @@
 namespace App\Controller;
 
 use App\CodeNames\GameStatus;
+use App\Entity\Colors;
 use App\Entity\Roles;
 use App\Repository\CardRepository;
 use App\Repository\GamePlayerRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use App\Repository\GameRepository;
+use App\Service\Random;
 use Ratchet\ConnectionInterface;
 
 class RealTimeController extends AbstractController
 {
     private $gameRepository;
     private $gamePlayerRepository;
+    private $random;
 
     public function __construct(GameRepository $gameRepository, 
-    GamePlayerRepository $gamePlayerRepository, CardRepository $cardRepository)
+    GamePlayerRepository $gamePlayerRepository, CardRepository $cardRepository,
+    Random $random)
     {
         $this->gameRepository       = $gameRepository;
         $this->gamePlayerRepository = $gamePlayerRepository;
         $this->cardRepository       = $cardRepository;
+        $this->random               = $random;
     }
 
+    /**
+     * 
+     */
     public function startGame($params)
     {
         try {
@@ -62,7 +70,17 @@ class RealTimeController extends AbstractController
         }    
     }
 
-
+    /**
+     * A player votes for a card.
+     * [
+     *  'action',
+     *  'playerKey',
+     *  'playerName',
+     *  'x',
+     *  'y',
+     *  'color'
+     * ]
+     */
     public function vote($params)
     {
         // TODO : Sanitize input !
@@ -72,7 +90,6 @@ class RealTimeController extends AbstractController
         $gameKey = $params['gameKey'];
         $clients = $params['clients'];
 
-        // Effectuer la commande demandée par l'utilisateur en passant les paramètres à la racine du graphe.
         try
         {
             // Récupérer la racine du graphe
@@ -92,7 +109,7 @@ class RealTimeController extends AbstractController
 
             // TODO : $this->gameRepository->save($gameInfo);
 
-            // Propage des évènements aux clients connectés
+            // Dispatch events
             $model = [
                 'action'    => 'hasVoted',
                 'playerKey' => $player->guid,
@@ -110,7 +127,6 @@ class RealTimeController extends AbstractController
                     'x' => $x,
                     'y' => $y,
                     'color' => $voteResult['card']->color,
-                    // Pass remaining votes ?
                 ];
                 $this->sendToAllClients($clients, json_encode($model));
             }
@@ -141,7 +157,6 @@ class RealTimeController extends AbstractController
 
     /**
      * Passes a team turn
-     * @return TurnPassedEvent
      * [
      *  'action',
      *  'team',
@@ -169,22 +184,10 @@ class RealTimeController extends AbstractController
 
             // Event dispatch
             // TODO : refactor into proper class
-            $spies = array_filter(
-                array_map(
-                    function($p) use($gameEntity) { 
-                        if($gameEntity->getCurrentTeam() == $p->getTeam()
-                            && $p->getRole() == Roles::Spy) {
-                            return $p;
-                        }
-                    },
-                    $gameEntity->getGamePlayers()->toArray()
-                )
-            );
-            $remainingVotes = [];
-            foreach($spies as $p) {
-                if($p->getX() == null && $p->getY() == null) {
-                    $remainingVotes[] = $p->getPublicKey();
-                }
+            $gamePlayers = $gameEntity->getGamePlayers()->toArray();
+            foreach($gamePlayers as $p) {
+                $p->setX(null);
+                $p->setY(null);
             }
 
             $gp = $this->gamePlayerRepository->findByGuid($playerKey);
@@ -199,7 +202,7 @@ class RealTimeController extends AbstractController
                 'team'              => $gameInfo->currentTeam(),
                 'canPassTurn'       => $gp->getRole() === Roles::Master
                                          && $gp->getTeam() === $gameEntity->getCurrentTeam(),
-                'remainingVotes'    => $remainingVotes
+                'remainingVotes'    => [] // TODO : remove uses from client app
             ];
             $this->sendToAllClients($clients, json_encode($model));
         }
@@ -233,6 +236,54 @@ class RealTimeController extends AbstractController
             'playerRole' => $gp->getRole(),
             'playerTeam' => $gp->getTeam(),
             'gameKey' => $gameKey,
+        ];
+        $this->sendToAllClients($clients, json_encode($model));
+    }
+
+    /**
+     * Resets a game and shuffle cards' colors and words
+     */
+    public function resetGame($params) 
+    {
+        $gameKey = $params['gameKey'];
+        $clients = $params['clients'];
+        
+        $game = $this->gameRepository->findByGuid($gameKey);
+        $cards = $game->getCards()->toArray();
+        $gamePlayers = $game->getGamePlayers()->toArray();
+
+        $numbers = [
+            [Colors::Blue, 7],
+            [Colors::Red, 7],
+            [Colors::White, 10],
+            [Colors::Black, 1],
+        ];
+
+        foreach($cards as $c) {
+            $c->setReturned(false);
+            $index = $this->random->rand(0, \count($numbers)-1);
+            $choice = $numbers[$index];
+            $color = $choice[0];
+            $number = $choice[1];
+            $c->setColor($color);
+            if($number === 1) {
+                array_splice($numbers, $index, 1);
+            } else {
+                $numbers[$index][1]--;
+            }
+        }
+
+        foreach($gamePlayers as $gp) {
+            $gp->setX(null);
+            $gp->setY(null);
+        }
+
+        $entityManager = $this->getDoctrine()->getManager();
+        $entityManager->flush();
+
+        $model = [
+            'action' => 'gameHasReset',
+            'gameKey' => $gameKey
         ];
         $this->sendToAllClients($clients, json_encode($model));
     }

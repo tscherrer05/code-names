@@ -6,5 +6,7 @@ export const Events = {
     TURN_PASSED: 'turnPassed',
     GLOBAL_ERROR: 'globalError',
     PLAYER_CONNECTED: 'playerConnected',
-    PLAYER_JOINED: 'playerJoined'
+    PLAYER_JOINED: 'playerJoined',
+    RESET_GAME: 'resetGame',
+    GAME_HAS_RESET: 'gameHasReset'
   }

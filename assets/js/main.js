@@ -79,6 +79,11 @@ conn.onmessage = (e) => {
             playerTeam: result.playerTeam
           })
           break
+        case Events.GAME_HAS_RESET:
+          PubSub.publish(Events.GAME_HAS_RESET, {
+            gameKey: result.gameKey
+          })
+          break
         case null:
         case undefined:
         default:
@@ -100,6 +105,10 @@ $(document).ready(() => {
   })
 
   PubSub.subscribe(Events.PASS_TURN, (evt, data) => {
+    send(evt, data)
+  })
+
+  PubSub.subscribe(Events.RESET_GAME, (evt, data) => {
     send(evt, data)
   })
 })

@@ -5,6 +5,7 @@ use App\CodeNames\GameStatus;
 use App\Controller\RealTimeController;
 use App\DataFixtures\TestFixtures;
 use App\Entity\Card;
+use App\Entity\Colors;
 use App\Entity\Game;
 use App\Entity\GamePlayer;
 use App\Entity\Teams;
@@ -209,16 +210,75 @@ class RealTimeControllerTest extends WebTestCase
             'gameKey' => TestFixtures::GameKey1,
             'from' => null
         ]);
-
-        $this->assertSame(Teams::Red, 
-                $this->entityManager
-                ->getRepository(Game::class)
-                ->findOneBy(['publicKey' => TestFixtures::GameKey1])
-                ->getCurrentTeam());
-        foreach($this->entityManager->getRepository(GamePlayer::class)->findBy(['game' => TestFixtures::GameKey1]) as $gp)
+        
+        $game = $this->getGame(TestFixtures::GameKey1);
+        $this->assertSame(Teams::Red, $game->getCurrentTeam());
+        $gamePlayers = $game->getGamePlayers();
+        foreach($gamePlayers as $gp)
         {
             $this->assertNull($gp->getX());
             $this->assertNull($gp->getY());
         }
+    }
+
+    public function testResetGame_AllCardsHidden() {
+        $gameKey = TestFixtures::GameKey4;
+        $this->service->resetGame([
+            'gameKey' => $gameKey,
+            'clients' => new SplObjectStorage(),
+            'from' => null
+        ]);
+
+        $game = $this->getGame($gameKey);
+        
+        $cards = $game->getCards()->toArray();
+        $this->assertTrue(\count($cards) > 0);
+        foreach($cards as $c) {
+            $this->assertFalse($c->getReturned());
+        }
+    }
+
+    public function testResetGame_AllVotesReset() {
+        $gameKey = TestFixtures::GameKey4;
+        $this->service->resetGame([
+            'gameKey' => $gameKey,
+            'clients' => new SplObjectStorage(),
+            'from' => null
+        ]);
+
+        $game = $this->getGame($gameKey);
+        
+        $gps = $game->getGamePlayers()->toArray();
+        $this->assertTrue(\count($gps) > 0);
+        foreach($gps as $gp) {
+            $this->assertNull($gp->getX());
+            $this->assertNull($gp->getY());
+        }
+    }
+
+    public function testResetGame_OneBlackCard() {
+        $gameKey = TestFixtures::GameKey4;
+        $this->service->resetGame([
+            'gameKey' => $gameKey,
+            'clients' => new SplObjectStorage(),
+            'from' => null
+        ]);
+
+        $game = $this->getGame($gameKey);
+        
+        $cards = $game->getCards()->toArray();
+        $this->assertTrue(\count($cards) > 0);
+        $count = 0;
+        foreach($cards as $c) {
+            if($c->getColor() === Colors::Black) $count++;
+        }
+        $this->assertSame(1, $count);
+    }
+
+
+    private function getGame($gameKey) {
+        return $this->entityManager
+                    ->getRepository(Game::class)
+                    ->findOneBy(['publicKey' => $gameKey]);
     }
 }

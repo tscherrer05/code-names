@@ -265,7 +265,6 @@ class RealTimeControllerTest extends WebTestCase
         ]);
 
         $game = $this->getGame($gameKey);
-        
         $cards = $game->getCards()->toArray();
         $this->assertTrue(\count($cards) > 0);
         $count = 0;
@@ -274,6 +273,18 @@ class RealTimeControllerTest extends WebTestCase
         }
         $this->assertSame(1, $count);
     }
+
+    public function testEmptyGame_Nominal() {
+        $gameKey = TestFixtures::GameKey1;
+        $this->service->emptyGame([
+            'gameKey' => $gameKey,
+            'clients' => new SplObjectStorage(),
+            'from' => null
+        ]);
+
+        $this->assertSame(0, \count($this->getGame($gameKey)->getGamePlayers()->toArray()));
+    }
+
 
 
     private function getGame($gameKey) {

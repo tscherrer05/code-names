@@ -8,5 +8,7 @@ export const Events = {
     PLAYER_CONNECTED: 'playerConnected',
     PLAYER_JOINED: 'playerJoined',
     RESET_GAME: 'resetGame',
-    GAME_HAS_RESET: 'gameHasReset'
+    GAME_HAS_RESET: 'gameHasReset',
+    EMPTY_GAME: 'emptyGame',
+    GAME_IS_EMPTIED: 'gameIsEmptied'
   }

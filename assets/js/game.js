@@ -78,9 +78,6 @@ export default class Game extends React.Component {
                         {remainingVotes: data.remainingVotes}
                     )
                 )
-            }),
-            PubSub.subscribe(Events.GAME_HAS_RESET, (evt, data) => {
-                location.reload()
             })
         ]
     }
@@ -160,6 +157,12 @@ export default class Game extends React.Component {
             gameKey: this.state.gameKey
         })
     }
+
+    emptyGame() {
+        PubSub.publish(Events.EMPTY_GAME, {
+            gameKey: this.state.gameKey
+        })
+    }
     
     render() {
         var errorMessage;
@@ -204,7 +207,8 @@ export default class Game extends React.Component {
                     Paramètres du jeu
                 </Modal.Header>
                 <Modal.Body>
-                    <button className='btn btn-secondary' onClick={() => this.resetGame()}>Recommencer la partie</button>
+                    <button className='btn btn-secondary btn-lg btn-block' onClick={() => this.resetGame()}>Recommencer la partie (POUR TOUS)</button>
+                    <button className='btn btn-secondary btn-lg btn-block' onClick={() => this.emptyGame()}>Terminer la partie (POUR TOUS)</button>
                 </Modal.Body>
             </Modal>
         )

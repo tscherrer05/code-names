@@ -43,7 +43,7 @@ conn.onmessage = (e) => {
     const result = JSON.parse(e.data)
 
     switch (result.action) {
-        case 'hasVoted':
+        case Events.HAS_VOTED:
           if('error' in result) {
             PubSub.publish(Events.HAS_VOTED, {
               error: result.error,
@@ -58,7 +58,7 @@ conn.onmessage = (e) => {
             })
           }
           break
-        case 'cardReturned':
+        case Events.CARD_RETURNED:
           PubSub.publish(Events.CARD_RETURNED, {
             x: result.x,
             y: result.y,
@@ -80,10 +80,10 @@ conn.onmessage = (e) => {
           })
           break
         case Events.GAME_HAS_RESET:
-          PubSub.publish(Events.GAME_HAS_RESET, {
-            gameKey: result.gameKey
-          })
+          location.reload()
           break
+        case Events.GAME_IS_EMPTIED:
+          location.href = result.redirectUrl
         case null:
         case undefined:
         default:
@@ -109,6 +109,10 @@ $(document).ready(() => {
   })
 
   PubSub.subscribe(Events.RESET_GAME, (evt, data) => {
+    send(evt, data)
+  })
+
+  PubSub.subscribe(Events.EMPTY_GAME, (evt, data) => {
     send(evt, data)
   })
 })

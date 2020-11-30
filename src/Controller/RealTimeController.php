@@ -288,6 +288,28 @@ class RealTimeController extends AbstractController
         $this->sendToAllClients($clients, json_encode($model));
     }
 
+    public function emptyGame($params) {
+        $gameKey = $params['gameKey'];
+        $clients = $params['clients'];
+        $em = $this->getDoctrine()->getManager();
+
+        foreach($this->gameRepository
+                    ->findByGuid($gameKey)
+                    ->getGamePlayers()
+                    ->toArray() 
+                as $gp) {
+               $em->remove($gp); 
+        }
+
+        $em->flush();        
+        $model = [
+            'action' => 'gameIsEmptied',
+            'gameKey' => $gameKey,
+            'redirectUrl' => '/disconnect'
+        ];
+        $this->sendToAllClients($clients, json_encode($model));
+    }
+
     // TODO : move into repo ?
     private function persist($gameInfo) 
     {

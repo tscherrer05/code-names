@@ -34,6 +34,8 @@ class Router
                 return $realTimeController->connectPlayer($arguments);
             case 'resetGame':
                 return $realTimeController->resetGame($arguments);
+            case 'emptyGame':
+                return $realTimeController->emptyGame($arguments);
             default:
                 throw new \InvalidArgumentException("Cette action n'est pas possible : " . $action->getMethod());
         }

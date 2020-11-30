@@ -2,9 +2,10 @@
 
 {% block content %}
 <div class="container">
-    <p>Connecté en tant que : {{playerName}}</p>
-    <p>ad0abce2-f458-4d02-8cb4-ee3e0df495e6</p>
-    <form action="/join" method="post" name="join-game-form">
+    <h1>Code Names</h1>
+    <p>Vous êtes connecté en tant que : {{playerName}}</p>
+    <a href="{{ path('auto_connect') }}?gameKey=ad0abce2-f458-4d02-8cb4-ee3e0df495e6">Rejoindre la partie</a>
+    {# <form action="/join" method="post" name="join-game-form">
         <label for="game">Rejoindre une partie</label>
         <input type="text" id="gameKey" name="gameKey">
         <button id="join-game" type="submit">Rejoindre</button>    
@@ -12,6 +13,6 @@
     <p>OU</p>
     <form action="/create" method="post">
         <button>Créer une nouvelle partie</button>
-    </form>
+    </form> #}
 </div>
 {% endblock %}

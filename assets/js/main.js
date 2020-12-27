@@ -115,4 +115,7 @@ $(document).ready(() => {
   PubSub.subscribe(Events.EMPTY_GAME, (evt, data) => {
     send(evt, data)
   })
+
+  setInterval(() => {send('heartBeat', {})}, 30000)
+
 })

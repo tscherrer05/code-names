@@ -36,6 +36,8 @@ class Router
                 return $realTimeController->resetGame($arguments);
             case 'emptyGame':
                 return $realTimeController->emptyGame($arguments);
+            case 'heartBeat':
+                return;
             default:
                 throw new \InvalidArgumentException("Cette action n'est pas possible : " . $action->getMethod());
         }

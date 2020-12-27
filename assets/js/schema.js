@@ -18,7 +18,7 @@ export class Schema extends React.Component {
         })
 
         return (
-            <div                    
+            <div      
                 key='cn-schema-row'
                 id='cn-schema'>
                 <div className='row'>

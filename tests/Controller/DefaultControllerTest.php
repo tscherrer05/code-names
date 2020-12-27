@@ -1,10 +1,12 @@
 <?php
 namespace App\Tests\Controller;
 
+use App\CodeNames\GameStatus;
 use App\Controller\DefaultController;
 use App\DataFixtures\TestFixtures;
 use App\Entity\Game;
 use App\Entity\GamePlayer;
+use App\Entity\Roles;
 use App\Service\Random;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
@@ -33,24 +35,6 @@ class DefaultControllerTest extends WebTestCase
 
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
         $this->assertSelectorExists('input#login');
-    }
-
-    public function testStartNominal()
-    {
-        $crawler = $this->client->request('GET', '/start');
-
-        $this->assertSelectorExists('input#gameKey');
-        $form = $crawler->selectButton('join-game')->form();
-
-        $form['gameKey'] = TestFixtures::GameKey1;
-
-        $crawler = $this->client->submit($form);
-        $this->client->followRedirects(true);
-
-        $this->assertTrue($this->client->getResponse()->isRedirect());
-        $this->assertContains('join', $this->client->getRequest()->getUri());
-        $this->client->followRedirect();
-        $this->assertContains('login', $this->client->getRequest()->getUri());
     }
 
     public function testRefreshLobby()
@@ -114,15 +98,14 @@ class DefaultControllerTest extends WebTestCase
         $this->assertContains('game', $this->client->getRequest()->getUri(), "Doit être sur la page game");
     }
 
-    public function testAutoConnectUniqueName() 
-    {
-        $randomService = $this->createMock(Random::class);
-        $randomService->expects($this->any())
-            ->method('name')
-            ->willReturn('NomUnique');
-
-            // TODO : how to mock services in functional tests
-    }
+    // TODO : how to mock services in functional tests
+    // public function testAutoConnectUniqueName() 
+    // {
+    //     $randomService = $this->createMock(Random::class);
+    //     $randomService->expects($this->any())
+    //         ->method('name')
+    //         ->willReturn('NomUnique');
+    // }
 
     // TODO : résoudre le mystère de ce bug
     // public function testAutoConnectWithMissingSpyMaster() 
@@ -149,10 +132,47 @@ class DefaultControllerTest extends WebTestCase
     //     $this->assertSame(2, $masterSpies, 'Autoconnect should prioritize MasterSpies');
     // }
 
+
+    public function testCreateGame() 
+    {
+        // Arrange
+        $before = $this->countGames();
+
+        // Act
+        $this->client->request('GET', '/createGame');
+
+        // Assert
+        $this->assertEquals($before + 1, $this->countGames());
+
+        $this->client->followRedirect();
+        $this->assertEquals(302, $this->client->getResponse()->getStatusCode());
+        $this->assertContains('autoConnect', $this->client->getRequest()->getUri(), "Doit être sur la page autoConnect.");
+
+        $this->client->followRedirect();
+        $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
+        $this->assertContains('game', $this->client->getRequest()->getUri(), "Doit être sur la page game.");
+
+        $game = $this->gameRepository->createQueryBuilder('g')->select('g')->orderBy('g.id', 'DESC')->setMaxResults(1)->getQuery()->getOneOrNullResult();
+
+        $this->assertNotNull($game);
+        $this->assertEquals(GameStatus::OnGoing, $game->getStatus());
+        $this->assertEquals(1, \count($game->getGamePlayers()));
+        $this->assertEquals(Roles::Master, $game->getGamePlayers()[0]->getRole());
+
+    }
+
     private function assertNumberOfGamePlayers(int $expected)
     {
         $actual = (int)$this->countGamePlayers();
         $this->assertSame($expected, $actual);
+    }
+
+    private function countGames() 
+    {
+        return $this->gameRepository->createQueryBuilder('g')
+        ->select('count(g.id)')
+        ->getQuery()
+        ->getSingleScalarResult();
     }
 
     private function countGamePlayers()

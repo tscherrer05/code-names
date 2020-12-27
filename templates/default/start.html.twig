@@ -2,17 +2,22 @@
 
 {% block content %}
 <div class="container">
-    <h1>Code Names</h1>
-    <p>Vous êtes connecté en tant que : {{playerName}}</p>
-    <a href="{{ path('auto_connect') }}?gameKey=ad0abce2-f458-4d02-8cb4-ee3e0df495e6">Rejoindre la partie</a>
-    {# <form action="/join" method="post" name="join-game-form">
-        <label for="game">Rejoindre une partie</label>
-        <input type="text" id="gameKey" name="gameKey">
-        <button id="join-game" type="submit">Rejoindre</button>    
-    </form>
-    <p>OU</p>
-    <form action="/create" method="post">
-        <button>Créer une nouvelle partie</button>
-    </form> #}
+    <h1>Hub de connexion CN512</h1>
+    {% if isInGame %}
+        <p>Bonjour, agent {{playerName}}.</p>
+        <p>Code de mission en cours : <a href="{{ path('join_game')}}?gameKey={{currentGameKey}} ">{{currentGameKey}}</p>
+    {% else %}
+        <p>Le système de cyber-sécurité CN512 n'est pas parvenu à vous authentifier.</p>
+    {% endif %}
+    
+    <ul>
+        <li>
+            <a href="{{ path('create_game') }}">Accepter une nouvelle mission</a>
+        </li>
+        <li>
+            <a href="{{ path('auto_connect') }}?gameKey=ad0abce2-f458-4d02-8cb4-ee3e0df495e6">Renforcer une mission en cours : ad0abce2-f458-4d02-8cb4-ee3e0df495e6</a>
+        </li>
+    </ul>
+    
 </div>
 {% endblock %}

@@ -6,10 +6,8 @@ class Player
 {
     public $name;
 
-    // Team can be 1 or 2
     public $team;
 
-    // Role can be 1 or 2
     public $role;
 
     // Unique id (in whole application) to identify a player

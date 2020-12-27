@@ -46,11 +46,6 @@ class GameInfo
         return $this->team;
     }
 
-    public function board()
-    {
-        return $this->board;
-    }
-
     public function getPlayers()
     {
         return $this->players;
@@ -66,6 +61,9 @@ class GameInfo
         return $this->id;
     }
 
+    /**
+     * Gets a player from its player key
+     */
     public function getPlayer(string $playerKey)
     {
         return array_values(array_filter($this->players, function($p) use($playerKey) 
@@ -74,11 +72,15 @@ class GameInfo
         }))[0];
     }
 
-    public function nbSpies()
+    /**
+     * Number of spies in the game/team
+     */
+    public function nbSpies($team = null)
     {
-        return \count(array_filter($this->players, function($p) {
+        return \count(array_filter($this->players, function($p) use($team) {
             if($p->role === Roles::Spy)
-                return $p;
+                if($team === null || $team != null && $team === $p->team)
+                    return $p;
         }));
     }
 
@@ -90,11 +92,17 @@ class GameInfo
         return $this->board()->votes;
     }
 
+    /**
+     * Get all cards from the board
+     */
     public function getAllCards()
     {
         return $this->board()->cards();
     }
 
+    /**
+     * Gets the winner. Null if no winner.
+     */
     public function winner($board)
     {
         if ($board->nbColorCards[Teams::Blue] == 0)
@@ -105,7 +113,9 @@ class GameInfo
             return null;
     }
 
-    // Commands
+    /**
+     * Make a player vote for a card (from its coordinates)
+     */
     public function vote(Player $player, int $x, int $y)
     {
         if($this->team != $player->team)
@@ -117,6 +127,10 @@ class GameInfo
         ];
     }
 
+    /**
+     * Add a player into the game.
+     * Throws if the player can not be added.
+     */
     public function addPlayer(string $guid, string $name, int $team = null, int $role = null)
     {
         if($role == Roles::Master) 
@@ -135,9 +149,17 @@ class GameInfo
         $this->players[] = new Player($guid, $name, $team, $role);
     }
 
+    /**
+     * Passes the turn to the opposite team.
+     */
     public function passTurn()
     {
         $this->team = $this->team === 1 ? 2 : 1;
+    }
+
+    private function board()
+    {
+        return $this->board;
     }
 }
 

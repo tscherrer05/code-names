@@ -253,9 +253,9 @@ class RealTimeController extends AbstractController
         $gamePlayers = $game->getGamePlayers()->toArray();
 
         $numbers = [
-            [Colors::Blue, 7],
-            [Colors::Red, 7],
-            [Colors::White, 10],
+            [Colors::Blue, 9],
+            [Colors::Red, 8],
+            [Colors::White, 7],
             [Colors::Black, 1],
         ];
 

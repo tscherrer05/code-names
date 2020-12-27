@@ -44,9 +44,8 @@ class ApiControllerTest extends WebTestCase
         $this->assertSame(42, $content['currentNumber']);
         $this->assertSame(1, $content['playerTeam']);
         $this->assertSame([
-            TestFixtures::PlayerKey1, 
-            TestFixtures::PlayerKey3,
-            TestFixtures::PlayerKey4], 
+            TestFixtures::PlayerKey1,
+            TestFixtures::PlayerKey3],
             $content['remainingVotes']);
         $this->assertSame([], $content['currentVotes']);
         $this->assertSame(false, $content['canPassTurn']);
@@ -74,8 +73,7 @@ class ApiControllerTest extends WebTestCase
         $this->assertSame(1, $content['playerTeam']);
         $this->assertSame([
             TestFixtures::PlayerKey1, 
-            TestFixtures::PlayerKey3,
-            TestFixtures::PlayerKey4], 
+            TestFixtures::PlayerKey3], 
             $content['remainingVotes']);
         $this->assertSame([], $content['currentVotes']);
         $this->assertSame(true, $content['canPassTurn']);
@@ -103,8 +101,7 @@ class ApiControllerTest extends WebTestCase
         $this->assertSame(Teams::Red, $content['playerTeam']);
         $this->assertSame([
             TestFixtures::PlayerKey1, 
-            TestFixtures::PlayerKey3,
-            TestFixtures::PlayerKey4], 
+            TestFixtures::PlayerKey3], 
             $content['remainingVotes']);
         $this->assertSame([], $content['currentVotes']);
         $this->assertSame(false, $content['canPassTurn']);
@@ -133,15 +130,6 @@ class ApiControllerTest extends WebTestCase
             'from' => null
         ]);
 
-        $this->service->vote([
-            'x' => 0,
-            'y' => 3,
-            'playerKey' => TestFixtures::PlayerKey1,
-            'gameKey' => TestFixtures::GameKey1,
-            'clients' => new SplObjectStorage(),
-            'from' => null
-        ]);
-
         $client->request('GET', '/gameInfos?gameKey='.TestFixtures::GameKey1);
         $response = $client->getResponse();
 
@@ -155,11 +143,10 @@ class ApiControllerTest extends WebTestCase
         $this->assertSame(42, $content['currentNumber']);
         $this->assertSame(1, $content['playerTeam']);
         $this->assertSame([
-            TestFixtures::PlayerKey4
+            TestFixtures::PlayerKey1
         ], 
         $content['remainingVotes']);
         $this->assertSame([
-            TestFixtures::PlayerKey1 => "03",
             TestFixtures::PlayerKey3 => "02"
         ], $content['currentVotes']);
     }

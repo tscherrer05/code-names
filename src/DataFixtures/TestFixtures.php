@@ -109,9 +109,9 @@ class TestFixtures extends Fixture implements FixtureGroupInterface
         // player
         $this->createFakePlayer($manager, $game, Teams::Blue, Roles::Spy, 'Spy'.self::PlayerKey1, self::PlayerKey1);
         $this->createFakePlayer($manager, $game, Teams::Blue, Roles::Spy, 'Spy'.self::PlayerKey3, self::PlayerKey3);
-        $this->createFakePlayer($manager, $game, Teams::Blue, Roles::Spy,'Spy'.self::PlayerKey4, self::PlayerKey4);
-        $this->createFakePlayer($manager, $game, Teams::Blue, Roles::Master,'Player2', self::PlayerKey2);
-        $this->createFakePlayer($manager, $game, Teams::Red, Roles::Master,'Player2', self::PlayerKey9);
+        $this->createFakePlayer($manager, $game, Teams::Red, Roles::Spy,'Spy'.self::PlayerKey4, self::PlayerKey4);
+        $this->createFakePlayer($manager, $game, Teams::Blue, Roles::Master,'MasterSpy'.self::PlayerKey2, self::PlayerKey2);
+        $this->createFakePlayer($manager, $game, Teams::Red, Roles::Master,'MasterSpy'.self::PlayerKey9, self::PlayerKey9);
 
         // card
         $dataCards = self::Cards;

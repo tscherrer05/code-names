@@ -101,15 +101,19 @@ class ApiController extends AbstractController
                 if(Roles::Spy === $p->getRole())
                 {
                     $currentTeamSpies[$p->getPublicKey()] = $playerModel;
-                    if($p->getX() == null && $p->getY() == null && $p->getTeam() === $currentTeam) 
+                    if($p->getTeam() === $currentTeam) 
                     {
-                        $remainingVotes[] = $p->getPublicKey();
-                    } 
-                    else 
-                    {
-                        $cardKey = $p->getX().$p->getY();
-                        $currentVotes[$p->getPublicKey()] = $cardKey;
+                        if($p->getX() == null && $p->getY() == null) 
+                        {
+                            $remainingVotes[] = $p->getPublicKey();
+                        } 
+                        else 
+                        {
+                            $cardKey = $p->getX().$p->getY();
+                            $currentVotes[$p->getPublicKey()] = $cardKey;
+                        }
                     }
+
                 }
             }
 
@@ -126,7 +130,7 @@ class ApiController extends AbstractController
                                             && $gp->getTeam() === $gameEntity->getCurrentTeam(),
                 'allPlayers'            => $allPlayers,
                 'currentTeamPlayers'    => $currentTeamPlayers,
-                'currentTeamSpies'          => $currentTeamSpies,    
+                'currentTeamSpies'      => $currentTeamSpies,    
                 'currentVotes'          => $currentVotes,
                 'remainingVotes'        => $remainingVotes
             ];

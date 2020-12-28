@@ -106,7 +106,7 @@ class ApiController extends AbstractController
                         if($p->getX() == null && $p->getY() == null) 
                         {
                             $remainingVotes[] = $p->getPublicKey();
-                        } 
+                        }
                         else 
                         {
                             $cardKey = $p->getX().$p->getY();

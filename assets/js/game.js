@@ -71,11 +71,15 @@ export default class Game extends React.Component {
                     )
                 )
             }),
-            PubSub.subscribe(Events.TURN_PASSED, (evt, data) => {            
+            PubSub.subscribe(Events.TURN_PASSED, (evt, data) => { 
                 this.setState(
                     passTurn(
                         this.state, 
-                        {remainingVotes: data.remainingVotes}
+                        {
+                            remainingVotes: data.remainingVotes,
+                            team: data.team,
+                            canPassTurn: data.canPassTurn
+                        }
                     )
                 )
             })

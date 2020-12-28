@@ -119,7 +119,9 @@ class GameInfo
     public function vote(Player $player, int $x, int $y)
     {
         if($this->team != $player->team)
-            return "WrongTurn";
+            return [
+                'ok' => false,
+            ];
         $this->board->voteForCard($player, $x, $y, $this);
         return [
             'ok' => true,
@@ -154,7 +156,7 @@ class GameInfo
      */
     public function passTurn()
     {
-        $this->team = $this->team === 1 ? 2 : 1;
+        $this->team = $this->team === Teams::Blue ? Teams::Red : Teams::Blue;
     }
 
     private function board()

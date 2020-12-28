@@ -68,7 +68,7 @@ conn.onmessage = (e) => {
         case Events.TURN_PASSED:
           PubSub.publish(Events.TURN_PASSED, {
             team: result.team,
-            remainingVotes: result.remainingVotes
+            remainingVotes: result.remainingVotes,
           })
           break
         case Events.PLAYER_JOINED:

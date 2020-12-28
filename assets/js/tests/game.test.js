@@ -543,16 +543,18 @@ test('passTurn with no votes', () => {
             ...baseState,
             canPassTurn: true,
             remainingVotes: [],
-            currentTeam: 1
+            currentTeam: Teams.Blue,
+            isMyTurn: true
         },
         {
             remainingVotes: [playerOneKey, playerTwoKey]
         })
-    ).toStrictEqual({
-        currentTeam: 2,
+    ).toMatchObject({
+        currentTeam: Teams.Red,
         currentVotes: {},
         remainingVotes: [playerOneKey, playerTwoKey],
-        canPassTurn: false
+        canPassTurn: false,
+        isMyTurn: false
     })
 
     expect(passTurn(
@@ -560,23 +562,24 @@ test('passTurn with no votes', () => {
             ...baseState,
             canPassTurn: false,
             remainingVotes: [],
-            currentTeam: 2
+            currentTeam: Teams.Red,
+            isMyTurn: false
         },
         {
             remainingVotes: [playerOneKey, playerTwoKey],
         })
     )
-    .toStrictEqual({
-        currentTeam: 1,
+    .toMatchObject({
+        currentTeam: Teams.Blue,
         currentVotes: {},
         remainingVotes: [playerOneKey, playerTwoKey],
-        canPassTurn: false
+        canPassTurn: false,
+        isMyTurn: false
     })
 
 })
 
 test('passTurn with votes', () => {
-
     expect(
         passTurn(
         {
@@ -589,7 +592,7 @@ test('passTurn with votes', () => {
             remainingVotes: [playerOneKey, playerTwoKey],
         })
     )
-    .toStrictEqual(
+    .toMatchObject(
     {
         currentTeam: 2,
         currentVotes: {},
@@ -609,7 +612,7 @@ test('pass turn to master spy team', () => {
         canPassTurn: false
     }, {
         remainingVotes: [playerOneKey, playerTwoKey]
-    })).toStrictEqual({
+    })).toMatchObject({
         currentTeam: Teams.Blue,
         currentVotes: {},
         remainingVotes: [playerOneKey, playerTwoKey],
@@ -628,7 +631,7 @@ test('pass turn to master spy adverse team', () => {
         canPassTurn: true
     }, {
         remainingVotes: [playerOneKey, playerTwoKey]
-    })).toStrictEqual({
+    })).toMatchObject({
         currentTeam: Teams.Blue,
         currentVotes: {},
         remainingVotes: [playerOneKey, playerTwoKey],

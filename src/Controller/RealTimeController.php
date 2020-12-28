@@ -107,8 +107,6 @@ class RealTimeController extends AbstractController
             // Mapping domaine <-> persistance
             $this->persist($gameInfo);
 
-            // TODO : $this->gameRepository->save($gameInfo);
-
             // Dispatch events
             $model = [
                 'action'    => 'hasVoted',
@@ -179,16 +177,22 @@ class RealTimeController extends AbstractController
             // Persistance
             $gameEntity = $this->gameRepository->findByGuid($gameKey);
             $gameEntity->setCurrentTeam($gameInfo->team);
-            $entityManager = $this->getDoctrine()->getManager();
-            $entityManager->flush();
 
             // Event dispatch
             // TODO : refactor into proper class
             $gamePlayers = $gameEntity->getGamePlayers()->toArray();
+            $currentTeam = $gameEntity->getCurrentTeam();
             foreach($gamePlayers as $p) {
                 $p->setX(null);
                 $p->setY(null);
+                if(Roles::Spy === $p->getRole() && $p->getTeam() === $currentTeam)
+                {
+                    $remainingVotes[] = $p->getPublicKey();
+                }
             }
+
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->flush();
 
             $gp = $this->gamePlayerRepository->findByGuid($playerKey);
             if($gp == null) 
@@ -200,9 +204,7 @@ class RealTimeController extends AbstractController
             $model = [
                 'action'            => 'turnPassed',
                 'team'              => $gameInfo->currentTeam(),
-                'canPassTurn'       => $gp->getRole() === Roles::Master
-                                         && $gp->getTeam() === $gameEntity->getCurrentTeam(),
-                'remainingVotes'    => [] // TODO : remove uses from client app
+                'remainingVotes'    => $remainingVotes
             ];
             $this->sendToAllClients($clients, json_encode($model));
         }

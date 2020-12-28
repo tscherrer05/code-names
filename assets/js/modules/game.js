@@ -1,5 +1,5 @@
-import { Roles } from "../roles"
-import { Teams } from "../teams"
+import { Roles } from "../roles.js"
+import { Teams } from "../teams.js"
 
 
 /**
@@ -81,7 +81,7 @@ const addNewPlayer = (state, eventData) => {
 }
 
 /**
- * 
+ * Passes turn to the next team.`
  * @param {*} state 
  */
 const passTurn = (state, eventData) => {
@@ -92,7 +92,8 @@ const passTurn = (state, eventData) => {
         currentTeam: newTeam,
         currentVotes: {},
         remainingVotes: eventData.remainingVotes,
-        canPassTurn: state.role === Roles.Master && state.playerTeam === newTeam
+        canPassTurn: state.role === Roles.Master && state.playerTeam === newTeam, // TODO : refactor
+        isMyTurn: state.playerTeam === newTeam
     }
 }
 

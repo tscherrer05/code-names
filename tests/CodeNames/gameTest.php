@@ -90,7 +90,9 @@ class GameTest extends TestCase
         // Act
         $result = $gameInfo->vote($player, $coordX, $coordY);
 
-        $this->assertSame("WrongTurn", $result);
+        $this->assertSame([
+            'ok' => false
+        ], $result);
     }
 
     public function testPlayerVoteForReturnedCardShouldFail()

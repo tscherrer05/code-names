@@ -1,0 +1,7 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
+
+<p id="message">Vous participez déjà à une autre mission. Cliquez ici pour la rejoindre : <a href="{{path('join_game')}}?gameKey={{gameKey}}">Mission {{gameKey}}</a></p>
+
+{% endblock %}

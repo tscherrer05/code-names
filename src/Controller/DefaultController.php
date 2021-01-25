@@ -40,11 +40,6 @@ class DefaultController extends AbstractController
         $this->random               = $random;
     }
 
-    public function index()
-    {
-        return $this->render('default/index.html.twig');
-    }
-
     /**
      * @Route("/getPlayer", methods={"GET"}, name="get_player")
      */
@@ -82,6 +77,14 @@ class DefaultController extends AbstractController
     }
 
     /**
+     * 
+     */
+    public function index()
+    {
+        return $this->redirectToRoute('start');
+    }
+
+    /**
      * @Route("/createGame", methods={"GET"}, name="create_game")
      */
     public function createGame(Request $request)
@@ -89,7 +92,7 @@ class DefaultController extends AbstractController
         $gameKey = $this->session->get(self::GameSession);
         if($gameKey !== null) 
         {
-            return $this->redirectToRoute('start');
+            return $this->redirectToRoute('already_in_game');
         }
 
         $game = new Game();
@@ -150,18 +153,9 @@ class DefaultController extends AbstractController
         $playerKey = $this->session->get(self::PlayerSession);
 
         // Routing
-        if(!isset($gameKey))
+        if(!isset($gameKey) || !isset($playerKey))
         {
             return $this->redirectToRoute('start');
-        }
-        if (!isset($playerKey))
-        {
-            return $this->redirectToRoute(
-                'get_login',
-                [
-                    'gameKey' => $gameKey
-                ]
-            );
         }
 
         // Lecture IO
@@ -202,6 +196,68 @@ class DefaultController extends AbstractController
         return $this->redirectToRoute('join_game', [
             "gameKey" => $gameKey
         ]);
+    }
+
+    /**
+     * @Route("/joinAutoConnect", methods={"POST"})
+     */
+    public function joinAutoConnect(Request $request)
+    {
+        $gameKey = $request->request->get('gameKey');
+        
+        $sessionGameKey = $this->session->get(self::GameSession);
+        if(isset($sessionGameKey) && $gameKey !== $sessionGameKey)
+        {
+            return $this->redirectToRoute('already_in_game');
+        }
+        
+        $game = $this->gameRepository->findByGuid($gameKey);
+        if($game !== null)
+        {
+            return $this->redirectToRoute('auto_connect', ['gameKey' => $gameKey]);
+        }
+
+        return $this->startWithError('Clé invalide');
+    }
+
+    private function startWithError($errorMessage)
+    {
+        $identity = $this->session->get(self::PlayerSession);
+        $currentGameKey = $this->session->get(self::GameSession);
+        $playerName = 'anonyme';
+        $isInGame = false;
+
+        if(isset($identity))
+        {
+            $isInGame = true;
+            $player = $this->gamePlayerRepository->findByGuid($identity);
+            if(!isset($player))
+            {
+                return $this->redirectToRoute('user_disconnect');
+            }
+            $playerName = $player->getName();
+        }
+
+        $viewModel = [
+            'playerName' => $playerName,
+            'isInGame'   => $isInGame,
+            'currentGameKey' => $currentGameKey,
+            'errorMessage' => $errorMessage
+        ];
+        return $this->render('default/start.html.twig', $viewModel);
+    }
+
+    /**
+     * @Route("/alreadyInGame", methods={"GET"}, name="already_in_game")
+     */
+    public function alreadyInGame()
+    {
+        $sessionGameKey = $this->session->get(self::GameSession);
+
+        $viewModel = [
+            'gameKey' => $sessionGameKey
+        ];
+        return $this->render('default/alreadyInGame.html.twig', $viewModel);
     }
 
     /**
@@ -323,7 +379,7 @@ class DefaultController extends AbstractController
 
         if($playerKey != null)
         {
-            return $this->redirectToRoute('join_game', ['gameKey' => $gameKey]);
+            return $this->redirectToRoute('already_in_game');
         }
 
         $game = $this->gameRepository->findByGuid($gameKey);
@@ -417,7 +473,8 @@ class DefaultController extends AbstractController
         $viewModel = [
             'playerName' => $playerName,
             'isInGame'   => $isInGame,
-            'currentGameKey' => $currentGameKey
+            'currentGameKey' => $currentGameKey,
+            'errorMessage' => ''
         ];
         return $this->render('default/start.html.twig', $viewModel);
     }

@@ -7,7 +7,7 @@ use App\DataFixtures\TestFixtures;
 use App\Entity\Game;
 use App\Entity\GamePlayer;
 use App\Entity\Roles;
-use App\Service\Random;
+use Ramsey\Uuid\Uuid;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class DefaultControllerTest extends WebTestCase
@@ -48,7 +48,7 @@ class DefaultControllerTest extends WebTestCase
 
         $this->assertTrue($this->client->getResponse()->isRedirect(), "Refresh lobby doit rediriger vers le lobby.");
 
-        $this->assertContains('lobby', $this->client->getRequest()->getUri());
+        $this->assertStringContainsString('lobby', $this->client->getRequest()->getUri());
     }
 
     public function testLobbyNominal()
@@ -75,27 +75,36 @@ class DefaultControllerTest extends WebTestCase
         $this->client->followRedirect();
         $this->assertEquals(302, $this->client->getResponse()->getStatusCode());
         $this->assertTrue($this->client->getResponse()->isRedirect(), "Doit rediriger.");
-        $this->assertContains('game', $this->client->getRequest()->getUri(), "Doit être sur la page game");
+        $this->assertStringContainsString('game', $this->client->getRequest()->getUri(), "Doit être sur la page game");
     }
 
     public function testFirstAutoConnect()
     {
+        // Assert guard
         $before = intval($this->countGamePlayers());
+
+        // Arrange
         $this->client->request('GET', '/autoConnect?gameKey='.TestFixtures::GameKey3);
 
+        // Assert
         $this->assertNumberOfGamePlayers($before+1);
     }
 
     public function testAutoConnectTwice() 
     {
+        // Assert guard
         $before = $this->countGamePlayers();
+
+        // Act
         static::$container->get('session')->set(DefaultController::PlayerSession, TestFixtures::PlayerKey1);
+        
+        // Assert
         $before = $this->countGamePlayers();
         $this->client->request('GET', '/autoConnect?gameKey='.TestFixtures::GameKey2);
         $this->assertNumberOfGamePlayers(intval($before));
         $this->assertEquals(302, $this->client->getResponse()->getStatusCode());
         $this->assertTrue($this->client->getResponse()->isRedirect(), "Doit rediriger.");
-        $this->assertContains('game', $this->client->getRequest()->getUri(), "Doit être sur la page game");
+        $this->assertStringContainsString('game', $this->client->getRequest()->getUri(), "Doit être sur la page game");
     }
 
     // TODO : how to mock services in functional tests
@@ -146,11 +155,11 @@ class DefaultControllerTest extends WebTestCase
 
         $this->client->followRedirect();
         $this->assertEquals(302, $this->client->getResponse()->getStatusCode());
-        $this->assertContains('autoConnect', $this->client->getRequest()->getUri(), "Doit être sur la page autoConnect.");
+        $this->assertStringContainsString('autoConnect', $this->client->getRequest()->getUri(), "Doit être sur la page autoConnect.");
 
         $this->client->followRedirect();
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
-        $this->assertContains('game', $this->client->getRequest()->getUri(), "Doit être sur la page game.");
+        $this->assertStringContainsString('game', $this->client->getRequest()->getUri(), "Doit être sur la page game.");
 
         $game = $this->gameRepository->createQueryBuilder('g')->select('g')->orderBy('g.id', 'DESC')->setMaxResults(1)->getQuery()->getOneOrNullResult();
 
@@ -159,6 +168,100 @@ class DefaultControllerTest extends WebTestCase
         $this->assertEquals(1, \count($game->getGamePlayers()));
         $this->assertEquals(Roles::Master, $game->getGamePlayers()[0]->getRole());
 
+    }
+
+    /**
+     * @dataProvider invalidInputsProvider
+     */
+    public function testJoinAutoConnect_invalidParameters($invalidGameKey) 
+    {
+        // Act
+        $crawler = $this->client->request('POST', '/joinAutoConnect', ['gameKey' => $invalidGameKey]);
+
+        // Assert
+        $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
+        $this->assertStringContainsString('joinAutoConnect', $this->client->getRequest()->getUri(), "Doit être sur la page joinAutoConnect.");
+        $this->assertSelectorTextContains('#gameKeyError', 'Clé invalide');
+    }
+
+    public function invalidInputsProvider()
+    {
+        return [
+            [''],
+            ['sdfmsldfkjsdmf'],
+            ['0980943042'],
+            ['sfdsd-987987'],
+            [Uuid::uuid1()->toString()]
+        ];
+    }
+
+    /**
+     * @dataProvider sessionDataProvider
+     */
+    public function testJoinAutoConnect_nominal($gameKey, $playerKey)
+    {
+        // Arrange
+        $expectedRedirect = 'autoConnect';
+        $session = static::$container->get('session');
+        $session->set(DefaultController::PlayerSession, $playerKey);
+
+        // Act
+        $this->client->request('POST', '/joinAutoConnect', ['gameKey' => $gameKey]);
+
+        // Assert
+        $this->assertEquals(302, $this->client->getResponse()->getStatusCode());
+        $this->client->followRedirect();
+        $this->assertStringContainsString($expectedRedirect, $this->client->getRequest()->getUri(), 'Doit être sur la page '.$expectedRedirect);
+        $this->assertStringContainsString($gameKey, $this->client->getRequest()->getUri(), "Doit contenir la clé du jeu.");
+    }
+
+    public function sessionDataProvider()
+    {
+        return [
+            [TestFixtures::GameKey1, null],
+            [TestFixtures::GameKey1, Uuid::uuid1()->toString()],
+        ];
+    }
+
+    public function testAutoConnect_alreadyInGame()
+    {
+        // Arrange
+        $session = static::$container->get('session');
+        $gameKey = TestFixtures::GameKey1;
+        $playerKey = TestFixtures::PlayerKey3;
+        $session->set(DefaultController::PlayerSession, $playerKey);
+        $session->set(DefaultController::GameSession, $gameKey);
+        $expectedRedirect = 'alreadyInGame';
+
+        // Act
+        $this->client->followRedirects(true);
+        $this->client->request('GET', '/autoConnect', ['gameKey' => $gameKey]);
+
+        // Assert
+        $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
+        $this->assertStringContainsString($expectedRedirect, $this->client->getRequest()->getUri(), "Doit être sur la page ".$expectedRedirect);
+        $this->assertSelectorExists('#message');
+    }
+
+    public function testAutoConnect_createGame()
+    {
+        // Arrange
+        $session = static::$container->get('session');
+        $gameKey = TestFixtures::GameKey1;
+        $playerKey = TestFixtures::PlayerKey3;
+        $session->set(DefaultController::PlayerSession, $playerKey);
+        $session->set(DefaultController::GameSession, $gameKey);
+        $expectedRedirect = 'alreadyInGame';
+
+        // Act
+        $this->client->followRedirects(true);
+        $this->client->request('GET', '/createGame', ['gameKey' => $gameKey]);
+
+        // Assert
+        $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
+        $this->assertStringContainsString($expectedRedirect, $this->client->getRequest()->getUri(), "Doit être sur la page ".$expectedRedirect);
+        $this->assertSelectorExists('#message');
+        
     }
 
     private function assertNumberOfGamePlayers(int $expected)

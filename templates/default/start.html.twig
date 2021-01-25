@@ -10,14 +10,16 @@
         <p>Le système de cyber-sécurité CN512 n'est pas parvenu à vous authentifier.</p>
     {% endif %}
     
-    <ul>
-        <li>
-            <a href="{{ path('create_game') }}">Accepter une nouvelle mission</a>
-        </li>
-        <li>
-            <a href="{{ path('auto_connect') }}?gameKey=ad0abce2-f458-4d02-8cb4-ee3e0df495e6">Renforcer une mission en cours : ad0abce2-f458-4d02-8cb4-ee3e0df495e6</a>
-        </li>
-    </ul>
+    <a href="{{ path('create_game') }}">Accepter une nouvelle mission</a>
+
+    <form id='joinGame' action="joinAutoConnect" method="post">
+        <p>Renforcer une mission en cours :</p>
+        
+        <label for="game-key">Clé du jeu</label>
+        <input type="text" name="gameKey">
+        <button type="submit">Valider</button>
+        <p id="gameKeyError" style="color:red;">{{errorMessage}}</p>
+    </form>
     
 </div>
 {% endblock %}

@@ -7,7 +7,6 @@ import { Schema } from './schema'
 import { returnCard, vote, addNewPlayer, passTurn } from './modules/game'
 import { Roles } from './roles'
 import Modal from 'react-bootstrap/Modal';
-import Button from 'react-bootstrap/Button';
 
 
 export default class Game extends React.Component {
@@ -195,7 +194,11 @@ export default class Game extends React.Component {
         if(this.state.role == Roles.Master) {
             schema = (
                 <div className='col'>
-                    <Schema cards={this.state.cards}/>
+                    <div className='card'>
+                        <div className='card-body'>
+                            <Schema cards={this.state.cards}/>
+                        </div>
+                    </div>
                 </div>
             )
         }

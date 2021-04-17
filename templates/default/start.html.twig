@@ -2,24 +2,42 @@
 
 {% block content %}
 <div class="container">
-    <h1>Hub de connexion CN512</h1>
-    {% if isInGame %}
-        <p>Bonjour, agent {{playerName}}.</p>
-        <p>Code de mission en cours : <a href="{{ path('join_game')}}?gameKey={{currentGameKey}} ">{{currentGameKey}}</p>
-    {% else %}
-        <p>Le système de cyber-sécurité CN512 n'est pas parvenu à vous authentifier.</p>
-    {% endif %}
-    
-    <a href="{{ path('create_game') }}">Accepter une nouvelle mission</a>
+    <div class="row">
+        <h1>CodeNames</h1>
+    </div>
 
-    <form id='joinGame' action="joinAutoConnect" method="post">
-        <p>Renforcer une mission en cours :</p>
-        
-        <label for="game-key">Clé du jeu</label>
-        <input type="text" name="gameKey">
-        <button type="submit">Valider</button>
-        <p id="gameKeyError" style="color:red;">{{errorMessage}}</p>
-    </form>
+    <div class="row">
+        <div class="col">
+            <div class="card">
+                <div class="card-body text-center">
+                    {% if isInGame %}
+                        <p>Bonjour,
+                            {{playerName}}.</p>
+                        <p>Vous avez une partie en cours. Cliquez ici pour la rejoindre :
+                            <a href="{{ path('join_game')}}?gameKey={{currentGameKey}}" class="btn btn-primary">Rejoindre</a>
+                        </p>
+                    {% else %}
+                        <a href="{{ path('create_game') }}" class="btn btn-primary">Lancer une nouvelle partie</a>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card">
+                <div class="card-body">
+                    <form id='joinGame' action="joinAutoConnect" method="post">
+                        <p>Rejoindre une partie en cours :</p>
+
+                        <label for="game-key">Code de partie</label>
+                        <input type="text" name="gameKey">
+                        <button type="submit">Valider</button>
+                        <p id="gameKeyError" style="color:red;">{{errorMessage}}</p>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
     
 </div>
 {% endblock %}

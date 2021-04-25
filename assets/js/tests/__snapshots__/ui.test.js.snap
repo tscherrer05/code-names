@@ -1,0 +1,118 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`game UI renders correctly 1`] = `
+<div
+  className="container-fluid"
+>
+  <div
+    className="row"
+  >
+    <a
+      href="#"
+      onClick={[Function]}
+    >
+      Menu
+    </a>
+  </div>
+  <div
+    className="row"
+  >
+    <div
+      className="col"
+    >
+      <div>
+        <div
+          className="row"
+          id="cn-cards-row"
+        />
+      </div>
+    </div>
+  </div>
+  <div
+    className="row"
+  >
+    <div
+      className="container"
+    >
+      <div
+        className="row"
+      >
+        <div
+          className="col"
+        >
+          <p>
+            Vous êtes : 
+            <span
+              id="current-player"
+            />
+          </p>
+          <p>
+            Votre équipe : 
+            <span
+              style={
+                Object {
+                  "color": "red",
+                }
+              }
+            >
+              Rouge
+            </span>
+          </p>
+          <p>
+            Votre rôle : 
+            Maître espion
+          </p>
+        </div>
+        <div
+          className="col"
+        >
+          <p>
+            Tour : 
+            <span
+              id="current-team"
+            >
+              Equipe 
+              <span
+                style={
+                  Object {
+                    "color": "red",
+                  }
+                }
+              >
+                Rouge
+              </span>
+            </span>
+          </p>
+          <span
+            data-value="123"
+            id="gameKey"
+          />
+          <span
+            data-value="456"
+            id="playerKey"
+          />
+        </div>
+        <div
+          className="col"
+        >
+          <p
+            className="display-block"
+          >
+            Votes restants :
+          </p>
+        </div>
+        <div
+          className="col"
+        >
+          <p
+            className="display-block"
+          >
+            Joueurs connectés :
+          </p>
+          <ul />
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

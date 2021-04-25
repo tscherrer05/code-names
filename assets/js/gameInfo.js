@@ -28,12 +28,6 @@ export class GameInfo extends React.Component {
         const playerModels = Object.entries(this.props.players || [])
         const players = 
             playerModels.map(([key, model]) => {
-                let color
-                if(model.team === Teams.Blue) {
-                    color = "blue"
-                } else {
-                    color = "red"
-                }
                 return <li 
                     id={'player-'+key} 
                     key={'player-'+key} 

@@ -18,7 +18,7 @@ export class Board extends React.Component {
                 var cardKey = votes[playerKey]
                 var playerName = this.props.players[playerKey].name
                 if(cardVotes[cardKey] == null)
-                    cardVotes[cardKey] = [{ key: playerKey, name: playerName}]   
+                    cardVotes[cardKey] = [{ key: playerKey, name: playerName}]  
                 else
                     cardVotes[cardKey].push({ key: playerKey, name: playerName})
             }

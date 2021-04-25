@@ -25,36 +25,27 @@ export class Schema extends React.Component {
             >
                 <div className='row'>
                         {sq.map(c => {
-                                const attr = {
-                                    key: c.x+'-'+c.y,
-                                    src: '',
-                                    className: 'cn-schema-img'
-                                }
+                            const attr = {
+                                key: c.x+'-'+c.y,
+                                src: '',
+                                className: 'cn-schema-img'
+                            }
 
-                                let src = 'images/schema-'
-                                switch(c.color) {
-                                    case Colors.Blue:
-                                        src += 'blue'
-                                        break
-                                    case Colors.Red:
-                                        src += 'red'
-                                        break
-                                    case Colors.White:
-                                        src += 'white'
-                                        break
-                                    case Colors.Black:
-                                        src += 'black'
-                                        break
-                                    default:
-                                }
+                            const src = 'images/schema-'
+                            attr.src = src
+                                + {
+                                [Colors.Blue]: 'blue',
+                                [Colors.Red]: 'red',
+                                [Colors.Black]: 'black',
+                                [Colors.White]: 'white'
+                                }[c.color]
+                                + '.png'
 
-                                attr.src = src+'.png'
-
-                                return <img 
-                                    key={attr.key} 
-                                    src={attr.src}
-                                    className={attr.className}
-                                />
+                            return <img 
+                                key={attr.key} 
+                                src={attr.src}
+                                className={attr.className}
+                            />
                             }
                         )}
                 </div>

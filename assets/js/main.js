@@ -3,15 +3,6 @@ import ReactDOM from 'react-dom'
 import { Events } from './events';
 import Game from './game'
 
-// Le système doit :
-// OK Avoir des composants qui s'initialisent au chargement de la page
-// OK Avoir des composants qui réagissent à des évènements (utilisateurs ou DOM)
-// OK Réagir à la réception de messages depuis le serveur
-// OK Pouvoir se connecter par web socket à un serveur
-// OK Pouvoir envoyer des messages au serveur
-// OK Gérer les erreurs
-// OK Avoir des composants testables
-
 // TODO : où gérer la connection ws ?
 // TODO : config env
 // WebSocket connection

@@ -166,69 +166,75 @@ export default class Game extends React.Component {
             gameKey: this.state.gameKey
         })
     }
-    
-    render() {
-        var errorMessage;
-        if(this.state.displayError)
-        {
-            errorMessage = (
-                <div style={{position: 'fixed', left: '50%', top: '50%', zIndex: 1000}}>
+
+    getErrorMessageIfApplicable() {
+        if (this.state.displayError) {
+            return (
+                <div style={{ position: 'fixed', left: '50%', top: '50%', zIndex: 1000 }}>
                     <div style={{
-                        position: 'relative', 
-                        left: '-50%', 
+                        position: 'relative',
+                        left: '-50%',
                         zIndex: 1000,
-                        textAlign: 'center', 
+                        textAlign: 'center',
                         background: '#7b2d26',
                         color: 'whitesmoke',
                         animation: 'shake 0.5s',
                         padding: '7px',
                         borderRadius: '10px'
-                        }}>
+                    }}>
                         <h1>{this.state.errorMessage}</h1>
                     </div>
                 </div>
             )
+        } else {
+            return null;
         }
+    }
 
-        let schema = null
-        if(this.state.role == Roles.Master) {
-            schema = (
-                <div className='col'>
-                    <div className='card'>
-                        <div className='card-body'>
-                            <Schema cards={this.state.cards}/>
-                        </div>
-                    </div>
-                </div>
-            )
-        }
-
-        let parameters = (
+    getModalIfApplicable() {
+        return (
             <Modal
                 show={this.state.displayParameters}
                 backdrop="static"
                 keyboard={true}
                 onHide={() => this.closeParameters()}
             >
-                <Modal.Header closeButton>
-                    Paramètres du jeu
-                </Modal.Header>
-                <Modal.Body>
-                    <button className='btn btn-secondary btn-lg btn-block' onClick={() => this.resetGame()}>Recommencer la partie (POUR TOUS)</button>
-                    <button className='btn btn-secondary btn-lg btn-block' onClick={() => this.emptyGame()}>Terminer la partie (POUR TOUS)</button>
-                </Modal.Body>
-            </Modal>
-        )
+            <Modal.Header closeButton>
+                Paramètres du jeu
+                    </Modal.Header>
+            <Modal.Body>
+                <button className='btn btn-secondary btn-lg btn-block' onClick={() => this.resetGame()}>Recommencer la partie (POUR TOUS)</button>
+                <button className='btn btn-secondary btn-lg btn-block' onClick={() => this.emptyGame()}>Terminer la partie (POUR TOUS)</button>
+            </Modal.Body>
+        </Modal>)
+    }
 
+    getSchemaIfApplicable() {
+        if (this.state.role == Roles.Master) {
+            return (
+                <div className='col'>
+                    <div className='card'>
+                        <div className='card-body'>
+                            <Schema cards={this.state.cards} />
+                        </div>
+                    </div>
+                </div>
+            )
+        } else {
+            return null
+        }
+    }
+    
+    render() {
         return (
             <div className='container-fluid'>
-                {errorMessage}
-                {parameters}
+                {this.getErrorMessageIfApplicable()}
+                {this.getModalIfApplicable()}
                 <div className='row'>
-                    <a href='#' onClick={() => this.openParameters()}>Paramètres</a>
+                    <a href='#' onClick={() => this.openParameters()}>Menu</a>
                 </div>
                 <div className='row'>
-                    {schema}
+                    {this.getSchemaIfApplicable()}
                     <div className='col'>
                         <Board 
                             gameKey={this.state.gameKey} 

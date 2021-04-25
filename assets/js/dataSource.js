@@ -1,5 +1,3 @@
-
-
 const MaxParametersNumber = 6;
 
 export const DataSource = {
@@ -16,6 +14,6 @@ export const DataSource = {
                 : `&${res}`;
         },
         `/${cleanUrl}?`)
-        return $.get(fullUrl);
+        return $.get(fullUrl)
     }
 }

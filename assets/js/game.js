@@ -116,26 +116,20 @@ export default class Game extends React.Component {
                     currentVotes:       data.currentVotes,
                     remainingVotes:     data.remainingVotes,
                     isMyTurn:           data.currentTeam === data.playerTeam,
-                    canPassTurn:        data.canPassTurn
+                    canPassTurn:        data.canPassTurn,
+                    cards:              data.cards.map(x => {
+                        return {
+                            color: x.color,
+                            returned: x.returned,
+                            name: x.word,
+                            x: x.x,
+                            y: x.y
+                        }
+                    })
                 })
             })
-
-
-        DataSource
-            .get('cards', { gameKey: this.state.gameKey })
-            .then(data => {
-                self.setState(
-                {
-                    cards: data.map(x => {
-                                        return {
-                                            color: x.color,
-                                            returned: x.returned,
-                                            name: x.word,
-                                            x: x.x,
-                                            y: x.y
-                                        }}),
-                    currentVotes: this.state.currentVotes
-                })
+            .catch((error) => {
+                console.log('Error fetching data', error)
             })
     }
 

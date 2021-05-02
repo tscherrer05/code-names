@@ -92,7 +92,7 @@ export class GameInfo extends React.Component {
                         {votes}
                     </div>
                     <div className="col">
-                        <p className="display-bloc">Joueurs connectés :</p>
+                        <p className="display-block">Joueurs connectés :</p>
                         <ul>
                             {players}
                         </ul>

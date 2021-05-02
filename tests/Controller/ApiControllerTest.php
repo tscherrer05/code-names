@@ -8,21 +8,6 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 class ApiControllerTest extends WebTestCase
 {
 
-    public function testCardsEndPointNominal()
-    {
-        $client = static::createClient();
-
-        $client->request('GET', '/cards?gameKey='.TestFixtures::GameKey1);
-
-        $response = $client->getResponse();
-
-        $this->assertSame(200, $response->getStatusCode());
-
-        $content = json_decode($response->getContent(), true);
-
-        $this->assertSame('orange', $content[0]['word']);
-    }
-
     public function testGameInfosWithSpy()
     {
         $client = static::createClient(); // à invoquer avant d'écrire dans la session
@@ -49,6 +34,7 @@ class ApiControllerTest extends WebTestCase
             $content['remainingVotes']);
         $this->assertSame([], $content['currentVotes']);
         $this->assertSame(false, $content['canPassTurn']);
+        $this->assertSame('orange', $content['cards'][0]['word']);
     }
 
     public function testGameInfosWithMasterSpyOfCurrentTeam() 
@@ -77,6 +63,7 @@ class ApiControllerTest extends WebTestCase
             $content['remainingVotes']);
         $this->assertSame([], $content['currentVotes']);
         $this->assertSame(true, $content['canPassTurn']);
+        $this->assertSame('orange', $content['cards'][0]['word']);
     }
 
     public function testGameInfosWithMasterSpyOfOppositeTeam()
@@ -105,6 +92,7 @@ class ApiControllerTest extends WebTestCase
             $content['remainingVotes']);
         $this->assertSame([], $content['currentVotes']);
         $this->assertSame(false, $content['canPassTurn']);
+        $this->assertSame('orange', $content['cards'][0]['word']);
     }
 
     public function testGameInfosWithVotes()

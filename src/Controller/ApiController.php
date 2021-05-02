@@ -81,6 +81,7 @@ class ApiController extends AbstractController
             {
                 throw new Exception("Player not found with guid : $playerKey");
             }
+            $cards = $this->cardRepository->findBy(['game' => $gameEntity->getId()]);
 
             $currentTeam = $gameEntity->getCurrentTeam();
             $gamePlayers = $gameEntity->getGamePlayers()->toArray();
@@ -89,6 +90,17 @@ class ApiController extends AbstractController
             $currentTeamPlayers = [];
             $remainingVotes = [];
             $currentVotes = [];
+
+            $models = [];
+            foreach ($cards as $c) {
+                $models[] = [
+                    'color'     => $c->getColor(),
+                    'returned'  => $c->getReturned(),
+                    'word'      => $c->getWord(),
+                    'x'         => $c->getX(),
+                    'y'         => $c->getY()
+                ];
+            }
 
             foreach($gamePlayers as $p) 
             {
@@ -132,7 +144,8 @@ class ApiController extends AbstractController
                 'currentTeamPlayers'    => $currentTeamPlayers,
                 'currentTeamSpies'      => $currentTeamSpies,    
                 'currentVotes'          => $currentVotes,
-                'remainingVotes'        => $remainingVotes
+                'remainingVotes'        => $remainingVotes,
+                'cards'                 => $models
             ];
 
             return new JsonResponse($model);

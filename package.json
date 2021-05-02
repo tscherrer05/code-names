@@ -4,6 +4,7 @@
         "@babel/preset-env": "^7.12.1",
         "@babel/preset-react": "^7.12.1",
         "@symfony/webpack-encore": "^0.30.0",
+        "@testing-library/react": "^11.2.6",
         "core-js": "^3.0.0",
         "jest": "^26.6.1",
         "react": "^16.13.1",
@@ -19,7 +20,7 @@
         "dev": "encore dev",
         "watch": "encore dev --watch",
         "build": "encore production --progress",
-        "test": "jest"
+        "test": "jest --detectOpenHandles"
     },
     "dependencies": {
         "jquery-slim": "^3.0.0",

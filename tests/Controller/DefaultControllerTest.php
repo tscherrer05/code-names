@@ -9,10 +9,11 @@ use App\Entity\GamePlayer;
 use App\Entity\Roles;
 use Ramsey\Uuid\Uuid;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 
 class DefaultControllerTest extends WebTestCase
 {
-    private $gamePlayerRepository;
     private $gameRepository;
     private $client;
 
@@ -30,7 +31,6 @@ class DefaultControllerTest extends WebTestCase
 
     public function testLoginPageNominal()
     {
-
         $this->client->request('GET', '/login');
 
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
@@ -108,13 +108,12 @@ class DefaultControllerTest extends WebTestCase
     }
 
     // TODO : how to mock services in functional tests
-    // public function testAutoConnectUniqueName() 
-    // {
-    //     $randomService = $this->createMock(Random::class);
-    //     $randomService->expects($this->any())
-    //         ->method('name')
-    //         ->willReturn('NomUnique');
-    // }
+    public function testAutoConnectUniqueName() 
+    {
+        $randomService = $this->createMock(Random::class, );
+        $randomService->method('name')->willReturn('NomUnique');
+        $this->assertEquals('dfssfqd', $randomService->name());
+    }
 
     // TODO : résoudre le mystère de ce bug
     // public function testAutoConnectWithMissingSpyMaster() 
@@ -202,8 +201,6 @@ class DefaultControllerTest extends WebTestCase
     {
         // Arrange
         $expectedRedirect = 'autoConnect';
-        $session = static::$container->get('session');
-        $session->set(DefaultController::PlayerSession, $playerKey);
 
         // Act
         $this->client->request('POST', '/joinAutoConnect', ['gameKey' => $gameKey]);
@@ -226,11 +223,12 @@ class DefaultControllerTest extends WebTestCase
     public function testAutoConnect_alreadyInGame()
     {
         // Arrange
-        $session = static::$container->get('session');
         $gameKey = TestFixtures::GameKey1;
         $playerKey = TestFixtures::PlayerKey3;
+        $session = new Session(new MockArraySessionStorage());
         $session->set(DefaultController::PlayerSession, $playerKey);
         $session->set(DefaultController::GameSession, $gameKey);
+        static::$container->set('session', $session);
         $expectedRedirect = 'alreadyInGame';
 
         // Act

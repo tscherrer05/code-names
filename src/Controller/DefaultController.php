@@ -110,12 +110,15 @@ class DefaultController extends AbstractController
 
         $rows = 5;
         $cols = 5;
+        $excludedWords = [];
         for($i = 0; $i <= $cols - 1; $i++) {
             for($j = 0; $j <= $rows - 1; $j++) {
                 $card = new Card();
                 $card->setX($i);
                 $card->setY($j);
-                $card->setWord($this->random->word());
+                $word = $this->random->word();
+                $excludedWords[] = $word;
+                $card->setWord($word);
                 // Choose color
                 $index = $this->random->rand(0, \count($numbers)-1);
                 $choice = $numbers[$index];

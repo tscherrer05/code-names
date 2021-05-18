@@ -108,12 +108,12 @@ class DefaultControllerTest extends WebTestCase
     }
 
     // TODO : how to mock services in functional tests
-    public function testAutoConnectUniqueName() 
-    {
-        $randomService = $this->createMock(Random::class, );
-        $randomService->method('name')->willReturn('NomUnique');
-        $this->assertEquals('dfssfqd', $randomService->name());
-    }
+    // public function testAutoConnectUniqueName() 
+    // {
+    //     $randomService = $this->createMock(Random::class, );
+    //     $randomService->method('name')->willReturn('NomUnique');
+    //     $this->assertEquals('dfssfqd', $randomService->name());
+    // }
 
     // TODO : résoudre le mystère de ce bug
     // public function testAutoConnectWithMissingSpyMaster() 

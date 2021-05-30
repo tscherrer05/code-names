@@ -125,6 +125,8 @@ class RealTimeController extends AbstractController
                     'x' => $x,
                     'y' => $y,
                     'color' => $voteResult['card']->color,
+                    'team' => $player->team,
+                    'word' => $voteResult['card']->word
                 ];
                 $this->sendToAllClients($clients, json_encode($model));
             }

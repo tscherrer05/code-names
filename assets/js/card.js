@@ -61,38 +61,38 @@ export class Card extends React.Component {
                 key:        `${props.x}-${props.y}`,
                 className:  'cn-card',
                 onClick:    props.isClickable ? () => this.vote() : () => this.dispatchError("Pas toucher ! è_é"),
-                src:        src
+                src: src
             }
         }
 
         const renderImgComponent = (props) => {
             const attr = buildImgAttr(props);
             
-            return (props.returned) 
-            ? <img 
+            return (props.returned)
+                ? <img
                     key={attr.key}
                     src={attr.src}
                     onClick={attr.onClick}
                     className={attr.className}
+                    alt={props.name}
                 />
              : (
                     <div>
                         <div className="cn-card-votes">
                             {props.votes.map(v => {
                                 if(v.key === props.playerKey) {
-                                    return (<span id={`vote-tag-${v.key}`} key={`vote-tag-${v.key}`} className="badge badge-success">{v.name}</span>) 
-
+                                    return (<span id={`vote-tag-${v.key}`} key={`vote-tag-${v.key}`} className="badge badge-success">{v.name}</span>)
                                 } else {
-                                    return (<span id={`vote-tag-${v.key}`} key={`vote-tag-${v.key}`} className="badge badge-secondary">{v.name}</span>) 
-
+                                    return (<span id={`vote-tag-${v.key}`} key={`vote-tag-${v.key}`} className="badge badge-secondary">{v.name}</span>)
                                 }
                             })}
                         </div>
                         <img 
-                            key={attr.key} 
+                            key={attr.key}
                             src={attr.src}
                             onClick={attr.onClick}
                             className={attr.className}
+                            alt={props.name}
                         />
                         <div key='cn-card-text' className='cn-card-text'>
                             {props.name}
@@ -102,6 +102,7 @@ export class Card extends React.Component {
         }
 
         return (
+            
             <div
                 key={`card-container-${this.props.x}${this.props.y}`}
                 id={`cn-card-${this.props.x}-${this.props.y}`}

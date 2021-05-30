@@ -6,8 +6,8 @@ import { Events } from './events'
 import { Schema } from './schema'
 import { returnCard, vote, addNewPlayer, passTurn } from './modules/game'
 import { Roles } from './roles'
-import Modal from 'react-bootstrap/Modal';
-
+import Modal from 'react-bootstrap/Modal'
+import PubSub from 'pubsub-js'
 
 export default class Game extends React.Component {
 
@@ -23,7 +23,8 @@ export default class Game extends React.Component {
             currentVotes: [],
             remainingVotes: [],
             cards: [],
-            displayParameters: false
+            displayParameters: false,
+            events: []
         }
 
         this.subscriptions = 
@@ -86,8 +87,6 @@ export default class Game extends React.Component {
     }
 
     componentDidMount() {
-        // Discute avec le composant de données pour et met à jour l'état une fois
-        // que la réponse est revenue
         const self = this;
 
         DataSource
@@ -194,11 +193,11 @@ export default class Game extends React.Component {
                 onHide={() => this.closeParameters()}
             >
             <Modal.Header closeButton>
-                Paramètres du jeu
+                Menu
                     </Modal.Header>
             <Modal.Body>
-                <button className='btn btn-secondary btn-lg btn-block' onClick={() => this.resetGame()}>Recommencer la partie (POUR TOUS)</button>
-                <button className='btn btn-secondary btn-lg btn-block' onClick={() => this.emptyGame()}>Terminer la partie (POUR TOUS)</button>
+                <button className='cn-button btn-block' onClick={() => this.resetGame()}>Réinitialiser la partie en cours</button>
+                <button className='cn-button btn-block' onClick={() => this.emptyGame()}>Terminer la partie en cours</button>
             </Modal.Body>
         </Modal>)
     }
@@ -224,9 +223,13 @@ export default class Game extends React.Component {
             <div className='container-fluid'>
                 {this.getErrorMessageIfApplicable()}
                 {this.getModalIfApplicable()}
+
                 <div className='row'>
-                    <a href='#' onClick={() => this.openParameters()}>Menu</a>
+                    <button className='cn-button' onClick={() => this.openParameters()}>Menu</button>
                 </div>
+                <ul>
+                    {this.state.events.map((evt) => <li id={evt.key} key={evt.key}>{evt.text}</li>)}
+                </ul>
                 <div className='row'>
                     {this.getSchemaIfApplicable()}
                     <div className='col'>

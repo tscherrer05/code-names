@@ -11,4 +11,4 @@ export const Events = {
     GAME_HAS_RESET: 'gameHasReset',
     EMPTY_GAME: 'emptyGame',
     GAME_IS_EMPTIED: 'gameIsEmptied'
-  }
+}

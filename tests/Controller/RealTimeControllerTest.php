@@ -47,8 +47,6 @@ class RealTimeControllerTest extends WebTestCase
             'from' => null
         ]);
 
-        $parsed = json_decode($result, true);
-
         $gp = $this->entityManager
             ->getRepository(GamePlayer::class)
             ->findOneBy(['publicKey' => $playerKey])

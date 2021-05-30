@@ -1,6 +1,29 @@
 {% extends 'base.html.twig' %}
 
 {% block content %}
+	<style>
+		body {
+			background: linear-gradient(#e66465, #9198e5);
+		}
+
+		.cn-button {
+			display: inline-block;
+			position: relative;
+			padding: 0.4rem 1rem 0.3rem;
+			color: black;
+			border-radius: 1rem;
+			background-color: rgb(255, 228, 0);
+			border-width: 2px 1px;
+			border-style: solid;
+			border-color: rgb(255, 246, 167) rgb(255, 212, 0) rgb(243, 146, 0);
+			cursor: pointer;
+			font-weight: 500;
+		}
+
+		.cn-button:hover {
+			background-color: rgb(255, 188, 0);
+		}
+	</style>
 	<span id="gameKey" data-value={{gameKey}}></span>
 	<span id="playerKey" data-value={{currentPlayerKey}}></span>
 	<div class="container-fluid" id="cn-cards">

@@ -2,7 +2,8 @@ html { height: 100%; }
 body { height: 100%; }
 
 #cn-cards {
-    background: linear-gradient(#e66465, #9198e5);
+    background: radial-gradient(ellipse at center, #e6942e, #b52527);
+    height:100%;
 }
 
 .cn-button {

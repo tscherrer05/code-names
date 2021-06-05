@@ -345,9 +345,9 @@ export default class Game extends React.Component {
 
                 <section style={{display: 'flex'}}>
                     <div style={{ flex: '1 1 100px', padding: '10px', background: 'radial-gradient(ellipse at left bottom, rgb(107, 17, 17), rgb(187, 31, 31))', borderRadius: '.5em', color: 'white' }}>
-                        <h4>Maître-espion</h4>
+                        <h5>Maître-espion</h5>
                         {redMaster}
-                        <h4>Agents</h4>
+                        <h5>Agents</h5>
                         <ul style={{ listStyleType: 'none', paddingLeft: '0' }}>
                             {redSpies}
                         </ul>
@@ -365,9 +365,9 @@ export default class Game extends React.Component {
                         />
                     </div>
                     <div style={{ flex: '1 1 100px', padding: '10px', background: 'radial-gradient(ellipse at right bottom, rgb(10, 10, 80), rgb(26, 26, 185))', borderRadius: '.5em', color: 'white'  }}>
-                        <h4>Maître-espion</h4>
+                        <h5>Maître-espion</h5>
                         {blueMaster}
-                        <h4>Agents</h4>
+                        <h5>Agents</h5>
                         <ul style={{ listStyleType: 'none', paddingLeft: '0' }}>
                             {blueSpies}
                         </ul>
@@ -376,7 +376,7 @@ export default class Game extends React.Component {
                 <div style={{ display: 'flex', justifyContent: 'space-evenly', marginTop: '10px' }}>
                     {this.getSchemaIfApplicable()}
                     <div style={{ color: 'white', backgroundColor: 'rgba(91, 90, 90, 0.74)', padding: '10px', borderRadius: '.5em' }}>
-                        <h4>Votes restants</h4>
+                        <h5>Votes restants</h5>
                         {votes}
                     </div>
                     <div style={{ color: 'white', backgroundColor: 'rgba(91, 90, 90, 0.74)', padding: '10px', borderRadius: '.5em', flex: '0 1 300px' }}>

@@ -337,15 +337,12 @@ export default class Game extends React.Component {
                     {nextTurnButton}
                 </div>
 
-                <div style={{display: 'flex', justifyContent: 'center'}}>
+                <div style={{display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
                     <span className='cn-message'>
                         {this.getCurrentTeamIfApplicable()}
                     </span>
                 </div>
 
-                <ul>
-                    {this.state.events.map((evt) => <li id={evt.key} key={evt.key}>{evt.text}</li>)}
-                </ul>
                 <section style={{display: 'flex'}}>
                     <div style={{ flex: '1 1 100px', padding: '10px', background: 'radial-gradient(ellipse at left bottom, rgb(107, 17, 17), rgb(187, 31, 31))', borderRadius: '.5em', color: 'white' }}>
                         <h4>Maître-espion</h4>
@@ -376,11 +373,17 @@ export default class Game extends React.Component {
                         </ul>
                     </div>
                 </section>
-                <div style={{display: 'flex', justifyContent: 'space-evenly'}}>
+                <div style={{ display: 'flex', justifyContent: 'space-evenly', marginTop: '10px' }}>
                     {this.getSchemaIfApplicable()}
-                    <div>
+                    <div style={{ color: 'white', backgroundColor: 'rgba(91, 90, 90, 0.74)', padding: '10px', borderRadius: '.5em' }}>
                         <h4>Votes restants</h4>
                         {votes}
+                    </div>
+                    <div style={{ color: 'white', backgroundColor: 'rgba(91, 90, 90, 0.74)', padding: '10px', borderRadius: '.5em', flex: '0 1 300px' }}>
+                        <h5>Historique</h5>
+                        <ul style={{listStyleType: 'none', paddingLeft: '0', fontSize: '.7em'}}>
+                            {this.state.events.map((evt) => <li id={evt.key} key={evt.key}>{evt.text}</li>)}
+                        </ul>
                     </div>
                 </div>
             </div>

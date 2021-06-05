@@ -46,7 +46,7 @@ const returnCard = (state, eventData) => {
     return {
         events: [
             ...state.events,
-            { key: Date.now(), text: "L'équipe " + Teams.stringFromInt(eventData.team)["fr"] + " a retourné la carte " + eventData.word }
+            { key: Date.now(), text: "L'équipe " + Teams.stringFromInt(eventData.team)["fr"] + " a retourné la carte '" + eventData.word + "'" }
         ],
         currentVotes: {},
         remainingVotes: Object.entries(state.currentVotes).map(v => {

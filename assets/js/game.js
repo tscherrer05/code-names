@@ -1,6 +1,5 @@
 import React from 'react'
 import {Board} from './board'
-import {GameInfo} from './gameInfo'
 import { DataSource } from './dataSource'
 import { Events } from './events'
 import { Schema } from './schema'
@@ -8,6 +7,8 @@ import { returnCard, vote, addNewPlayer, passTurn } from './modules/game'
 import { Roles } from './roles'
 import Modal from 'react-bootstrap/Modal'
 import PubSub from 'pubsub-js'
+import { Teams } from './teams'
+import { Colors } from './colors'
 
 export default class Game extends React.Component {
 
@@ -71,7 +72,7 @@ export default class Game extends React.Component {
                     )
                 )
             }),
-            PubSub.subscribe(Events.TURN_PASSED, (evt, data) => { 
+            PubSub.subscribe(Events.TURN_PASSED, (evt, data) => {
                 this.setState(
                     passTurn(
                         this.state, 
@@ -160,6 +161,13 @@ export default class Game extends React.Component {
         })
     }
 
+    handlePassTurn() {
+        PubSub.publish(Events.PASS_TURN, {
+            gameKey: this.state.gameKey,
+            playerKey: this.state.playerKey
+        })
+    }
+
     getErrorMessageIfApplicable() {
         if (this.state.displayError) {
             return (
@@ -169,11 +177,12 @@ export default class Game extends React.Component {
                         left: '-50%',
                         zIndex: 1000,
                         textAlign: 'center',
-                        background: '#7b2d26',
-                        color: 'whitesmoke',
+                        background: 'rgb(255, 228, 0)',
+                        color: 'black',
                         animation: 'shake 0.5s',
                         padding: '7px',
-                        borderRadius: '10px'
+                        borderRadius: '10px',
+                        userSelect: 'none'
                     }}>
                         <h1>{this.state.errorMessage}</h1>
                     </div>
@@ -205,38 +214,152 @@ export default class Game extends React.Component {
     getSchemaIfApplicable() {
         if (this.state.role == Roles.Master) {
             return (
-                <div className='col'>
-                    <div className='card'>
-                        <div className='card-body'>
-                            <Schema cards={this.state.cards} />
-                        </div>
-                    </div>
+                <div style={{ backgroundColor: 'rgba(0, 0, 0, 0)', border: 'none' }}>
+                        <Schema cards={this.state.cards} />
                 </div>
             )
         } else {
             return null
         }
     }
+
+    getCurrentTeamIfApplicable() {
+        if (this.state.currentTeam) {
+            return <span style={{  }}>C'est le tour de l'équipe <span>{Colors.stringFromIntLocale(this.state.currentTeam, "fr")}</span></span>
+        }
+    }
     
     render() {
+        // Connected players
+        const playerModels = Object.entries(this.state.players || [])
+        const redSpies = playerModels
+            .filter(([key, model]) => {
+                if (model.team == Teams.Red && model.role == Roles.Spy)
+                    return [key, model]
+            }).map(([key, model]) => {
+                if (this.state.playerKey == key)
+                    return <li
+                        id={'player-' + key}
+                        key={'player-' + key}>
+                        {model.name} (vous)
+                    </li>
+                else
+                    return <li
+                        id={'player-' + key}
+                        key={'player-' + key}>
+                        {model.name} 
+                    </li>
+            })
+        
+        const redMaster = playerModels
+            .filter(([key, model]) => {
+                if (model.team == Teams.Red && model.role == Roles.Master)
+                    return [key, model]
+            }).map(([key, model]) => {
+                if (this.state.playerKey == key)
+                    return <p
+                        id={'player-' + key}
+                        key={'player-' + key}>
+                        {model.name} (vous)
+                    </p>
+                else
+                    return <p
+                        id={'player-' + key}
+                        key={'player-' + key}>
+                        {model.name}
+                    </p>
+            })[0]
+        
+        const blueSpies = playerModels
+            .filter(([key, model]) => {
+                if (model.team == Teams.Blue && model.role == Roles.Spy)
+                    return [key, model]
+            }).map(([key, model]) => {
+                if (this.state.playerKey == key)
+                    return <li
+                        id={'player-' + key}
+                        key={'player-' + key}>
+                        {model.name} (vous)
+                    </li>
+                else
+                    return <li
+                        id={'player-' + key}
+                        key={'player-' + key}>
+                        {model.name}
+                    </li>
+            })
+        
+        const blueMaster = playerModels
+            .filter(([key, model]) => {
+                if (model.team == Teams.Blue && model.role == Roles.Master)
+                    return [key, model]
+            }).map(([key, model]) => {
+                if (this.state.playerKey == key)
+                    return <p
+                        id={'player-' + key}
+                        key={'player-' + key}>
+                        {model.name} (vous)
+                    </p>
+                else
+                    return <p
+                        id={'player-' + key}
+                        key={'player-' + key}>
+                        {model.name}
+                    </p>
+            })[0]
+        
+        // Next turn button
+        const nextTurnButton = this.state.canPassTurn
+            ? (<button className='cn-button' onClick={() => this.handlePassTurn()}>Finir le tour</button>)
+            : null
+        
+        // Remaining votes
+        const PRIMARY_COLOR = 'badge-success'
+        const SECONDARY_COLOR = 'badge-secondary'
+        var currentPlayerKey = this.state.playerKey;
+        const votes = this.state.remainingVotes
+            ?.map(playerKey => {
+                return {
+                    key: playerKey,
+                    name: this.state.players[playerKey].name,
+                    color: playerKey == currentPlayerKey ? PRIMARY_COLOR : SECONDARY_COLOR
+                }
+            })
+            ?.map(p => <span id={'vote-tag-' + p.key} key={'vote-tag-' + p.key} className={'badge ' + p.color}>{p.name}</span>)
+
         return (
-            <div className='container-fluid'>
+            <div>
                 {this.getErrorMessageIfApplicable()}
                 {this.getModalIfApplicable()}
 
-                <div className='row'>
+                <div style={{display: 'flex', justifyContent:'space-between'}}>
                     <button className='cn-button' onClick={() => this.openParameters()}>Menu</button>
+                    {nextTurnButton}
                 </div>
+
+                <div style={{display: 'flex', justifyContent: 'center'}}>
+                    <span className='cn-message'>
+                        {this.getCurrentTeamIfApplicable()}
+                    </span>
+                </div>
+
                 <ul>
                     {this.state.events.map((evt) => <li id={evt.key} key={evt.key}>{evt.text}</li>)}
                 </ul>
-                <div className='row'>
-                    {this.getSchemaIfApplicable()}
-                    <div className='col'>
-                        <Board 
-                            gameKey={this.state.gameKey} 
+                <section style={{display: 'flex'}}>
+                    <div style={{ flex: '1 1 100px', padding: '10px', background: 'radial-gradient(ellipse at left bottom, rgb(107, 17, 17), rgb(187, 31, 31))', borderRadius: '.5em', color: 'white' }}>
+                        <h4>Maître-espion</h4>
+                        {redMaster}
+                        <h4>Agents</h4>
+                        <ul style={{ listStyleType: 'none', paddingLeft: '0' }}>
+                            {redSpies}
+                        </ul>
+                    </div>
+                    <div style={{ flex: 'auto', display: 'flex', justifyContent: 'center' }}>
+                        <Board
+                            gameKey={this.state.gameKey}
                             playerKey={this.state.playerKey}
-                            name= {this.state.name}
+                            name={this.state.name}
                             role={this.state.role}
                             isMyTurn={this.state.isMyTurn}
                             players={this.state.players}
@@ -244,21 +367,21 @@ export default class Game extends React.Component {
                             cards={this.state.cards}
                         />
                     </div>
-                </div>
-                <div className='row'>
-                    <GameInfo 
-                            gameKey={this.state.gameKey} 
-                            playerKey={this.state.playerKey}
-                            playerTeam={this.state.playerTeam}
-                            name={this.state.name}
-                            role={this.state.role}
-                            currentTeam={this.state.currentTeam}
-                            announcedNumber={this.state.announcedNumber}
-                            announcedWord={this.state.announcedWord}
-                            players={this.state.players}
-                            remainingVotes={this.state.remainingVotes}
-                            canPassTurn={this.state.canPassTurn}
-                        />
+                    <div style={{ flex: '1 1 100px', padding: '10px', background: 'radial-gradient(ellipse at right bottom, rgb(10, 10, 80), rgb(26, 26, 185))', borderRadius: '.5em', color: 'white'  }}>
+                        <h4>Maître-espion</h4>
+                        {blueMaster}
+                        <h4>Agents</h4>
+                        <ul style={{ listStyleType: 'none', paddingLeft: '0' }}>
+                            {blueSpies}
+                        </ul>
+                    </div>
+                </section>
+                <div style={{display: 'flex', justifyContent: 'space-evenly'}}>
+                    {this.getSchemaIfApplicable()}
+                    <div>
+                        <h4>Votes restants</h4>
+                        {votes}
+                    </div>
                 </div>
             </div>
         )

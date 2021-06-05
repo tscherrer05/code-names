@@ -7,7 +7,7 @@ export const Teams = {
         switch (index) {
             case 1: return BlueString
             case 2: return RedString
-            default: throw new Error("Unsupported team index")
+            default: throw new Error("Unsupported team index : " + index)
         }
     }
 }

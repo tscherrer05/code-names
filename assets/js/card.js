@@ -31,37 +31,21 @@ export class Card extends React.Component {
     render() {
 
         const buildImgAttr = (props) => {
-            let src = 'images/'
-            if(props.returned) 
-            {
-                // TODO : retirer les magic strings
-                switch(props.color) 
-                {
-                    case Colors.White:
-                        src += 'white'
-                        break;
-                    case Colors.Blue:
-                        src += 'blue1'
-                        break;
-                    case Colors.Red:
-                        src += 'red0'
-                        break;
-                    case Colors.Black:
-                        src += 'black'
-                        break;
-                }
+            const colorToFileName = {
+                [Colors.Blue]: 'blue0',
+                [Colors.Red]: 'red0',
+                [Colors.White]: 'white',
+                [Colors.Black]: 'black'
             }
-            else 
-            {
-                src += 'card'
-            }
-            src += '.png'
-
+            const fileName = props.returned
+                ? colorToFileName[props.color]
+                : 'card'
+            
             return {
                 key:        `${props.x}-${props.y}`,
                 className:  'cn-card',
                 onClick:    props.isClickable ? () => this.vote() : () => this.dispatchError("Pas toucher ! è_é"),
-                src: src
+                src:        'images/' + fileName + '.png',
             }
         }
 
@@ -69,13 +53,18 @@ export class Card extends React.Component {
             const attr = buildImgAttr(props);
             
             return (props.returned)
-                ? <img
-                    key={attr.key}
-                    src={attr.src}
-                    onClick={attr.onClick}
-                    className={attr.className}
-                    alt={props.name}
-                />
+                ? <div>
+                        <img
+                            key={attr.key}
+                            src={attr.src}
+                            onClick={attr.onClick}
+                            className={attr.className}
+                            alt={props.name}
+                        />
+                    <div key='cn-card-text' className='cn-card-text' style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)', color: 'white' }}>
+                            {props.name}
+                        </div>
+                    </div>
              : (
                     <div>
                         <div className="cn-card-votes">
@@ -94,7 +83,7 @@ export class Card extends React.Component {
                             className={attr.className}
                             alt={props.name}
                         />
-                        <div key='cn-card-text' className='cn-card-text'>
+                        <div key='cn-card-text' className='cn-card-text' style={{ backgoundColor: 'none', color: 'black' }}>
                             {props.name}
                         </div>
                     </div>
@@ -102,7 +91,6 @@ export class Card extends React.Component {
         }
 
         return (
-            
             <div
                 key={`card-container-${this.props.x}${this.props.y}`}
                 id={`cn-card-${this.props.x}-${this.props.y}`}

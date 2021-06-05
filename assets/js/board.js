@@ -10,7 +10,6 @@ export class Board extends React.Component {
     }
 
     render() {
-
         const cardVotes = {}
         const votes = this.props.currentVotes || []
         for (var playerKey in votes) {
@@ -25,11 +24,15 @@ export class Board extends React.Component {
         }
 
         return (
-            <div>
                 <div
                     key='cn-cards-row'
                     id='cn-cards-row'
-                    className='row'>
+                style={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    maxWidth: '700px',
+                    justifyContent: 'center'
+                }}>
                         {this.props.cards.map(c => {
                             return <Card
                                     key=        {c.x+'-'+c.y}
@@ -46,7 +49,6 @@ export class Board extends React.Component {
                             }
                         )}
                 </div>
-            </div>
         )
     }
 }

@@ -21,7 +21,6 @@ export class Schema extends React.Component {
             <div      
                 key='cn-schema-row'
                 id='cn-schema'
-                style={{ margin: 'auto' }}
             >
                 <div className='row'>
                         {sq.map(c => {

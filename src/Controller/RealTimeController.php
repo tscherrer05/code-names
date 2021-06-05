@@ -184,6 +184,7 @@ class RealTimeController extends AbstractController
             // TODO : refactor into proper class
             $gamePlayers = $gameEntity->getGamePlayers()->toArray();
             $currentTeam = $gameEntity->getCurrentTeam();
+            $remainingVotes = [];
             foreach($gamePlayers as $p) {
                 $p->setX(null);
                 $p->setY(null);

@@ -1,117 +1,162 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`game UI renders correctly 1`] = `
-<div
-  className="container-fluid"
->
+<div>
   <div
-    className="row"
+    style={
+      Object {
+        "display": "flex",
+        "justifyContent": "space-between",
+      }
+    }
   >
-    <a
-      href="#"
+    <button
+      className="cn-button"
       onClick={[Function]}
     >
       Menu
-    </a>
+    </button>
   </div>
   <div
-    className="row"
+    style={
+      Object {
+        "display": "flex",
+        "justifyContent": "center",
+        "marginBottom": "10px",
+      }
+    }
+  >
+    <span
+      className="cn-message"
+    />
+  </div>
+  <section
+    style={
+      Object {
+        "display": "flex",
+      }
+    }
   >
     <div
-      className="col"
+      style={
+        Object {
+          "background": "radial-gradient(ellipse at left bottom, rgb(107, 17, 17), rgb(187, 31, 31))",
+          "borderRadius": ".5em",
+          "color": "white",
+          "flex": "1 1 100px",
+          "padding": "10px",
+        }
+      }
     >
-      <div>
-        <div
-          className="row"
-          id="cn-cards-row"
-        />
-      </div>
+      <h5>
+        Maître-espion
+      </h5>
+      <h5>
+        Agents
+      </h5>
+      <ul
+        style={
+          Object {
+            "listStyleType": "none",
+            "paddingLeft": "0",
+          }
+        }
+      />
     </div>
-  </div>
-  <div
-    className="row"
-  >
     <div
-      className="container"
+      style={
+        Object {
+          "display": "flex",
+          "flex": "auto",
+          "justifyContent": "center",
+        }
+      }
     >
       <div
-        className="row"
-      >
-        <div
-          className="col"
-        >
-          <p>
-            Vous êtes : 
-            <span
-              id="current-player"
-            />
-          </p>
-          <p>
-            Votre équipe : 
-            <span
-              style={
-                Object {
-                  "color": "red",
-                }
-              }
-            >
-              Rouge
-            </span>
-          </p>
-          <p>
-            Votre rôle : 
-            Maître espion
-          </p>
-        </div>
-        <div
-          className="col"
-        >
-          <p>
-            Tour : 
-            <span
-              id="current-team"
-            >
-              Equipe 
-              <span
-                style={
-                  Object {
-                    "color": "red",
-                  }
-                }
-              >
-                Rouge
-              </span>
-            </span>
-          </p>
-          <span
-            data-value="123"
-            id="gameKey"
-          />
-          <span
-            data-value="456"
-            id="playerKey"
-          />
-        </div>
-        <div
-          className="col"
-        >
-          <p
-            className="display-block"
-          >
-            Votes restants :
-          </p>
-        </div>
-        <div
-          className="col"
-        >
-          <p
-            className="display-block"
-          >
-            Joueurs connectés :
-          </p>
-          <ul />
-        </div>
-      </div>
+        id="cn-cards-row"
+        style={
+          Object {
+            "display": "flex",
+            "flexWrap": "wrap",
+            "justifyContent": "center",
+            "maxWidth": "700px",
+          }
+        }
+      />
+    </div>
+    <div
+      style={
+        Object {
+          "background": "radial-gradient(ellipse at right bottom, rgb(10, 10, 80), rgb(26, 26, 185))",
+          "borderRadius": ".5em",
+          "color": "white",
+          "flex": "1 1 100px",
+          "padding": "10px",
+        }
+      }
+    >
+      <h5>
+        Maître-espion
+      </h5>
+      <h5>
+        Agents
+      </h5>
+      <ul
+        style={
+          Object {
+            "listStyleType": "none",
+            "paddingLeft": "0",
+          }
+        }
+      />
+    </div>
+  </section>
+  <div
+    style={
+      Object {
+        "display": "flex",
+        "justifyContent": "space-evenly",
+        "marginTop": "10px",
+      }
+    }
+  >
+    <div
+      style={
+        Object {
+          "backgroundColor": "rgba(91, 90, 90, 0.74)",
+          "borderRadius": ".5em",
+          "color": "white",
+          "padding": "10px",
+        }
+      }
+    >
+      <h5>
+        Votes restants
+      </h5>
+    </div>
+    <div
+      style={
+        Object {
+          "backgroundColor": "rgba(91, 90, 90, 0.74)",
+          "borderRadius": ".5em",
+          "color": "white",
+          "flex": "0 1 300px",
+          "padding": "10px",
+        }
+      }
+    >
+      <h5>
+        Historique
+      </h5>
+      <ul
+        style={
+          Object {
+            "fontSize": ".7em",
+            "listStyleType": "none",
+            "paddingLeft": "0",
+          }
+        }
+      />
     </div>
   </div>
 </div>

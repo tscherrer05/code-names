@@ -223,7 +223,8 @@ const voteEventData =  {
 
 const returnEventData = {
     x: 2,
-    y: 3
+    y: 3,
+    team: Teams.Red
 }
 
 const addPlayerEvent = {
@@ -377,7 +378,7 @@ test('return a card nominal', () => {
 
     var result = returnCard(state, returnEventData);
 
-    expect(result).toStrictEqual({
+    expect(result).toMatchObject({
         currentVotes: {},
         remainingVotes: [playerOneKey, playerTwoKey],
         cards: [{x:2, y:3, returned: true}]

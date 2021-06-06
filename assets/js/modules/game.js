@@ -45,7 +45,7 @@ const vote = (state, eventData) => {
 const returnCard = (state, eventData) => {
     return {
         events: [
-            ...state.events,
+            ...(state.events || []),
             { key: Date.now(), text: "L'équipe " + Teams.stringFromInt(eventData.team)["fr"] + " a retourné la carte '" + eventData.word + "'" }
         ],
         currentVotes: {},

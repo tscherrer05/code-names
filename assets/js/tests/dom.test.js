@@ -19,7 +19,7 @@ import { Teams } from '../teams'
 import { Roles } from '../roles'
 import { Colors } from '../colors'
 import { StartUp } from '../startUp'
-import { WebSocketServer } from '../WebSocketServer'
+import { webSocketServer } from '../webSocketServer'
 import { Events } from '../events'
 import PubSub from 'pubsub-js'
 
@@ -90,7 +90,7 @@ it('Clicking on a card, happy path', async () => {
 
     // Assert
     await waitFor(() =>
-        expect(WebSocketServer.mock.instances[0].send).toHaveBeenCalledTimes(1)
+        expect(webSocketServer.mock.instances[0].send).toHaveBeenCalledTimes(1)
     )
 })
 
@@ -112,7 +112,7 @@ it('Clicking on a card during other team turn', async () => {
 
     // Assert
     await waitFor(() =>
-        expect(WebSocketServer.mock.instances[0].send).toHaveBeenCalledTimes(0)
+        expect(webSocketServer.mock.instances[0].send).toHaveBeenCalledTimes(0)
     )
 })
 

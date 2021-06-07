@@ -1,4 +1,4 @@
-export class WebSocketServer {
+export class webSocketServer {
     // TODO : config env
 
     constructor(url) {

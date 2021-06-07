@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import ReactDOM from 'react-dom'
 import regeneratorRuntime from "regenerator-runtime" // Needed to use 'async' keyword
 
-import { WebSocketServer } from './WebSocketServer'
+import { webSocketServer } from './webSocketServer'
 
 import { Events } from './events'
 import Game from './game'
@@ -19,7 +19,7 @@ import PubSub from 'pubsub-js'
  */
 export async function StartUp(domContainer, gameKey, playerKey, callback = null) {
 
-    const realTimeServer = new WebSocketServer('ws://localhost:8080')
+    const realTimeServer = new webSocketServer('ws://localhost:8080')
 
     const send = (evt, data) => realTimeServer.send(evt, data)
 

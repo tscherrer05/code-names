@@ -55,6 +55,22 @@ beforeEach(() => {
     document.body.appendChild(rootElement)
 })
 
+
+it('Connecting to the game', async () => {
+    // Arrange
+    // Mettre la datasource dans un état non résolu
+    dataSourceStub.__setToUnresolvedState()
+
+    // Act
+    await StartUp(rootElement, defaultServerData.gameKey, defaultServerData.playerKey)
+
+    // Assert
+    const expected = "Connexion à la partie..."
+    const actual = queryAllByText(rootElement, expected)
+    expect(actual).toHaveLength(1)
+    expect(actual[0].innerHTML).toEqual(expected)
+})
+
 it('Game displays with basic info', async () => {
     // Arrange
     dataSourceStub.__setData({

@@ -15,6 +15,7 @@ export default class Game extends React.Component {
     constructor(props) {
         super(props)
         this.state = {
+            connecting: true,
             gameKey: props.gameKey,
             playerKey: props.playerKey,
             playerTeam: props.playerTeam,
@@ -102,6 +103,7 @@ export default class Game extends React.Component {
                     return
                 }
                 self.setState({
+                    connecting:         false,
                     gameKey:            data.gameKey,
                     playerKey:          data.playerKey,
                     playerTeam:         data.playerTeam,
@@ -230,6 +232,10 @@ export default class Game extends React.Component {
     }
     
     render() {
+        if (this.state.connecting) {
+            return (<h4 style={{ color: 'white', textAlign: 'center' }}>Connexion à la partie...</h4>)
+        }
+
         // Connected players
         const playerModels = Object.entries(this.state.players || [])
         const redSpies = playerModels

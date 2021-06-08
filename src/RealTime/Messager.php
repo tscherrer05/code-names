@@ -44,6 +44,12 @@ class Messager implements MessageComponentInterface
             $err = \json_encode(array("data" => "Une erreur s'est produite."));
             $from->send($err);
         }
+        catch(\Error $e) 
+        {
+            echo "A fatal error has occurred: {$e->getMessage()}\n";
+            $err = \json_encode(array("data" => "Une erreur s'est produite."));
+            $from->send($err);
+        }
     }
 
     public function onClose(ConnectionInterface $conn)

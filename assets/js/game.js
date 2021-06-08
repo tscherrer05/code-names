@@ -238,81 +238,43 @@ export default class Game extends React.Component {
 
         // Connected players
         const playerModels = Object.entries(this.state.players || [])
+        const toPlayerListItem = ([key, model]) => {
+            if (this.state.playerKey == key)
+                return <li
+                    id={'player-' + key}
+                    key={'player-' + key}>
+                    {model.name} (vous)
+                    </li>
+            else
+                return <li
+                    id={'player-' + key}
+                    key={'player-' + key}>
+                    {model.name}
+                </li>
+        }
         const redSpies = playerModels
             .filter(([key, model]) => {
                 if (model.team == Teams.Red && model.role == Roles.Spy)
                     return [key, model]
-            }).map(([key, model]) => {
-                if (this.state.playerKey == key)
-                    return <li
-                        id={'player-' + key}
-                        key={'player-' + key}>
-                        {model.name} (vous)
-                    </li>
-                else
-                    return <li
-                        id={'player-' + key}
-                        key={'player-' + key}>
-                        {model.name} 
-                    </li>
-            })
+            }).map(toPlayerListItem)
         
         const redMaster = playerModels
             .filter(([key, model]) => {
                 if (model.team == Teams.Red && model.role == Roles.Master)
                     return [key, model]
-            }).map(([key, model]) => {
-                if (this.state.playerKey == key)
-                    return <p
-                        id={'player-' + key}
-                        key={'player-' + key}>
-                        {model.name} (vous)
-                    </p>
-                else
-                    return <p
-                        id={'player-' + key}
-                        key={'player-' + key}>
-                        {model.name}
-                    </p>
-            })[0]
+            }).map(toPlayerListItem)[0]
         
         const blueSpies = playerModels
             .filter(([key, model]) => {
                 if (model.team == Teams.Blue && model.role == Roles.Spy)
                     return [key, model]
-            }).map(([key, model]) => {
-                if (this.state.playerKey == key)
-                    return <li
-                        id={'player-' + key}
-                        key={'player-' + key}>
-                        {model.name} (vous)
-                    </li>
-                else
-                    return <li
-                        id={'player-' + key}
-                        key={'player-' + key}>
-                        {model.name}
-                    </li>
-            })
+            }).map(toPlayerListItem)
         
         const blueMaster = playerModels
             .filter(([key, model]) => {
                 if (model.team == Teams.Blue && model.role == Roles.Master)
                     return [key, model]
-            }).map(([key, model]) => {
-                if (this.state.playerKey == key)
-                    return <p
-                        id={'player-' + key}
-                        key={'player-' + key}>
-                        {model.name} (vous)
-                    </p>
-                else
-                    return <p
-                        id={'player-' + key}
-                        key={'player-' + key}>
-                        {model.name}
-                    </p>
-            })[0]
+            }).map(toPlayerListItem)[0]
         
         // Next turn button
         const nextTurnButton = this.state.canPassTurn
@@ -352,7 +314,9 @@ export default class Game extends React.Component {
                 <section style={{display: 'flex'}}>
                     <div style={{ flex: '1 1 100px', padding: '10px', background: 'radial-gradient(ellipse at left bottom, rgb(107, 17, 17), rgb(187, 31, 31))', borderRadius: '.5em', color: 'white' }}>
                         <h5>Maître-espion</h5>
-                        {redMaster}
+                        <ul style={{ listStyleType: 'none', paddingLeft: '0' }}>
+                            {redMaster}
+                        </ul>
                         <h5>Agents</h5>
                         <ul style={{ listStyleType: 'none', paddingLeft: '0' }}>
                             {redSpies}
@@ -372,7 +336,9 @@ export default class Game extends React.Component {
                     </div>
                     <div style={{ flex: '1 1 100px', padding: '10px', background: 'radial-gradient(ellipse at right bottom, rgb(10, 10, 80), rgb(26, 26, 185))', borderRadius: '.5em', color: 'white'  }}>
                         <h5>Maître-espion</h5>
-                        {blueMaster}
+                        <ul style={{ listStyleType: 'none', paddingLeft: '0' }}>
+                            {blueMaster}
+                        </ul>
                         <h5>Agents</h5>
                         <ul style={{ listStyleType: 'none', paddingLeft: '0' }}>
                             {blueSpies}

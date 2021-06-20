@@ -174,6 +174,7 @@ class RealTimeController extends AbstractController
         {
             // Game rules
             $gameInfo = $this->gameRepository->getByGuid($gameKey);
+
             $gameInfo->passTurn();
 
             // Persistance
@@ -293,6 +294,9 @@ class RealTimeController extends AbstractController
         $this->sendToAllClients($clients, json_encode($model));
     }
 
+    /**
+     * Empties a game from all its players
+     */
     public function emptyGame($params) {
         $gameKey = $params['gameKey'];
         $clients = $params['clients'];

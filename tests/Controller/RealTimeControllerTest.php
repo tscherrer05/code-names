@@ -9,8 +9,10 @@ use App\Entity\Colors;
 use App\Entity\Game;
 use App\Entity\GamePlayer;
 use App\Entity\Teams;
+use App\Repository\GameRepository;
 use SplObjectStorage;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Ratchet\ConnectionInterface;
 
 class RealTimeControllerTest extends WebTestCase
 {
@@ -37,42 +39,48 @@ class RealTimeControllerTest extends WebTestCase
 
     public function testVoteNominal()
     {
+        // Arrange
         $playerKey = TestFixtures::PlayerKey1;
-        $result = $this->service->vote([
+        $mockedClients = new SplObjectStorage();
+        $client1 = $this->getMockBuilder(ConnectionInterface::class)
+            ->setMockClassName('FakeConnectionInterface')
+            ->onlyMethods(['send', 'close'])
+            ->getMock();
+        $model = [
+            'action'    => 'hasVoted',
+            'playerKey' => TestFixtures::PlayerKey1,
+            'playerName' => 'Spy' . TestFixtures::PlayerKey1,
+            'x'         => 0,
+            'y'         => 2,
+            'color'     => Colors::Red
+        ];
+        $params = json_encode($model);
+        $mockedClients->attach($client1);
+
+        // Act
+        $client1->expects($this->once())->method('send');
+        $client1->expects($this->once())->method('send')->with($params);
+        $this->service->vote([
             'x' => 0,
             'y' => 2,
             'playerKey' => $playerKey,
             'gameKey' => TestFixtures::GameKey1,
-            'clients' => new SplObjectStorage(),
+            'clients' => $mockedClients,
             'from' => null
         ]);
-
+        
+        // Assert
         $gp = $this->entityManager
             ->getRepository(GamePlayer::class)
             ->findOneBy(['publicKey' => $playerKey])
         ;
-
-        // Assert retour
-        // TODO : Trouver comment intercepter ces messages envoyés aux clients
-        // Le mock n'est pas dans la doctrine Symfony
-
-        // $this->assertIsArray($parsed, 'Mauvais format de retour.');
-        // $this->assertArrayHasKey('action', $parsed, 'Clé manquante.');
-        // $this->assertArrayHasKey('gameKey', $parsed, 'Clé manquante.');
-        // $this->assertArrayHasKey('playerKey', $parsed, 'Clé manquante.');
-        // $this->assertArrayHasKey('x', $parsed, 'Clé manquante.');
-        // $this->assertArrayHasKey('y', $parsed, 'Clé manquante.');
-        // $this->assertSame('vote', $parsed['action']);
-        // $this->assertSame(TestFixtures::PlayerKey1, $parsed['playerKey'], 'Mauvaise donnée de retour.');
-        
-        // Assert data
         $this->assertSame(0, $gp->getX());
         $this->assertSame(2, $gp->getY());
     }
 
     public function testVoteAndReturnCard()
     {
-        $result = $this->service->vote([
+        $this->service->vote([
             'x' => 0,
             'y' => 2,
             'playerKey' => TestFixtures::PlayerKey1,

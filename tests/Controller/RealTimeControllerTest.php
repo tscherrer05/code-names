@@ -9,7 +9,7 @@ use App\Entity\Colors;
 use App\Entity\Game;
 use App\Entity\GamePlayer;
 use App\Entity\Teams;
-use App\Repository\GameRepository;
+use PHPUnit\Framework\MockObject\MockObject;
 use SplObjectStorage;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Ratchet\ConnectionInterface;
@@ -17,6 +17,10 @@ use Ratchet\ConnectionInterface;
 class RealTimeControllerTest extends WebTestCase
 {
     private RealTimeController $service;
+    private MockObject $client1;
+    private MockObject $client2;
+    private MockObject $client3;
+    private \SplObjectStorage $clients;
     
     /**
      * @var \Doctrine\ORM\EntityManager
@@ -35,17 +39,19 @@ class RealTimeControllerTest extends WebTestCase
         $this->service = $container->get('realtime');
 
         $this->entityManager = $container->get('doctrine')->getManager();
+
+        $this->client1 = $this->getFakeClient(TestFixtures::PlayerConnectionId1);
+        $this->client2 = $this->getFakeClient(TestFixtures::PlayerConnectionId2);
+        $this->client3 = $this->getFakeClient(9999);
+        $this->clients = new SplObjectStorage();
+        $this->clients->attach($this->client1);
+        $this->clients->attach($this->client2);
+        $this->clients->attach($this->client3);
     }
 
     public function testVoteNominal()
     {
         // Arrange
-        $playerKey = TestFixtures::PlayerKey1;
-        $mockedClients = new SplObjectStorage();
-        $client1 = $this->getMockBuilder(ConnectionInterface::class)
-            ->setMockClassName('FakeConnectionInterface')
-            ->onlyMethods(['send', 'close'])
-            ->getMock();
         $model = [
             'action'    => 'hasVoted',
             'playerKey' => TestFixtures::PlayerKey1,
@@ -55,17 +61,20 @@ class RealTimeControllerTest extends WebTestCase
             'color'     => Colors::Red
         ];
         $params = json_encode($model);
-        $mockedClients->attach($client1);
+        $playerKey = TestFixtures::PlayerKey1;
 
         // Act
-        $client1->expects($this->once())->method('send');
-        $client1->expects($this->once())->method('send')->with($params);
+        $this->client1->expects($this->once())->method('send');
+        $this->client1->expects($this->once())->method('send')->with($params);
+        $this->client2->expects($this->once())->method('send');
+        $this->client2->expects($this->once())->method('send')->with($params);
+        $this->client3->expects($this->never())->method('send');
         $this->service->vote([
             'x' => 0,
             'y' => 2,
             'playerKey' => $playerKey,
             'gameKey' => TestFixtures::GameKey1,
-            'clients' => $mockedClients,
+            'clients' => $this->clients,
             'from' => null
         ]);
         
@@ -286,9 +295,47 @@ class RealTimeControllerTest extends WebTestCase
         $this->assertSame(0, \count($this->getGame($gameKey)->getGamePlayers()->toArray()));
     }
 
+    public function testConnectPlayer()
+    {
+        // Arrange
+        $gameKey = TestFixtures::GameKey1;
+        $playerKey = TestFixtures::PlayerKey1;
+        $gp = $this->getGamePlayer($playerKey);
+        $this->assertNull($gp->getConnectionId());
+
+        // Act
+        $this->service->connectPlayer([
+            'gameKey' => $gameKey,
+            'playerKey' => $playerKey,
+            'clients' => new SplObjectStorage(),
+            'from' => $this->client1
+        ]);
+
+        // Assert
+        $gp = $this->getGamePlayer($playerKey);
+        $this->assertSame($this->client1->resourceId, $gp->getConnectionId());
+    }
+
     private function getGame($gameKey) {
         return $this->entityManager
                     ->getRepository(Game::class)
                     ->findOneBy(['publicKey' => $gameKey]);
     }
+
+    private function getGamePlayer($playerKey) {
+        return $this->entityManager
+                    ->getRepository(GamePlayer::class)
+                    ->findOneBy(['publicKey' => $playerKey]);
+    }
+
+    private function getFakeClient($resourceId)
+    {
+        $mock = $this->getMockBuilder(ConnectionInterface::class)
+            ->setMockClassName('FakeConnection')
+            ->onlyMethods(['send', 'close'])
+            ->getMock();
+        $mock->resourceId = $resourceId;
+        return $mock;
+    }
+
 }

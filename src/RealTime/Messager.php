@@ -33,7 +33,7 @@ class Messager implements MessageComponentInterface
         try
         {
             // 1. Parse message
-            $action = new Action($msg);
+            $action = Action::create($msg);
 
             // 2. Execute corresponding action
             (new Router($this->container))->execute($action, $this->clients, $from);
@@ -44,7 +44,7 @@ class Messager implements MessageComponentInterface
             $err = \json_encode(array("data" => "Une erreur s'est produite."));
             $from->send($err);
         }
-        catch(\Error $e) 
+        catch(\Error $e)
         {
             echo "A fatal error has occurred: {$e->getMessage()}\n";
             $err = \json_encode(array("data" => "Une erreur s'est produite."));

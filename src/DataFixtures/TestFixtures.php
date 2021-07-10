@@ -49,6 +49,10 @@ class TestFixtures extends Fixture implements FixtureGroupInterface
     const PlayerKey8 = "900c6679-62a9-43d0-9a28-4299d2130dsq";
     const PlayerKey9 = "900c6679-62a9-43d0-9a28-4299d211dzsx";
     const PlayerKey10 = "456c6679-62a9-43d0-9a28-4299d211dzsx";
+
+    const PlayerConnectionId1 = 123;
+    const PlayerConnectionId2 = 234;
+    const PlayerConnectionId3 = 345;
     
     const Cards = [
         ['orange', 0, 0, Colors::Blue, false],
@@ -107,11 +111,11 @@ class TestFixtures extends Fixture implements FixtureGroupInterface
         $game->setCurrentTeam(Teams::Blue);
 
         // player
-        $this->createFakePlayer($manager, $game, Teams::Blue, Roles::Spy, 'Spy'.self::PlayerKey1, self::PlayerKey1);
-        $this->createFakePlayer($manager, $game, Teams::Blue, Roles::Spy, 'Spy'.self::PlayerKey3, self::PlayerKey3);
-        $this->createFakePlayer($manager, $game, Teams::Red, Roles::Spy,'Spy'.self::PlayerKey4, self::PlayerKey4);
-        $this->createFakePlayer($manager, $game, Teams::Blue, Roles::Master,'MasterSpy'.self::PlayerKey2, self::PlayerKey2);
-        $this->createFakePlayer($manager, $game, Teams::Red, Roles::Master,'MasterSpy'.self::PlayerKey9, self::PlayerKey9);
+        $this->createFakePlayer($manager, $game, Teams::Blue, Roles::Spy, 'Spy'.self::PlayerKey1, self::PlayerKey1, self::PlayerConnectionId1);
+        $this->createFakePlayer($manager, $game, Teams::Blue, Roles::Spy, 'Spy'.self::PlayerKey3, self::PlayerKey3, self::PlayerConnectionId2);
+        $this->createFakePlayer($manager, $game, Teams::Red, Roles::Spy,'Spy'.self::PlayerKey4, self::PlayerKey4, self::PlayerConnectionId3);
+        $this->createFakePlayer($manager, $game, Teams::Blue, Roles::Master,'MasterSpy'.self::PlayerKey2, self::PlayerKey2, 348);
+        $this->createFakePlayer($manager, $game, Teams::Red, Roles::Master,'MasterSpy'.self::PlayerKey9, self::PlayerKey9, 765);
 
         // card
         $dataCards = self::Cards;
@@ -185,7 +189,8 @@ class TestFixtures extends Fixture implements FixtureGroupInterface
     }
 
     private function createFakePlayer(ObjectManager $manager,
-        Game $game, int $team, int $role, string $name, string $playerKey, int $x = null, int $y = null)
+        Game $game, int $team, int $role, string $name, 
+        string $playerKey, int $x = null, int $y = null, $connectionId = null)
     {
         $gamePlayer = new GamePlayer();
         $gamePlayer->setGame($game);
@@ -196,6 +201,7 @@ class TestFixtures extends Fixture implements FixtureGroupInterface
         $gamePlayer->setRole($role);
         $gamePlayer->setX($x);
         $gamePlayer->setY($y);
+        $gamePlayer->setConnectionId($connectionId);
         $manager->persist($gamePlayer);
     }
 }

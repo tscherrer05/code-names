@@ -57,6 +57,11 @@ class GamePlayer
      */
     private $name;
 
+    /**
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $connectionId;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -154,6 +159,18 @@ class GamePlayer
     public function setName(?string $name): self
     {
         $this->name = $name;
+
+        return $this;
+    }
+
+    public function getConnectionId(): ?int
+    {
+        return $this->connectionId;
+    }
+
+    public function setConnectionId(?int $connectionId): self
+    {
+        $this->connectionId = $connectionId;
 
         return $this;
     }

@@ -21,5 +21,10 @@ class Action
     {
         return $this->json["parameters"];
     }
+
+    public static function create($msg)
+    {
+        return new Action($msg);
+    }
 }
 

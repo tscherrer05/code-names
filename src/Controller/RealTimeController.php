@@ -58,7 +58,7 @@ class RealTimeController extends AbstractController
                 'action' => 'gameStarted',
                 'gameKey' => $gameKey
             ];
-            $this->sendToAllClients($clients, json_encode($model));
+            $this->sendToAllGamePlayers($clients, $gameKey, json_encode($model));
         } catch (\Exception $exception) {
             print($exception->getMessage());
             $model = [
@@ -66,7 +66,7 @@ class RealTimeController extends AbstractController
                 'error' => true,
                 'message' => "Erreur lors du démarrage de la partie."
             ];
-            $this->sendToAllClients($clients, json_encode($model));
+            $this->sendToAllGamePlayers($clients, $gameKey, json_encode($model));
         }    
     }
 
@@ -116,7 +116,7 @@ class RealTimeController extends AbstractController
                 'y'         => $y,
                 'color'     => $voteResult['card']->color
             ];
-            $this->sendToAllClients($clients, json_encode($model));
+            $this->sendToAllGamePlayers($clients, $gameKey, json_encode($model));
             
             if($voteResult['card']->returned === true)
             {
@@ -128,7 +128,7 @@ class RealTimeController extends AbstractController
                     'team' => $player->team,
                     'word' => $voteResult['card']->word
                 ];
-                $this->sendToAllClients($clients, json_encode($model));
+                $this->sendToAllGamePlayers($clients, $gameKey, json_encode($model));
             }
         }
         catch(\InvalidArgumentException $e)
@@ -140,7 +140,7 @@ class RealTimeController extends AbstractController
                 'error' => true,
                 'message' => "Erreur lors du vote du joueur $playerKey sur la carte [$x, $y]"
             ];            
-            $this->sendToAllClients($clients, json_encode($model));
+            $this->sendToAllGamePlayers($clients, $gameKey, json_encode($model));
         }
         catch(\Exception $e)
         {
@@ -151,7 +151,7 @@ class RealTimeController extends AbstractController
                 'error' => true,
                 'message' => "Erreur lors du vote du joueur $playerKey sur la carte [$x, $y]"
             ];
-            $this->sendToAllClients($clients, json_encode($model));
+            $this->sendToAllGamePlayers($clients, $gameKey, json_encode($model));
         }
     }
 
@@ -204,19 +204,19 @@ class RealTimeController extends AbstractController
                 throw new \Exception("Player not found with guid : $playerKey");
             }
 
-            // TODO : how to test event dispatch ?
             $model = [
                 'action'            => 'turnPassed',
                 'team'              => $gameInfo->currentTeam(),
                 'remainingVotes'    => $remainingVotes
             ];
-            $this->sendToAllClients($clients, json_encode($model));
+            $this->sendToAllGamePlayers($clients, $gameKey, json_encode($model));
         }
         catch(\Exception $e)
         {
+            // TODO : système de log
             print($e->getMessage());
             print($e->getTraceAsString());
-            $this->sendToOtherClients($clients, $from, json_encode(['error' => "Une erreur interne s'est produite."]));
+            $this->sendToOtherGamePlayers($clients, $from, $gameKey, json_encode(['error' => "Une erreur interne s'est produite."]));
         }
     }
 
@@ -228,12 +228,15 @@ class RealTimeController extends AbstractController
         $gameKey = $params['gameKey'];
         $playerKey = $params['playerKey'];
         $clients = $params['clients'];
+        $from = $params['from'];
 
         $gp = $this->gamePlayerRepository->findByGuid($playerKey);
         if($gp == null) 
         {
             throw new \Exception("Player not found with guid : $playerKey");
         }
+        $gp->setConnectionId($from->resourceId);
+        $this->getDoctrine()->getManager()->flush();
 
         $model = [
             'action' => 'playerJoined',
@@ -243,7 +246,7 @@ class RealTimeController extends AbstractController
             'playerTeam' => $gp->getTeam(),
             'gameKey' => $gameKey,
         ];
-        $this->sendToAllClients($clients, json_encode($model));
+        $this->sendToAllGamePlayers($clients, $gameKey, json_encode($model));
     }
 
     /**
@@ -291,7 +294,7 @@ class RealTimeController extends AbstractController
             'action' => 'gameHasReset',
             'gameKey' => $gameKey
         ];
-        $this->sendToAllClients($clients, json_encode($model));
+        $this->sendToAllGamePlayers($clients, $gameKey, json_encode($model));
     }
 
     /**
@@ -302,6 +305,14 @@ class RealTimeController extends AbstractController
         $clients = $params['clients'];
         $em = $this->getDoctrine()->getManager();
 
+        // TODO : il y a un problème
+        $model = [
+            'action' => 'gameIsEmptied',
+            'gameKey' => $gameKey,
+            'redirectUrl' => '/disconnect'
+        ];
+        $this->sendToAllGamePlayers($clients, $gameKey, json_encode($model));
+
         foreach($this->gameRepository
                     ->findByGuid($gameKey)
                     ->getGamePlayers()
@@ -310,13 +321,7 @@ class RealTimeController extends AbstractController
                $em->remove($gp); 
         }
 
-        $em->flush();        
-        $model = [
-            'action' => 'gameIsEmptied',
-            'gameKey' => $gameKey,
-            'redirectUrl' => '/disconnect'
-        ];
-        $this->sendToAllClients($clients, json_encode($model));
+        $em->flush();
     }
 
     // TODO : move into repo ?
@@ -362,22 +367,41 @@ class RealTimeController extends AbstractController
         $entityManager->flush();
     }
 
-    private function sendToOtherClients(\SplObjectStorage $clients, ConnectionInterface $from, string $message)
+    private function sendToOtherGamePlayers(\SplObjectStorage $clients, ConnectionInterface $from, string $gameKey, string $message)
     {
+        $connectionIds = array_map(
+            function ($gp) {
+                return $gp->getConnectionId();
+            },
+            $this->gameRepository->findOneBy(['publicKey' => $gameKey])
+                ->getGamePlayers()
+                ->toArray()
+        );
+
         foreach ($clients as $client) 
         {
-            if($client != $from)
+            if($client != $from && in_array($client->resourceId, $connectionIds))
             {
                 $client->send($message);
             }
         }
     }
 
-    private function sendToAllClients(\SplObjectStorage $clients, string $message)
+    private function sendToAllGamePlayers(\SplObjectStorage $clients, string $gameKey, string $message)
     {
-        foreach ($clients as $client) 
+        $connectionIds = array_map(
+            function($gp) { return $gp->getConnectionId(); },
+            $this->gameRepository->findOneBy(['publicKey' => $gameKey])
+                ->getGamePlayers()
+                ->toArray()
+        );
+
+        foreach($clients as $client) 
         {
-            $client->send($message);
+            if(in_array($client->resourceId, $connectionIds))
+            {
+                $client->send($message);
+            }
         }
     }
 

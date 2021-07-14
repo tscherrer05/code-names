@@ -1327,7 +1327,7 @@
   dependencies:
     "@sinonjs/commons" "^1.7.0"
 
-"@symfony/webpack-encore@^0.30.0":
+"@symfony/webpack-encore@^0.30.2":
   "integrity" "sha512-fJGPnNJ69/FrRcIRluqk5grO4R0ZmXU1n3TyplOjjXv9nuLTA8ljvhk/sMAs/WMri4vb1ZdWwcT5sPw1pmYZdA=="
   "resolved" "https://registry.npmjs.org/@symfony/webpack-encore/-/webpack-encore-0.30.2.tgz"
   "version" "0.30.2"

@@ -15,6 +15,7 @@ class RealTimeController extends AbstractController
 {
     private $gameRepository;
     private $gamePlayerRepository;
+    private $cardRepository;
     private $random;
 
     public function __construct(GameRepository $gameRepository, 
@@ -33,13 +34,13 @@ class RealTimeController extends AbstractController
     public function startGame($params)
     {
         try {
-            // TODO : assainir input
+            // TODO : sanitize input
             $gameKey = $params['gameKey'];
             $clients = $params['clients'];
             $players = $params['players'];
             $entityManager = $this->getDoctrine()->getManager();
 
-            // Mettre le jeu au statut "OnGoing"
+            // Put game in "OnGoing" status
             $gameEntity = $this->gameRepository->findByGuid($gameKey);
             $gameEntity->setStatus(GameStatus::OnGoing);
 
@@ -92,11 +93,11 @@ class RealTimeController extends AbstractController
 
         try
         {
-            // Récupérer la racine du graphe
+            // Fetch domain
             $gameInfo = $this->gameRepository->getByGuid($gameKey);
             $player = $gameInfo->getPlayer($playerKey);
 
-            // Exécuter les règles du jeu (change l'état du jeu)
+            // Execute rule
             $voteResult = $gameInfo->vote($player, $x, $y);
 
             if($voteResult['ok'] !== true)
@@ -104,7 +105,7 @@ class RealTimeController extends AbstractController
                 // TODO : Propage évènements d'erreur
             }
 
-            // Mapping domaine <-> persistance
+            // Map domain <-> persistence
             $this->persist($gameInfo);
 
             // Dispatch events
@@ -131,7 +132,7 @@ class RealTimeController extends AbstractController
                 $this->sendToAllGamePlayers($clients, $gameKey, json_encode($model));
             }
         }
-        catch(\InvalidArgumentException $e)
+        catch(\InvalidArgumentException | \Exception $e)
         {
             print($e->getMessage());
             print($e->getTraceAsString());
@@ -140,17 +141,6 @@ class RealTimeController extends AbstractController
                 'error' => true,
                 'message' => "Erreur lors du vote du joueur $playerKey sur la carte [$x, $y]"
             ];            
-            $this->sendToAllGamePlayers($clients, $gameKey, json_encode($model));
-        }
-        catch(\Exception $e)
-        {
-            print($e->getMessage());
-            print($e->getTraceAsString());
-            $model = [
-                'action' => 'hasVoted',
-                'error' => true,
-                'message' => "Erreur lors du vote du joueur $playerKey sur la carte [$x, $y]"
-            ];
             $this->sendToAllGamePlayers($clients, $gameKey, json_encode($model));
         }
     }
@@ -172,12 +162,11 @@ class RealTimeController extends AbstractController
 
         try
         {
-            // Game rules
+            // Apply rule
             $gameInfo = $this->gameRepository->getByGuid($gameKey);
-
             $gameInfo->passTurn();
 
-            // Persistance
+            // Persist
             $gameEntity = $this->gameRepository->findByGuid($gameKey);
             $gameEntity->setCurrentTeam($gameInfo->team);
 

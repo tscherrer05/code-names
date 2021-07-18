@@ -26,6 +26,7 @@
         "test": "jest --detectOpenHandles"
     },
     "dependencies": {
+        "dotenv": "^10.0.0",
         "jquery-slim": "^3.0.0",
         "prop-types": "^15.7.2",
         "pubsub-js": "^1.8.0",

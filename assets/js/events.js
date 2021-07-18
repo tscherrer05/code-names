@@ -7,8 +7,10 @@ export const Events = {
     GLOBAL_ERROR: 'globalError',
     PLAYER_CONNECTED: 'playerConnected',
     PLAYER_JOINED: 'playerJoined',
+    PLAYER_LEFT: "playerLeft",
     RESET_GAME: 'resetGame',
     GAME_HAS_RESET: 'gameHasReset',
     EMPTY_GAME: 'emptyGame',
-    GAME_IS_EMPTIED: 'gameIsEmptied'
+    GAME_IS_EMPTIED: 'gameIsEmptied',
+    LEAVE_GAME: "leaveGame",
 }

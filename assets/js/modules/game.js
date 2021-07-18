@@ -12,7 +12,7 @@ import { Teams } from "../teams.js"
  * @param {string} eventData.y
  */
 const vote = (state, eventData) => {
-    if(eventData == null || eventData.x == null || eventData.y == null) {
+    if(eventData == null || eventData.x == null || eventData.y == null) {
         return {
             currentVotes: state.currentVotes,
             remainingVotes: state.remainingVotes
@@ -63,20 +63,21 @@ const returnCard = (state, eventData) => {
 
 /**
  * Adds a player to the game in an idempotent way.
- * @param {Object} state 
+ * @param {Readonly<S>} state
  * @param {{}} state.players
  * @param {{}} state.currentVotes
  * @param {string[]} state.remainingVotes
- * @param {Object} eventData 
- * @param {string} eventData.playerName 
+ * @param {Object} eventData
+ * @param {string} eventData.playerName
  * @param {string} eventData.playerKey
  * @param {number} eventData.playerRole
  * @param {number} eventData.playerTeam
+ * @returns  {{players, remainingVotes, currentVotes}}
  */
 const addNewPlayer = (state, eventData) => {
     const hasVoted = (state.currentVotes?.hasOwnProperty(eventData.playerKey) || false)
     const isMaster = eventData.playerRole === Roles.Master
-    const isOppositeTeam = eventData.playerTeam != state.currentTeam
+    const isOppositeTeam = eventData.playerTeam !== state.currentTeam
     return {
         players: {...state.players || {}, [eventData.playerKey]: {name:eventData.playerName, role:eventData.playerRole, team:eventData.playerTeam}},
         remainingVotes:  hasVoted || isMaster || isOppositeTeam
@@ -87,11 +88,25 @@ const addNewPlayer = (state, eventData) => {
 }
 
 /**
+ * Removes a player from the game
+ * @param state
+ * @param eventData
+ * @returns {{players}}
+ */
+const removePlayer = (state, eventData) => {
+    return {
+        players: Object.fromEntries(Object.entries(state.players).filter(([key, value]) => key !== eventData.playerKey) ),
+        remainingVotes: state.remainingVotes.filter(k => k !== eventData.playerKey),
+        currentVotes: Object.fromEntries(Object.entries(state.currentVotes).filter(([key, value]) => key !== eventData.playerKey) )
+    }
+}
+
+/**
  * Passes turn to the next team.`
  * @param {*} state 
  */
 const passTurn = (state, eventData) => {
-    if(!eventData || !eventData.remainingVotes)
+    if(!eventData || !eventData.remainingVotes)
         return {}
     const newTeam = state.currentTeam === Teams.Blue ? Teams.Red : Teams.Blue
     return {
@@ -103,4 +118,4 @@ const passTurn = (state, eventData) => {
     }
 }
 
-export {vote, returnCard, addNewPlayer, passTurn}
+export {vote, returnCard, addNewPlayer, removePlayer, passTurn}

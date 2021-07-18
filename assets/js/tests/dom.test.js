@@ -28,24 +28,37 @@ jest.mock('../WebSocketServer')
 
 let dataSourceStub
 let rootElement
-const gameKey = '072eae5f-1d47-4fc6-b452-411f76ec5b6e'
+const gameKey =  '072eae5f-1d47-4fc6-b452-411f76ec5b6e'
 const playerKey1 = '3fa222bf-b828-4212-a1be-084663e4a55d'
+const playerName1 = 'Inspecteur LeBlanco'
+const playerKey2 = 'op2022bf-b828-4212-a1be-084663e42d83'
+const playerName2 = 'Bengui bengui'
 const defaultServerData = {
     gameKey: gameKey,
     playerKey: playerKey1,
     playerTeam: Teams.Blue,
     playerRole: Roles.Spy,
-    playerName: 'Inspecteur LeBlanco',
+    playerName: playerName1,
     currentTeam: Teams.Blue,
     currentNumber: null,
     currentWord: null,
-    allPlayers: {[playerKey1]: { name: 'Inspecteur LeBlanco', role: Roles.Spy, team: Teams.Blue }},
-    currentTeamSpies: [playerKey1],
-    currentTeamPlayers: [],
-    currentVotes: [],
+    allPlayers: {
+        [playerKey1]: { name: playerName1, role: Roles.Spy, team: Teams.Blue },
+        [playerKey2]: { name: playerName2, role: Roles.Spy, team: Teams.Blue }
+    },
+    currentTeamSpies: [playerKey1, playerKey2],
+    currentTeamPlayers: [playerKey1, playerKey2],
+    currentVotes: { [playerKey2]: '11' },
     remainingVotes: [playerKey1],
     isMyTurn: true,
     canPassTurn: false,
+    cards: [{
+        color: Colors.Blue,
+        returned: false,
+        name: 'Word',
+        x: 1,
+        y: 1
+    }]
 }
 
 beforeEach(() => {
@@ -58,7 +71,6 @@ beforeEach(() => {
 
 it('Connecting to the game', async () => {
     // Arrange
-    // Mettre la datasource dans un état non résolu
     dataSourceStub.__setToUnresolvedState()
 
     // Act
@@ -85,7 +97,7 @@ it('Game displays with basic info', async () => {
     await StartUp(rootElement, defaultServerData.gameKey, defaultServerData.playerKey)
 
     // Assert
-    expect(queryAllByText(rootElement, defaultServerData.playerName)).toHaveLength(1)
+    expect(queryAllByText(rootElement, defaultServerData.playerName, {exact: false})).toHaveLength(2)
     expect(queryByText(rootElement, 'Mot de carte')).toBeDefined()
     expect(queryByText(rootElement, 'AAA')).toBeDefined()
 })
@@ -192,4 +204,40 @@ it('Blue team returns a card', async () => {
     expect(evts).toBeDefined()
     expect(evts.length).toBe(1)
     expect(evts[0].innerHTML).toBe(expected)
+})
+
+it('Player leaves game', async () => {
+    // Arrange
+    defaultServerData.currentVotes =
+    dataSourceStub.__setData(defaultServerData)
+    await StartUp(rootElement, defaultServerData.gameKey, defaultServerData.playerKey)
+
+    // Assert
+    expect(queryAllByText(rootElement, defaultServerData.playerName, {exact:false})).toHaveLength(2)
+
+    // Act
+    PubSub.publishSync(Events.PLAYER_LEFT, {
+        playerKey: playerKey1
+    })
+
+    // Assert
+    expect(queryAllByText(rootElement, defaultServerData.playerName, {exact:false})).toHaveLength(0)
+})
+
+it('Voting player leaves game', async () => {
+    // Arrange
+    defaultServerData.currentVotes =
+        dataSourceStub.__setData(defaultServerData)
+    await StartUp(rootElement, defaultServerData.gameKey, defaultServerData.playerKey)
+
+    // Assert
+    expect(queryAllByText(rootElement, playerName2, {exact:false})).toHaveLength(2)
+
+    // Act
+    PubSub.publishSync(Events.PLAYER_LEFT, {
+        playerKey: playerKey2
+    })
+
+    // Assert
+    expect(queryAllByText(rootElement, playerName2, {exact:false})).toHaveLength(0)
 })

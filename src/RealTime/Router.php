@@ -36,6 +36,8 @@ class Router
                 return $realTimeController->resetGame($arguments);
             case 'emptyGame':
                 return $realTimeController->emptyGame($arguments);
+            case 'leaveGame':
+                return $realTimeController->leaveGame($arguments);
             case 'heartBeat':
                 return;
             default:

@@ -3,7 +3,7 @@ import {Board} from './board'
 import { DataSource } from './dataSource'
 import { Events } from './events'
 import { Schema } from './schema'
-import { returnCard, vote, addNewPlayer, passTurn } from './modules/game'
+import { returnCard, vote, addNewPlayer, removePlayer, passTurn } from './modules/game'
 import { Roles } from './roles'
 import Modal from 'react-bootstrap/Modal'
 import PubSub from 'pubsub-js'
@@ -73,6 +73,16 @@ export default class Game extends React.Component {
                     )
                 )
             }),
+           PubSub.subscribe(Events.PLAYER_LEFT, (evt, data) => {
+                this.setState(
+                    removePlayer(
+                        this.state,
+                        {
+                            playerKey: data.playerKey
+                        }
+                    )
+                )
+            }),
             PubSub.subscribe(Events.TURN_PASSED, (evt, data) => {
                 this.setState(
                     passTurn(
@@ -117,8 +127,9 @@ export default class Game extends React.Component {
                     currentTeamPlayers: data.currentTeamPlayers,
                     currentVotes:       data.currentVotes,
                     remainingVotes:     data.remainingVotes,
-                    isMyTurn:           data.currentTeam === data.playerTeam,
                     canPassTurn:        data.canPassTurn,
+                    isMyTurn:           data.currentTeam === data.playerTeam,
+                    canManageGame:      data.playerRole == Roles.Master,
                     cards:              data.cards.map(x => {
                         return {
                             color: x.color,
@@ -161,6 +172,14 @@ export default class Game extends React.Component {
         PubSub.publish(Events.EMPTY_GAME, {
             gameKey: this.state.gameKey
         })
+    }
+
+    leaveGame() {
+        PubSub.publish(Events.LEAVE_GAME, {
+            gameKey: this.state.gameKey,
+            playerKey: this.state.playerKey
+        })
+        location.href = '/start'
     }
 
     handlePassTurn() {
@@ -207,8 +226,11 @@ export default class Game extends React.Component {
                 Menu
                     </Modal.Header>
             <Modal.Body>
-                <button className='cn-button btn-block' onClick={() => this.resetGame()}>Réinitialiser la partie en cours</button>
-                <button className='cn-button btn-block' onClick={() => this.emptyGame()}>Terminer la partie en cours</button>
+                    <span>
+                        { this.state.canManageGame && <button className='cn-button btn-block' onClick={() => this.resetGame()}>Réinitialiser la partie en cours</button>}
+                        { this.state.canManageGame && <button className='cn-button btn-block' onClick={() => this.emptyGame()}>Terminer la partie en cours</button> }
+                        <button className='cn-button btn-block' onClick={() => this.leaveGame()}>Quitter la partie</button>
+                    </span>
             </Modal.Body>
         </Modal>)
     }
@@ -284,7 +306,7 @@ export default class Game extends React.Component {
         // Remaining votes
         const PRIMARY_COLOR = 'badge-success'
         const SECONDARY_COLOR = 'badge-secondary'
-        var currentPlayerKey = this.state.playerKey;
+        const currentPlayerKey = this.state.playerKey;
         const votes = this.state.remainingVotes
             ?.map(playerKey => {
                 return {

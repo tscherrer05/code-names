@@ -52,6 +52,12 @@ const processRealTimeMessageEvent = (e) => {
             break
         case Events.GAME_IS_EMPTIED:
             location.href = result.redirectUrl
+        case Events.PLAYER_LEFT:
+            debugger
+            PubSub.publish(Events.PLAYER_LEFT, {
+                playerKey: result.playerKey,
+                redirectUrl: result.redirectUrl
+            })
         case null:
         case undefined:
         default:

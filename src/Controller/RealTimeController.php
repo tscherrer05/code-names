@@ -4,27 +4,26 @@ namespace App\Controller;
 use App\CodeNames\GameStatus;
 use App\Entity\Colors;
 use App\Entity\Roles;
-use App\Repository\CardRepository;
 use App\Repository\GamePlayerRepository;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use App\Repository\GameRepository;
 use App\Service\Random;
 use Ratchet\ConnectionInterface;
+use function count;
 
 class RealTimeController extends AbstractController
 {
-    private $gameRepository;
-    private $gamePlayerRepository;
-    private $cardRepository;
-    private $random;
+    private GameRepository $gameRepository;
+    private GamePlayerRepository $gamePlayerRepository;
+    private Random $random;
 
     public function __construct(GameRepository $gameRepository, 
-    GamePlayerRepository $gamePlayerRepository, CardRepository $cardRepository,
+    GamePlayerRepository $gamePlayerRepository,
     Random $random)
     {
         $this->gameRepository       = $gameRepository;
         $this->gamePlayerRepository = $gamePlayerRepository;
-        $this->cardRepository       = $cardRepository;
         $this->random               = $random;
     }
 
@@ -60,7 +59,7 @@ class RealTimeController extends AbstractController
                 'gameKey' => $gameKey
             ];
             $this->sendToAllGamePlayers($clients, $gameKey, json_encode($model));
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             print($exception->getMessage());
             $model = [
                 'action' => 'gameStarted',
@@ -100,10 +99,10 @@ class RealTimeController extends AbstractController
             // Execute rule
             $voteResult = $gameInfo->vote($player, $x, $y);
 
-            if($voteResult['ok'] !== true)
-            {
-                // TODO : Propage évènements d'erreur
-            }
+            // TODO : Propager évènements d'erreur
+//            if($voteResult['ok'] !== true)
+//            {
+//            }
 
             // Map domain <-> persistence
             $this->persist($gameInfo);
@@ -132,7 +131,7 @@ class RealTimeController extends AbstractController
                 $this->sendToAllGamePlayers($clients, $gameKey, json_encode($model));
             }
         }
-        catch(\InvalidArgumentException | \Exception $e)
+        catch(\InvalidArgumentException | Exception $e)
         {
             print($e->getMessage());
             print($e->getTraceAsString());
@@ -190,7 +189,7 @@ class RealTimeController extends AbstractController
             $gp = $this->gamePlayerRepository->findByGuid($playerKey);
             if($gp == null) 
             {
-                throw new \Exception("Player not found with guid : $playerKey");
+                throw new Exception("Player not found with guid : $playerKey");
             }
 
             $model = [
@@ -200,7 +199,7 @@ class RealTimeController extends AbstractController
             ];
             $this->sendToAllGamePlayers($clients, $gameKey, json_encode($model));
         }
-        catch(\Exception $e)
+        catch(Exception $e)
         {
             // TODO : système de log
             print($e->getMessage());
@@ -222,7 +221,7 @@ class RealTimeController extends AbstractController
         $gp = $this->gamePlayerRepository->findByGuid($playerKey);
         if($gp == null) 
         {
-            throw new \Exception("Player not found with guid : $playerKey");
+            throw new Exception("Player not found with guid : $playerKey");
         }
         $gp->setConnectionId($from->resourceId);
         $this->getDoctrine()->getManager()->flush();
@@ -259,7 +258,7 @@ class RealTimeController extends AbstractController
 
         foreach($cards as $c) {
             $c->setReturned(false);
-            $index = $this->random->rand(0, \count($numbers)-1);
+            $index = $this->random->rand(0, count($numbers)-1);
             $choice = $numbers[$index];
             $color = $choice[0];
             $number = $choice[1];
@@ -294,7 +293,6 @@ class RealTimeController extends AbstractController
         $clients = $params['clients'];
         $em = $this->getDoctrine()->getManager();
 
-        // TODO : il y a un problème
         $model = [
             'action' => 'gameIsEmptied',
             'gameKey' => $gameKey,
@@ -311,6 +309,25 @@ class RealTimeController extends AbstractController
         }
 
         $em->flush();
+    }
+
+    public function leaveGame($params)
+    {
+        $gameKey = $params['gameKey'];
+        $playerKey = $params['playerKey'];
+        $clients = $params['clients'];
+
+        $gp = $this->gamePlayerRepository->findOneBy(['publicKey' => $playerKey]);
+        $em = $this->getDoctrine()->getManager();
+        $em->remove($gp);
+        $em->flush();
+
+        $model = [
+            'action' => 'playerLeft',
+            'gameKey' => $gameKey,
+            'playerKey' => $playerKey
+        ];
+        $this->sendToAllGamePlayers($clients, $gameKey, json_encode($model));
     }
 
     // TODO : move into repo ?

@@ -6,7 +6,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
-use Symfony\Component\Routing\Annotation\Route;
 use App\Repository\CardRepository;
 use App\Repository\GamePlayerRepository;
 use App\Repository\GameRepository;
@@ -14,13 +13,10 @@ use Exception;
 
 class ApiController extends AbstractController
 {
-    private $gameRepository;
-    private $playerSession;
-    private $gamePlayerRepository;
-    private $cardRepository;
-
-    const PlayerSession = 'playerKey';
-    const GameSession = 'gameKey';
+    private GameRepository $gameRepository;
+    private SessionInterface $playerSession;
+    private GamePlayerRepository $gamePlayerRepository;
+    private CardRepository $cardRepository;
 
     public function __construct(SessionInterface $session,
         GameRepository $gameRepo,
@@ -36,7 +32,7 @@ class ApiController extends AbstractController
     /**
      * @Route("/cards", methods={"GET"}, name="get_cards")
      */
-    public function cards(Request $request)
+    public function cards(Request $request): JsonResponse
     {
         // Parsing
         $gameKey = $request->query->get('gameKey');
@@ -63,7 +59,7 @@ class ApiController extends AbstractController
     /**
      * @Route("/gameInfos", methods={"GET"}, name="get_game_infos")
      */
-    public function gameInfos(Request $request)
+    public function gameInfos(Request $request): JsonResponse
     {
         try {
             // Parsing

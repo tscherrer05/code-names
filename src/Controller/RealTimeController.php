@@ -10,6 +10,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use App\Repository\GameRepository;
 use App\Service\Random;
 use Ratchet\ConnectionInterface;
+use Symfony\Component\Routing\Annotation\Route;
 use function count;
 
 class RealTimeController extends AbstractController

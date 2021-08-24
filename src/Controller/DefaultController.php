@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -18,13 +17,15 @@ use App\Repository\GamePlayerRepository;
 use App\Repository\GameRepository;
 use App\Service\Random;
 use Ramsey\Uuid\Uuid;
+use Symfony\Component\Routing\Annotation\Route;
+
 
 class DefaultController extends AbstractController
 {
-    private $gameRepository;
-    private $session;
-    private $gamePlayerRepository;
-    private $random;
+    private GameRepository $gameRepository;
+    private SessionInterface $session;
+    private GamePlayerRepository $gamePlayerRepository;
+    private Random $random;
 
     const PlayerSession = 'playerKey';
     const GameSession = 'gameKey';
@@ -34,7 +35,7 @@ class DefaultController extends AbstractController
         GamePlayerRepository $gamePlayerRepository,
         Random $random)
     {
-        $this->session        = $session;
+        $this->session              = $session;
         $this->gameRepository       = $gameRepo;
         $this->gamePlayerRepository = $gamePlayerRepository;
         $this->random               = $random;

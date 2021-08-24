@@ -10,6 +10,7 @@ use App\Repository\CardRepository;
 use App\Repository\GamePlayerRepository;
 use App\Repository\GameRepository;
 use Exception;
+use Symfony\Component\Routing\Annotation\Route;
 
 class ApiController extends AbstractController
 {

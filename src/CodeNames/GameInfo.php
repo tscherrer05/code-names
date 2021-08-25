@@ -1,17 +1,21 @@
 <?php
 namespace App\CodeNames;
 
+use App\Entity\Colors;
 use App\Entity\Roles;
 use App\Entity\Teams;
+use App\Service\Random;
+use Exception;
+use Ramsey\Uuid\Uuid;
 
 class GameInfo
 {
     function __construct(
         Board $board,
+        array $players,
         int $teamId = null,
         string $word = null,
-        int $number = null,
-        array $players)
+        int $number = null)
     {
         $this->team = $teamId;
         $this->players = $players;
@@ -20,28 +24,48 @@ class GameInfo
         $this->number = $number;
     }
 
-    public $word;
-    public $number;
-    public $team;
+    public ?string $word;
+    public ?int $number;
+    public ?int $team;
 
-    private $board;
-    private $players = array();
+    private Board $board;
+    private array $players = array();
 
-    public $guid;
-    public $status;
-    public $id;
+    public ?string $guid;
+    public ?int $status;
+    public ?int $id;
 
-    public function currentWord()
+    /**
+     * @param Random $random
+     * @param array $numbers
+     * @return int
+     */
+    private static function chooseRandColor(Random $random, array $numbers): int
+    {
+        return $random->rand(0, \count($numbers) - 1);
+    }
+
+    /**
+     * @param Random $random
+     * @param array $excludedWords
+     * @return string
+     */
+    private static function chooseRandWord(Random $random, array $excludedWords): string
+    {
+        return $random->word($excludedWords);
+    }
+
+    public function currentWord(): ?string
     {
         return $this->word;
     }
 
-    public function currentNumber()
+    public function currentNumber(): ?int
     {
         return $this->number;
     }
 
-    public function currentTeam()
+    public function currentTeam(): ?int
     {
         return $this->team;
     }
@@ -49,6 +73,11 @@ class GameInfo
     public function getPlayers()
     {
         return $this->players;
+    }
+
+    public function getStatus()
+    {
+        return $this->status;
     }
 
     public function getGuid()
@@ -59,6 +88,45 @@ class GameInfo
     public function getId()
     {
         return $this->id;
+    }
+
+    public static function brandNew(Random $random) : GameInfo
+    {
+        $numbers = [
+            [Colors::Blue, 9],
+            [Colors::Red, 8],
+            [Colors::White, 7],
+            [Colors::Black, 1],
+        ];
+        $rows = 5;
+        $cols = 5;
+        $excludedWords = [];
+        $cards = [];
+
+        for($i = 0; $i <= $cols - 1; $i++) {
+            for($j = 0; $j <= $rows - 1; $j++) {
+                $word = self::chooseRandWord($random, $excludedWords);
+                $excludedWords[] = $word;
+                $index = self::chooseRandColor($random, $numbers);
+                $choice = $numbers[$index];
+                $color = $choice[0];
+                $number = $choice[1];
+                if($number === 1) {
+                    array_splice($numbers, $index, 1);
+                } else {
+                    $numbers[$index][1]--;
+                }
+                $cards[$i][] = new Card($word, $color, $i, $j);
+            }
+        }
+
+        $board = new Board($cards);
+        $gameInfo = new GameInfo($board, []);
+        $gameInfo->guid = Uuid::uuid1()->toString();
+        $gameInfo->status = GameStatus::OnGoing;
+        $gameInfo->team = Teams::Blue;
+
+        return $gameInfo;
     }
 
     /**
@@ -95,7 +163,7 @@ class GameInfo
     /**
      * Get all cards from the board
      */
-    public function getAllCards()
+    public function getAllCards(): array
     {
         return $this->board()->cards();
     }
@@ -146,7 +214,7 @@ class GameInfo
             );
 
             if(count($masters) >= 1)
-                throw new \Exception("Il y a déjà un maître espion dans cette équipe.");
+                throw new Exception("Il y a déjà un maître espion dans cette équipe.");
         }
         $this->players[] = new Player($guid, $name, $team, $role);
     }
@@ -163,6 +231,7 @@ class GameInfo
     {
         return $this->board;
     }
+
 }
 
 ?>

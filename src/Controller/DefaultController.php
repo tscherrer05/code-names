@@ -2,22 +2,23 @@
 
 namespace App\Controller;
 
+use App\CodeNames\GameInfo;
+use App\Entity\Card;
+use App\Entity\Game;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Ramsey\Uuid\Guid\Guid;
 use App\CodeNames\GameStatus;
-use App\Entity\Card;
-use App\Entity\Colors;
-use App\Entity\Game;
 use App\Entity\GamePlayer;
 use App\Entity\Roles;
 use App\Entity\Teams;
 use App\Repository\GamePlayerRepository;
 use App\Repository\GameRepository;
 use App\Service\Random;
-use Ramsey\Uuid\Uuid;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Annotation\Route; // Mandatory for annotations
 
 
 class DefaultController extends AbstractController
@@ -29,6 +30,7 @@ class DefaultController extends AbstractController
 
     const PlayerSession = 'playerKey';
     const GameSession = 'gameKey';
+    const AnonymousName = 'anonyme';
 
     public function __construct(SessionInterface $session,
         GameRepository $gameRepo,
@@ -88,67 +90,78 @@ class DefaultController extends AbstractController
     /**
      * @Route("/createGame", methods={"GET"}, name="create_game")
      */
-    public function createGame(Request $request)
+    public function createGame(): RedirectResponse
     {
         $gameKey = $this->session->get(self::GameSession);
-        if($gameKey !== null) 
+        if($gameKey !== null)
         {
             return $this->redirectToRoute('already_in_game');
         }
 
-        $game = new Game();
-        $gameKey = Uuid::uuid1()->toString();
-        $game->setPublicKey($gameKey);
-        $game->setStatus(GameStatus::OnGoing);
-        $game->setCurrentTeam(Teams::Blue);
-
-        $numbers = [
-            [Colors::Blue, 9],
-            [Colors::Red, 8],
-            [Colors::White, 7],
-            [Colors::Black, 1],
-        ];
-
-        $rows = 5;
-        $cols = 5;
-        $excludedWords = [];
-        for($i = 0; $i <= $cols - 1; $i++) {
-            for($j = 0; $j <= $rows - 1; $j++) {
-                $card = new Card();
-                $card->setX($i);
-                $card->setY($j);
-                $word = $this->random->word();
-                $excludedWords[] = $word;
-                $card->setWord($word);
-                // Choose color
-                $index = $this->random->rand(0, \count($numbers)-1);
-                $choice = $numbers[$index];
-                $color = $choice[0];
-                $number = $choice[1];
-                $card->setColor($color);
-                if($number === 1) {
-                    array_splice($numbers, $index, 1);
-                } else {
-                    $numbers[$index][1]--;
-                }
-                $card->setReturned(false);
-                $card->setGame($game);
-                $em = $this->getDoctrine()->getManager();
-                $em->persist($card);
-            }
-        }
-
-        $em = $this->getDoctrine()->getManager();
-        $em->persist($game);
-        $em->flush();
+        $gameInfo = GameInfo::brandNew($this->random);
+        $this->persist($gameInfo);
+        $gameKey = $gameInfo->getGuid();
 
         return $this->redirectToRoute('auto_connect', [
             "gameKey" => $gameKey
         ]);
     }
 
+    private function persist(GameInfo $gameInfo)
+    {
+        $entityManager = $this->getDoctrine()->getManager();
+
+        // Mapping jeu
+        $game = new Game();
+        $game->setPublicKey($gameInfo->getGuid());
+        $game->setStatus($gameInfo->status);
+        $game->setCurrentWord($gameInfo->currentWord());
+        $game->setCurrentNumber($gameInfo->currentNumber());
+        $game->setCurrentTeam($gameInfo->currentTeam());
+
+        // Mapping joueurs
+        // Sauvegarder les votes de chaque joueur de la partie
+        $gamePlayers = $this->gamePlayerRepository->findBy(['game' => $game->getId()]);
+        foreach($gamePlayers as $gpData)
+        {
+            $votes = $gameInfo->getAllVotes();
+            $key = $gpData->getPublicKey();
+            if(array_key_exists($key, $votes))
+            {
+                $gpData->setX($votes[$key]->x);
+                $gpData->setY($votes[$key]->y);
+            }
+            else
+            {
+                $gpData->setX(null);
+                $gpData->setY(null);
+            }
+        }
+
+        // Mapping cards
+        $cards = $gameInfo->getAllCards();
+        foreach($cards as $row)
+        {
+            foreach ($row as $card)
+            {
+                $c = new Card();
+                $c->setGame($game);
+                $c->setColor($card->getColor());
+                $c->setReturned($card->isReturned());
+                $c->setWord($card->getWord());
+                $c->setX($card->getX());
+                $c->setY($card->getY());
+                $entityManager->persist($c);
+            }
+        }
+
+        $entityManager->persist($game);
+        $entityManager->flush();
+    }
+
     /**
      * @Route("/game", methods={"GET"}, name="join_game")
+     * @throws Exception
      */
     public function game(Request $request)
     {
@@ -175,7 +188,7 @@ class DefaultController extends AbstractController
         $currPlayer = $this->gamePlayerRepository->findByGuid($playerKey);
         if($currPlayer == null)
         {
-            throw new \Exception("Player not found with guid : $playerKey");
+            throw new Exception("Player not found with guid : $playerKey");
         }
 
         $viewModel = [
@@ -228,7 +241,7 @@ class DefaultController extends AbstractController
     {
         $identity = $this->session->get(self::PlayerSession);
         $currentGameKey = $this->session->get(self::GameSession);
-        $playerName = 'anonyme';
+        $playerName = self::AnonymousName;
         $isInGame = false;
 
         if(isset($identity))
@@ -266,6 +279,7 @@ class DefaultController extends AbstractController
 
     /**
      * @Route("/lobby", methods={"GET"}, name="lobby")
+     * @throws Exception
      */
     public function lobby()
     {
@@ -289,7 +303,7 @@ class DefaultController extends AbstractController
         $gameInfo = $this->gameRepository->getByGuid($gameKey);
         if($gameInfo == null)
         {
-            throw new \Exception("Game not found with public key : ". $gameKey);
+            throw new Exception("Game not found with public key : ". $gameKey);
         }
 
         if($gameInfo->status == GameStatus::OnGoing)
@@ -350,7 +364,7 @@ class DefaultController extends AbstractController
         $game = $this->gameRepository->findByGuid($gameKey);
         if($game == null)
         {
-            throw new \Exception("Game not found with key : ".$gameKey);
+            throw new Exception("Game not found with key : ".$gameKey);
         }
         $playerKey = Guid::uuid4()->toString();
 
@@ -379,7 +393,7 @@ class DefaultController extends AbstractController
     public function autoConnect(Request $request) 
     {
         $playerKey = $this->session->get(self::PlayerSession);
-        $gameKey = $request->query->get('gameKey');
+        $gameKey = $request->query->get(self::GameSession);
 
         if($playerKey != null)
         {
@@ -389,7 +403,7 @@ class DefaultController extends AbstractController
         $game = $this->gameRepository->findByGuid($gameKey);
         if($game == null)
         {
-           throw new \Exception("Game not found with key : ".$gameKey);
+           throw new Exception("Game not found with key : ".$gameKey);
         }
         $playerKey = $this->getGUID();
 
@@ -460,7 +474,7 @@ class DefaultController extends AbstractController
     {
         $identity = $this->session->get(self::PlayerSession);
         $currentGameKey = $this->session->get(self::GameSession);
-        $playerName = 'anonyme';
+        $playerName = self::AnonymousName;
         $isInGame = false;
 
         if(isset($identity))

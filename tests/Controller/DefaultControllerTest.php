@@ -99,7 +99,6 @@ class DefaultControllerTest extends WebTestCase
         static::$container->get('session')->set(DefaultController::PlayerSession, TestFixtures::PlayerKey1);
         
         // Assert
-        $before = $this->countGamePlayers();
         $this->client->request('GET', '/autoConnect?gameKey='.TestFixtures::GameKey2);
         $this->assertNumberOfGamePlayers(intval($before));
         $this->assertEquals(302, $this->client->getResponse()->getStatusCode());
@@ -141,7 +140,7 @@ class DefaultControllerTest extends WebTestCase
     // }
 
 
-    public function testCreateGame() 
+    public function testCreateGame()
     {
         // Arrange
         $before = $this->countGames();
@@ -160,13 +159,19 @@ class DefaultControllerTest extends WebTestCase
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
         $this->assertStringContainsString('game', $this->client->getRequest()->getUri(), "Doit être sur la page game.");
 
-        $game = $this->gameRepository->createQueryBuilder('g')->select('g')->orderBy('g.id', 'DESC')->setMaxResults(1)->getQuery()->getOneOrNullResult();
+        $game = $this->gameRepository->createQueryBuilder('g')
+            ->select('g')
+            ->orderBy('g.id', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
 
         $this->assertNotNull($game);
         $this->assertEquals(GameStatus::OnGoing, $game->getStatus());
-        $this->assertEquals(1, \count($game->getGamePlayers()));
+        $this->assertCount(1, $game->getGamePlayers());
+        $cards = $game->getCards()->toArray();
+        $this->assertCount(25, $cards);
         $this->assertEquals(Roles::Master, $game->getGamePlayers()[0]->getRole());
-
     }
 
     /**

@@ -3,11 +3,11 @@ namespace App\CodeNames;
 
 class Card
 {
-    public $color;
-    public $word;
-    public $returned = false;
-    public $x;
-    public $y;
+    public int $color;
+    public string $word;
+    public bool $returned = false;
+    public int $x;
+    public int $y;
 
     public function __construct(string $word, int $color, int $x, int $y, bool $returned = false)
     {
@@ -27,6 +27,69 @@ class Card
     {
         return $this->word == $otherCard->word;
     }
-}
 
-?>
+    public function setX(int $i)
+    {
+        $this->x = $i;
+    }
+
+    public function setY(int $j)
+    {
+        $this->y = $j;
+    }
+
+    public function setWord(string $word)
+    {
+        $this->word = $word;
+    }
+
+    public function setColor($color)
+    {
+        $this->color = $color;
+    }
+
+    public function setReturned(bool $returned)
+    {
+        $this->returned = $returned;
+    }
+
+    /**
+     * @return int
+     */
+    public function getColor(): int
+    {
+        return $this->color;
+    }
+
+    /**
+     * @return string
+     */
+    public function getWord(): string
+    {
+        return $this->word;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isReturned(): bool
+    {
+        return $this->returned;
+    }
+
+    /**
+     * @return int
+     */
+    public function getX(): int
+    {
+        return $this->x;
+    }
+
+    /**
+     * @return int
+     */
+    public function getY(): int
+    {
+        return $this->y;
+    }
+}

@@ -11,10 +11,10 @@ use App\CodeNames\Board;
 use App\CodeNames\Card;
 use App\CodeNames\Player;
 use App\Entity\GamePlayer;
+use Exception;
 
 /**
  * @method Game|null find($id, $lockMode = null, $lockVersion = null)
- * @method Game|null findByGuid($gameKey)
  * @method Game|null findOneBy(array $criteria, array $orderBy = null)
  * @method Game[]    findAll()
  * @method Game[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
@@ -62,12 +62,13 @@ class GameRepository extends ServiceEntityRepository
 
     /**
      * Mappe les entités sur les objets logiques
+     * @throws Exception
      */
     private function createGame(Game $gameEntity)
     {
         if($gameEntity == null)
         {
-            throw new \Exception('Game does not exist in db.');
+            throw new Exception('Game does not exist in db.');
         }
 
         $cardEntities = $gameEntity->getCards()->toArray();
@@ -115,10 +116,10 @@ class GameRepository extends ServiceEntityRepository
         $board = new Board($twoDimCards, $votes);
         $gameInfo = new GameInfo(
             $board,
+            $players,
             $gameEntity->getCurrentTeam(),
             $gameEntity->getCurrentWord(),
-            $gameEntity->getCurrentNumber(),
-            $players);
+            $gameEntity->getCurrentNumber());
         $gameInfo->id = $gameEntity->getId();
         $gameInfo->guid = $gameEntity->getPublicKey();
         $gameInfo->status = $gameEntity->getStatus();

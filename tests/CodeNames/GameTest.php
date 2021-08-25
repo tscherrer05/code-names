@@ -21,7 +21,7 @@ class GameTest extends TestCase
         $player2  = new Player(2, "nom", Teams::Blue, Roles::Spy);
         $player1->guid = Uuid::uuid1()->toString();
         $player2->guid = Uuid::uuid1()->toString();
-        $gameInfo = new GameInfo($board, Teams::Blue, "", 0, array($player1, $player2));
+        $gameInfo = new GameInfo($board, array($player1, $player2), Teams::Blue, "", 0);
 
         // Act
         $gameInfo->vote($player1, 1, 1);
@@ -39,7 +39,7 @@ class GameTest extends TestCase
         $player2  = new Player(2, "nom", Teams::Blue, Roles::Spy);
         $player1->guid = Uuid::uuid1()->toString();
         $player2->guid = Uuid::uuid1()->toString();
-        $gameInfo = new GameInfo($board, Teams::Blue, "", 1, array($player1, $player2));
+        $gameInfo = new GameInfo($board, array($player1, $player2), Teams::Blue, "", 1);
 
         // Act
         $gameInfo->vote($player1, 1, 1);
@@ -66,7 +66,7 @@ class GameTest extends TestCase
         $player3->guid = Uuid::uuid1()->toString();
         $votes[$player1->guid] = new Card('whatevs', 1, 0, 0);
         $board    = new Board(TestData::getCards(), $votes);
-        $gameInfo = new GameInfo($board, 1, "", 1, array($player1, $player2, $player3));
+        $gameInfo = new GameInfo($board, array($player1, $player2, $player3), 1, "", 1);
         $coordX = 3;
         $coordY = 3;
 
@@ -83,7 +83,7 @@ class GameTest extends TestCase
         // Arrange
         $board = new Board(TestData::getCards());
         $player = new Player(1, "Jack", Teams::Red, Roles::Spy);
-        $gameInfo = new GameInfo($board, 1, "", 1, array($player));
+        $gameInfo = new GameInfo($board, array($player), 1, "", 1);
         $coordX = 1;
         $coordY = 1;
 
@@ -98,16 +98,15 @@ class GameTest extends TestCase
     public function testPlayerVoteForReturnedCardShouldFail()
     {
         // Arrange
-        $team = 1;
         $board = new Board(TestData::getCardAlmostWin());
         $player = new Player(1, "Jack", Teams::Blue, Roles::Spy);
-        $gameInfo = new GameInfo($board, 1, "", 1, array($player));
+        $gameInfo = new GameInfo($board,  array($player), 1, "", 1);
         // Coordonnées d'une carte retournée
         $coordX = 0;
         $coordY = 0;
 
         // TODO ; retourner plutôt un objet resultant (succès/échec, messages d'erreur, objets résultants)
-        $this->expectException(\Exception::class);
+        $this->expectException(Exception::class);
         $gameInfo->vote($player, $coordX, $coordY);
 
     }
@@ -117,13 +116,13 @@ class GameTest extends TestCase
         // Arrange
         $board    = new Board(TestData::getCards());
         $player   = new Player(1, "Jack", Teams::Blue, Roles::Spy);
-        $gameInfo = new GameInfo($board, 1, "", 1, array($player));
+        $gameInfo = new GameInfo($board,  array($player),1, "", 1);
         $coordX = 5;
         $coordY = 5;
 
         // Act & assert
-        $this->expectException(\InvalidArgumentException::class);
-        $result = $gameInfo->vote($player, $coordX, $coordY);
+        $this->expectException(InvalidArgumentException::class);
+        $gameInfo->vote($player, $coordX, $coordY);
     }
 
     public function testCardShouldReturnWhenAllPlayersVoted()
@@ -134,7 +133,7 @@ class GameTest extends TestCase
         $player2  = new Player(2, "Boby", Teams::Blue, Roles::Spy);
         $player1->guid = Uuid::uuid1()->toString();
         $player2->guid = Uuid::uuid1()->toString();
-        $gameInfo = new GameInfo($board, 1, "", 1, array($player1, $player2));
+        $gameInfo = new GameInfo($board,  array($player1, $player2), 1, "", 1);
         $coordX = 3;
         $coordY = 3;
 
@@ -169,7 +168,7 @@ class GameTest extends TestCase
         $role = Roles::Spy;
         $team = Teams::Red;
         $board    = new Board(TestData::getCards());
-        $gameInfo = new GameInfo($board, 1, "", 1, array());
+        $gameInfo = new GameInfo($board, array(), 1, "", 1);
 
         $gameInfo->addPlayer(Uuid::uuid1()->toString(), $name, $team, $role);
 
@@ -179,14 +178,14 @@ class GameTest extends TestCase
     public function testAddPlayerInvalid() 
     {
         $board    = new Board(TestData::getCards());
-        $gameInfo = new GameInfo($board, 1, "", 1, array());
+        $gameInfo = new GameInfo($board, array(), 1, "", 1);
 
         // 2 Master spies
         $gameInfo->addPlayer(Uuid::uuid1()->toString(), "yesyes", Teams::Blue, Roles::Master);
         $gameInfo->addPlayer(Uuid::uuid1()->toString(), "yesyes", Teams::Red, Roles::Master);
 
         // Try to add another master spy
-        $this->expectException(\Exception::class);
+        $this->expectException(Exception::class);
         $gameInfo->addPlayer(Uuid::uuid1()->toString(), "whatev", Teams::Blue, Roles::Master);
     }
 
@@ -196,7 +195,7 @@ class GameTest extends TestCase
         $player1  = new Player(3, "Jack", 1, 1);
         $playerGuid = Uuid::uuid1();
         $player1->guid = $playerGuid->toString();
-        $gameInfo = new GameInfo($board, 1, "", 1, array($player1));
+        $gameInfo = new GameInfo($board, array($player1),1, "", 1);
 
         $result = $gameInfo->getPlayer($playerGuid);
 
@@ -208,7 +207,7 @@ class GameTest extends TestCase
         $board = new Board(TestData::getCards());
         $player = new Player(3, "Kirk", 1, 1);
         $player->guid = Uuid::uuid1()->toString();
-        $gameInfo = new GameInfo($board, 1, '', 1, array($player));
+        $gameInfo = new GameInfo($board, array($player), 1, '', 1);
         $before = $gameInfo->currentTeam();
 
         $gameInfo->passTurn();

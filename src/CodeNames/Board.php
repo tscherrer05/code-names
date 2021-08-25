@@ -4,15 +4,17 @@ namespace App\CodeNames;
 
 use App\Entity\Colors;
 use Exception;
+use InvalidArgumentException;
+use function count;
 
 class Board
 {
     // A two dimensional array representing the cards on board
-    private $cards;
+    private array $cards;
     // A single dimension array playerKey => card
-    public $votes;
+    public array $votes;
 
-    public $nbColorCards;
+    public array $nbColorCards;
 
     public function __construct(array $cards, array $votes = array())
     {
@@ -25,7 +27,8 @@ class Board
         $this->nbColorCards[Colors::Black] = count($this->getCards(Colors::Black));
     }
 
-    private function getCards(int $color) {
+    private function getCards(int $color): array
+    {
         return array_filter($this->cards, function($c) use($color) {
             return array_filter($c, function($c1) use($color) {
                 if($c1->color === $color)
@@ -37,15 +40,15 @@ class Board
     // Command
     public function voteForCard(Player $player, int $x, int $y, GameInfo $gameInfo)
     {
-        if(\count($this->cards) <= $x)
-            throw new \InvalidArgumentException("Invalid x coord");
-        if(\count($this->cards[0]) <= $y)
-            throw new \InvalidArgumentException("Invalid y coord");
+        if(count($this->cards) <= $x)
+            throw new InvalidArgumentException("Invalid x coord");
+        if(count($this->cards[0]) <= $y)
+            throw new InvalidArgumentException("Invalid y coord");
         $card = $this->cards[$x][$y];
         if($this->isCardReturned($x, $y))
             throw new Exception("Can not return a returned card");
         $this->votes[$player->guid] = $card;
-        $everyBodyHasVoted = (\count($this->votes) == $gameInfo->nbSpies($player->team));
+        $everyBodyHasVoted = (count($this->votes) == $gameInfo->nbSpies($player->team));
 
         if($everyBodyHasVoted && $this->everybodyVotedForSameCard())
         {
@@ -53,7 +56,7 @@ class Board
         }
     }
 
-    private function everybodyVotedForSameCard()
+    private function everybodyVotedForSameCard(): bool
     {
         $lastCard = null;
         foreach($this->votes as $card)
@@ -84,7 +87,7 @@ class Board
     }
 
     // Query
-    public function getVotes(int $x, int $y)
+    public function getVotes(int $x, int $y): array
     {
         $cardToInspect = $this->cards[$x][$y];
         $result = array();
@@ -102,7 +105,7 @@ class Board
         return $this->votes[$playerKey];
     }
 
-    public function cards()
+    public function cards(): array
     {
         return $this->cards;
     }

@@ -13,7 +13,7 @@ class GuesserTest extends TestCase
         // Arrange
         $board = new Board(TestData::getCards());
         $guesser1 = new Guesser("toto", 1);
-        $gameInfo = new GameInfo($board, 1, "", 1, array());
+        $gameInfo = new GameInfo($board, array(), 1, "", 1);
 
         // Act
         $guesser1->announce($gameInfo, $board, "word", 3);
@@ -29,11 +29,11 @@ class GuesserTest extends TestCase
         // Arrange
         $board = new Board(TestData::getCards());
         $guesser1 = new Guesser("toto", 1);
-        $gameInfo = new GameInfo($board, 1, "", 1, array());
+        $gameInfo = new GameInfo($board, array(), 1, "", 1);
 
         // Act & assert
         $guesser1->announce($gameInfo, $board, "word", 3);
-        $this->expectException(\Exception::class);
+        $this->expectException(Exception::class);
         $guesser1->announce($gameInfo, $board, "otherword", 2);
 
     }

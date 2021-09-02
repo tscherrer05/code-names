@@ -19,6 +19,8 @@ use App\Repository\GamePlayerRepository;
 use App\Repository\GameRepository;
 use App\Service\Random;
 use Symfony\Component\Routing\Annotation\Route; // Mandatory for annotations
+use Psr\Log\LoggerInterface;
+
 
 
 class DefaultController extends AbstractController
@@ -77,6 +79,15 @@ class DefaultController extends AbstractController
     {
         $this->session->set(self::GameSession, $this->getGUID());
         exit;
+    }
+
+    /**
+     * @Route("/log", methods={"GET"}, name="log")
+     * @param LoggerInterface $logger
+     */
+    public function log(LoggerInterface $logger)
+    {
+        $logger->info('I just got the logger');
     }
 
     /**

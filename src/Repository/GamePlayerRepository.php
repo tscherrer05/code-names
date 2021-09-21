@@ -6,6 +6,7 @@ use App\Entity\GamePlayer;
 use App\Entity\Roles;
 use App\Entity\Teams;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -21,17 +22,18 @@ class GamePlayerRepository extends ServiceEntityRepository
         parent::__construct($registry, GamePlayer::class);
     }
 
-    public function findByGame(int $gameId)
+    public function findByGameId(int $gameId)
     {
-        $gamePlayerEntity = $this->createQueryBuilder('g')
+        return $this->createQueryBuilder('g')
             ->where('g.game = :val')
             ->setParameter(':val', $gameId)
             ->getQuery()
-            ->getResult()
-        ;
-        return $gamePlayerEntity;
+            ->getResult();
     }
 
+    /**
+     * @throws NonUniqueResultException
+     */
     public function findByGuid(string $playerKey)
     {
         $playerEntity = $this->createQueryBuilder('g')

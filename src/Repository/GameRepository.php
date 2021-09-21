@@ -3,6 +3,9 @@
 namespace App\Repository;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
 use Doctrine\Persistence\ManagerRegistry;
 
 use App\Entity\Game;
@@ -28,7 +31,12 @@ class GameRepository extends ServiceEntityRepository
     }
 
     // Model object
-    public function getById(int $gameId)
+
+    /**
+     * @throws NonUniqueResultException
+     * @throws Exception
+     */
+    public function getById(int $gameId): GameInfo
     {
         $gameEntity = $this->createQueryBuilder('g')
             ->andWhere('g.id = :val')
@@ -39,7 +47,12 @@ class GameRepository extends ServiceEntityRepository
     }
 
     // Model object
-    public function getByGuid(string $gameKey)
+
+    /**
+     * @throws NonUniqueResultException
+     * @throws Exception
+     */
+    public function getByGuid(string $gameKey): GameInfo
     {
         $gameEntity = $this->createQueryBuilder('g')
             ->andWhere('g.publicKey = :val')
@@ -50,21 +63,24 @@ class GameRepository extends ServiceEntityRepository
     }
 
     // Entity
-    public function findByGuid(string $gameKey)
+
+    /**
+     * @throws NonUniqueResultException
+     */
+    public function findByGuid(string $gameKey) : Game
     {
-        $gameEntity = $this->createQueryBuilder('g')
+        return $this->createQueryBuilder('g')
             ->andWhere('g.publicKey = :val')
             ->setParameter(':val', $gameKey)
             ->getQuery()
             ->getOneOrNullResult();
-        return $gameEntity;
     }
 
     /**
      * Mappe les entités sur les objets logiques
      * @throws Exception
      */
-    private function createGame(Game $gameEntity)
+    private function createGame(Game $gameEntity): GameInfo
     {
         if($gameEntity == null)
         {
@@ -127,8 +143,12 @@ class GameRepository extends ServiceEntityRepository
         return $gameInfo;
     }
 
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
     public function commit()
     {
-        $this->entityManager->flush();
+        $this->getEntityManager()->flush();
     }
 }

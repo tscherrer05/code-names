@@ -175,7 +175,7 @@ class RealTimeController extends AbstractController
 
             // Event dispatch
             // TODO : refactor into proper class
-            $gamePlayers = $gameEntity->getGamePlayers()->toArray();
+            $gamePlayers = $this->gamePlayerRepository->findByGameId($gameEntity->getId());
             $currentTeam = $gameEntity->getCurrentTeam();
             $remainingVotes = [];
             foreach($gamePlayers as $p) {

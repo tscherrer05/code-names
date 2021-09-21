@@ -22,6 +22,10 @@ class GamePlayerRepository extends ServiceEntityRepository
         parent::__construct($registry, GamePlayer::class);
     }
 
+    /**
+     * @param int $gameId
+     * @return int|mixed|string
+     */
     public function findByGameId(int $gameId)
     {
         return $this->createQueryBuilder('g')

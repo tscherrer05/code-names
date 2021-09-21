@@ -609,7 +609,7 @@ test('passTurn with votes', () => {
     )
     .toMatchObject(
     {
-        currentTeam: 2,
+        currentTeam: Teams.Red,
         currentVotes: {},
         remainingVotes: [playerOneKey, playerTwoKey],
         canPassTurn: false

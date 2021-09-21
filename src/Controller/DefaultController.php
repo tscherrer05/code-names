@@ -93,7 +93,7 @@ class DefaultController extends AbstractController
     /**
      * 
      */
-    public function index()
+    public function index(): RedirectResponse
     {
         return $this->redirectToRoute('start');
     }

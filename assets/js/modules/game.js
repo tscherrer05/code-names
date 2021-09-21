@@ -97,7 +97,7 @@ const addNewPlayer = (state, eventData) => {
 }
 
 /**
- * Removes a player from the game
+ * Removes a player from the game.
  * @param state
  * @param eventData
  * @returns {{players}}
@@ -111,7 +111,7 @@ const removePlayer = (state, eventData) => {
 }
 
 /**
- * Passes turn to the next team.`
+ * Passes turn to the next team.
  * @param {*} state
  * @param eventData
  */

@@ -5,7 +5,10 @@ use App\CodeNames\GameStatus;
 use App\Entity\Colors;
 use App\Entity\Roles;
 use App\Repository\GamePlayerRepository;
+use Doctrine\ORM\NonUniqueResultException;
 use Exception;
+use InvalidArgumentException;
+use SplObjectStorage;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use App\Repository\GameRepository;
 use App\Service\Random;
@@ -132,7 +135,7 @@ class RealTimeController extends AbstractController
                 $this->sendToAllGamePlayers($clients, $gameKey, json_encode($model));
             }
         }
-        catch(\InvalidArgumentException | Exception $e)
+        catch(InvalidArgumentException | Exception $e)
         {
             print($e->getMessage());
             print($e->getTraceAsString());
@@ -374,7 +377,7 @@ class RealTimeController extends AbstractController
         $entityManager->flush();
     }
 
-    private function sendToOtherGamePlayers(\SplObjectStorage $clients, ConnectionInterface $from, string $gameKey, string $message)
+    private function sendToOtherGamePlayers(SplObjectStorage $clients, ConnectionInterface $from, string $gameKey, string $message)
     {
         $connectionIds = array_map(
             function ($gp) {
@@ -394,22 +397,29 @@ class RealTimeController extends AbstractController
         }
     }
 
-    private function sendToAllGamePlayers(\SplObjectStorage $clients, string $gameKey, string $message)
+    /**
+     * @throws NonUniqueResultException
+     */
+    private function sendToAllGamePlayers(SplObjectStorage $clients, string $gameKey, string $message)
     {
+        $gameId = $this->gameRepository->findByGuid($gameKey)->getId();
+        $gamePlayers = $this->gamePlayerRepository->findByGameId($gameId);
         $connectionIds = array_map(
             function($gp) { return $gp->getConnectionId(); },
-            $this->gameRepository->findOneBy(['publicKey' => $gameKey])
-                ->getGamePlayers()
-                ->toArray()
+            $gamePlayers
         );
-
+        $client_count = 0;
+        echo sprintf('%s : Start notifying clients with message "%s"'. "\n", $gameKey, $message);
         foreach($clients as $client) 
         {
             if(in_array($client->resourceId, $connectionIds))
             {
                 $client->send($message);
+                $client_count++;
+                echo sprintf('%s : Notified %d'. "\n", $gameKey, $client->resourceId);
             }
         }
+        echo sprintf('%s : Notified %d clients with message "%s"'. "\n", $gameKey, $client_count, $message);
     }
 
 }

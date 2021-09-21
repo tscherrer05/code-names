@@ -1,19 +1,23 @@
 <?php
 namespace App\RealTime;
 
+use Error;
+use Exception;
 use Ratchet\MessageComponentInterface;
 use Ratchet\ConnectionInterface;
+use SplObjectStorage;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use function json_encode;
 
 class Messager implements MessageComponentInterface
 {
-    protected $clients;
-    protected $container;
+    protected SplObjectStorage $clients;
+    protected ContainerInterface $container;
 
     public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
-        $this->clients = new \SplObjectStorage;
+        $this->clients = new SplObjectStorage;
     }
 
     public function onOpen(ConnectionInterface $conn)
@@ -26,9 +30,7 @@ class Messager implements MessageComponentInterface
 
     public function onMessage(ConnectionInterface $from, $msg)
     {
-        $numRecv = count($this->clients) - 1;
-        echo sprintf('Connection %d sending message "%s" to %d other connection%s' . "\n",
-        $from->resourceId, $msg, $numRecv, $numRecv == 1 ? '' : 's');
+        echo sprintf('%d sent message "%s"' . "\n", $from->resourceId, $msg);
 
         try
         {
@@ -38,16 +40,16 @@ class Messager implements MessageComponentInterface
             // 2. Execute corresponding action
             (new Router($this->container))->execute($action, $this->clients, $from);
         }
-        catch(\Exception $e)
+        catch(Exception $e)
         {
             echo "An error has occurred: {$e->getMessage()}\n";
-            $err = \json_encode(array("data" => "Une erreur s'est produite."));
+            $err = json_encode(array("data" => "Une erreur s'est produite."));
             $from->send($err);
         }
-        catch(\Error $e)
+        catch(Error $e)
         {
             echo "A fatal error has occurred: {$e->getMessage()}\n";
-            $err = \json_encode(array("data" => "Une erreur s'est produite."));
+            $err = json_encode(array("data" => "Une erreur s'est produite."));
             $from->send($err);
         }
     }
@@ -60,7 +62,7 @@ class Messager implements MessageComponentInterface
         echo "Connection {$conn->resourceId} has disconnected\n";
     }
 
-    public function onError(ConnectionInterface $conn, \Exception $e)
+    public function onError(ConnectionInterface $conn, Exception $e)
     {
         echo "An error has occurred: {$e->getMessage()}\n";
 

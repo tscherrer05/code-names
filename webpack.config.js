@@ -33,14 +33,12 @@ Encore
         const path = Encore.isProduction()
             ? './.env'
             : './.env.local';
-        console.log(path);
         const env = dotenv.config({ path: path });
 
         if (env.error) {
             throw env.error;
         }
         options['process.env'].WEB_SOCKET_URL = JSON.stringify(env.parsed.WEB_SOCKET_URL);
-        console.log(JSON.stringify(env.parsed.WEB_SOCKET_URL));
     })
     // When enabled, Webpack "splits" your files into smaller pieces for greater optimization.
     .splitEntryChunks()

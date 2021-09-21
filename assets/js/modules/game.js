@@ -66,8 +66,9 @@ const returnCard = (state, eventData) => {
  * @param {Readonly<S>} state
  * @param {{}} state.players
  * @param {{}} state.currentVotes
+ * @param {{}} state.currentTeam
  * @param {string[]} state.remainingVotes
- * @param {Object} eventData
+ * @param {{playerKey: string, playerName: string, playerTeam: null, playerRole: null}} eventData
  * @param {string} eventData.playerName
  * @param {string} eventData.playerKey
  * @param {number} eventData.playerRole
@@ -75,16 +76,24 @@ const returnCard = (state, eventData) => {
  * @returns  {{players, remainingVotes, currentVotes}}
  */
 const addNewPlayer = (state, eventData) => {
-    const hasVoted = (state.currentVotes?.hasOwnProperty(eventData.playerKey) || false)
-    const isMaster = eventData.playerRole === Roles.Master
-    const isOppositeTeam = eventData.playerTeam !== state.currentTeam
+    const isValid = eventData.playerRole && eventData.playerTeam;
+    const hasVoted = (state.currentVotes?.hasOwnProperty(eventData.playerKey) || false);
+    const isMaster = eventData.playerRole === Roles.Master;
+    const isOppositeTeam = eventData.playerTeam !== state.currentTeam;
+    const players = isValid
+        ? {
+            ...state.players || {},
+            [eventData.playerKey]: {name:eventData.playerName, role:eventData.playerRole, team:eventData.playerTeam}
+        }
+        : state.players || {};
+
     return {
-        players: {...state.players || {}, [eventData.playerKey]: {name:eventData.playerName, role:eventData.playerRole, team:eventData.playerTeam}},
+        players: players,
         remainingVotes:  hasVoted || isMaster || isOppositeTeam
                             ? state.remainingVotes 
                             : [...new Set(state.remainingVotes).add(eventData.playerKey)],
         currentVotes: state.currentVotes || {}
-    }
+    };
 }
 
 /**
@@ -103,7 +112,8 @@ const removePlayer = (state, eventData) => {
 
 /**
  * Passes turn to the next team.`
- * @param {*} state 
+ * @param {*} state
+ * @param eventData
  */
 const passTurn = (state, eventData) => {
     if(!eventData || !eventData.remainingVotes)

@@ -252,7 +252,7 @@ test('vote with null data', () => {
         }
     }
 
-    var result = vote(state, null)
+    const result = vote(state, null);
 
     expect(result).toStrictEqual(votes)
 })
@@ -268,7 +268,7 @@ test('vote with incorrect state', () => {
         }
     }
 
-    var result = vote(state, voteEventData)
+    const result = vote(state, voteEventData);
 
     expect(result).toStrictEqual({
         currentVotes: {},
@@ -296,7 +296,7 @@ test('vote with incorrect data', () => {
         playerName: 'test'
     }
 
-    var result = vote(state, eventData)
+    const result = vote(state, eventData);
 
     expect(result).toStrictEqual(votes)
 })
@@ -312,7 +312,7 @@ test('player first vote', () => {
         }
     }
 
-    var result = vote(state, voteEventData)
+    const result = vote(state, voteEventData);
 
     expect(result).toStrictEqual({
         currentVotes: {[playerTwoKey]: '02'},
@@ -332,7 +332,7 @@ test('player vote for card nominal', () => {
         }
     }
 
-    var result = vote(state, voteEventData)
+    const result = vote(state, voteEventData);
 
     expect(result).toStrictEqual({
         currentVotes: {[playerOneKey]: '02', [playerTwoKey]: '02'},
@@ -352,7 +352,7 @@ test('player vote for other card nominal', () => {
         }
     }
 
-    var result = vote(state, voteEventData)
+    const result = vote(state, voteEventData);
 
     expect(result).toStrictEqual({
         currentVotes:  {[playerOneKey]: '02', [playerTwoKey]: '02'},
@@ -376,7 +376,7 @@ test('return a card nominal', () => {
         }
     }
 
-    var result = returnCard(state, returnEventData);
+    const result = returnCard(state, returnEventData);
 
     expect(result).toMatchObject({
         currentVotes: {},
@@ -391,50 +391,63 @@ test('return a card nominal', () => {
 test('player joined first', () => {
     const state = {
         ...baseState,
+        currentTeam: Teams.Blue,
         remainingVotes: []
-    }
+    };
+    const evt = {
+        ...addPlayerEvent,
+        playerRole: Roles.Spy,
+        playerTeam: Teams.Blue
+    };
 
-    var result = addNewPlayer(state, addPlayerEvent)
+    const result = addNewPlayer(state, evt);
 
     expect(result).toStrictEqual({
-        players: {[playerThreeKey]: {name:addPlayerEvent.playerName, team:addPlayerEvent.playerTeam, role:addPlayerEvent.playerRole}},
-        remainingVotes: [playerThreeKey],
+        players: {[evt.playerKey]: {name:evt.playerName, team:evt.playerTeam, role:evt.playerRole}},
+        remainingVotes: [evt.playerKey],
         currentVotes: {}
-    })
+    });
 })
 
 test('player joined nominal', () => {
+    const playerOne = {name:'PLAYER_TEST'+playerOneKey, role:Roles.Spy,team:Teams.Blue}
     const state = {
         ...baseState,
-        players: {[playerOneKey]: {name:'PLAYER_TEST'+playerOneKey, role:Roles.Spy,team:Teams.Blue}},
-        remainingVotes: [playerOneKey]
-    }
+        players: {[playerOneKey]: playerOne},
+        remainingVotes: [playerOneKey],
+        currentTeam: Teams.Blue
+    };
+    const evt = {
+        ...addPlayerEvent,
+        playerTeam: Teams.Blue,
+        playerRole: Roles.Spy
+    };
 
-    var result = addNewPlayer(state, addPlayerEvent)
+    const result = addNewPlayer(state, evt)
 
     expect(result).toStrictEqual({
-        players: 
-            {
-                [playerOneKey]: {name:'PLAYER_TEST'+playerOneKey, role:Roles.Spy,team:Teams.Blue},
-                [addPlayerEvent.playerKey]: {name:addPlayerEvent.playerName, role:addPlayerEvent.playerRole,team:addPlayerEvent.playerTeam}
+        players: {
+                [playerOneKey]: playerOne,
+                [evt.playerKey]: {name:evt.playerName, role:evt.playerRole,team:evt.playerTeam}
             },
-        remainingVotes: [playerOneKey, playerThreeKey],
+        remainingVotes: [playerOneKey, evt.playerKey],
         currentVotes: {}
     })
 })
 
-test('player joined invalid state', () => {
+test('player joined with an invalid state', () => {
+    const playerOne = {name:'PLAYER_TEST'+playerOneKey, role:Roles.Spy,team:Teams.Blue}
     const state = {
-        ...baseState
-    }
-
-    var result = addNewPlayer(state, addPlayerEvent)
-
-    expect(result).toStrictEqual({
-        players: {[addPlayerEvent.playerKey]: {name:addPlayerEvent.playerName, role:addPlayerEvent.playerRole,team:addPlayerEvent.playerTeam}    },
-        remainingVotes: [playerThreeKey],
+        ...baseState,
+        players: {[playerOneKey]: playerOne},
+        remainingVotes: [playerOneKey],
+        currentTeam: Teams.Blue,
         currentVotes: {}
-    })
+    };
+
+    const result = addNewPlayer(state, addPlayerEvent);
+
+    expect(state).toMatchObject(result);
 })
 
 
@@ -447,7 +460,7 @@ test('new player already joined', () => {
         remainingVotes: [addPlayerEvent.playerKey]
     }
 
-    var result = addNewPlayer(state, addPlayerEvent)
+    const result = addNewPlayer(state, addPlayerEvent);
 
     expect(result).toStrictEqual({
         players: {
@@ -468,7 +481,7 @@ test('new player already voted', () => {
         currentVotes: {[addPlayerEvent.playerKey]: '02'}
     }
 
-    var result = addNewPlayer(state, addPlayerEvent)
+    const result = addNewPlayer(state, addPlayerEvent);
 
     expect(result).toStrictEqual({
         players: {
@@ -487,35 +500,36 @@ test('master spy joined', () => {
         currentVotes: {}
     }
 
-    addPlayerEvent.playerRole = Roles.Master
-
-    var result = addNewPlayer(state, addPlayerEvent)
+    const evt = { ...addPlayerEvent, playerRole: Roles.Master , playerTeam: Teams.Blue};
+    const result = addNewPlayer(state, evt);
 
     expect(result).toStrictEqual({
         players: {
-            [addPlayerEvent.playerKey]: {name:addPlayerEvent.playerName, role:addPlayerEvent.playerRole,team:addPlayerEvent.playerTeam}
+            [evt.playerKey]: {name:evt.playerName, role:evt.playerRole,team:evt.playerTeam}
         },
         remainingVotes: state.remainingVotes,
         currentVotes: state.currentVotes
     })
 })
 
-test('opposite team joined', () => {
+test('red player joined during blue turn', () => {
     const state = {
         ...baseState,
         currentTeam: Teams.Blue,
         remainingVotes: [],
         currentVotes: {}
     }
+    const evt = {
+        ...addPlayerEvent,
+        playerTeam: Teams.Red,
+        playerRole: Roles.Spy
+    };
 
-    addPlayerEvent.playerTeam = Teams.Red
-    addPlayerEvent.playerRole = Roles.Spy
-
-    var result = addNewPlayer(state, addPlayerEvent)
+    const result = addNewPlayer(state, evt);
 
     expect(result).toStrictEqual({
         players: {
-            [addPlayerEvent.playerKey]: {name:addPlayerEvent.playerName, role:addPlayerEvent.playerRole,team:addPlayerEvent.playerTeam}
+            [evt.playerKey]: {name:evt.playerName, role:evt.playerRole,team:evt.playerTeam}
         },
         remainingVotes: state.remainingVotes,
         currentVotes: state.currentVotes

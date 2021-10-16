@@ -65,9 +65,10 @@ class GameRepository extends ServiceEntityRepository
     // Entity
 
     /**
+     * Return a game entity with a given game key. Null if not found.
      * @throws NonUniqueResultException
      */
-    public function findByGuid(string $gameKey) : Game
+    public function findByGuid(string $gameKey) : ?Game
     {
         return $this->createQueryBuilder('g')
             ->andWhere('g.publicKey = :val')
@@ -77,7 +78,7 @@ class GameRepository extends ServiceEntityRepository
     }
 
     /**
-     * Mappe les entités sur les objets logiques
+     * Map data from DB on logic objects
      * @throws Exception
      */
     private function createGame(Game $gameEntity): GameInfo
